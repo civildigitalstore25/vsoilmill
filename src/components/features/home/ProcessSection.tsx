@@ -1,3 +1,9 @@
+import {
+  FadeIn,
+  Stagger,
+  StaggerItem,
+} from "@/components/shared/motion";
+
 const STEPS = [
   {
     step: "01",
@@ -25,21 +31,25 @@ export function ProcessSection() {
   return (
     <section className="bg-primary/5 py-16">
       <div className="mx-auto max-w-6xl px-4">
-        <p className="text-sm font-medium uppercase tracking-wide text-primary">
-          Our Process
-        </p>
-        <h2 className="mt-2 max-w-xl font-display text-3xl text-dark md:text-4xl">
-          From Seed to Bottle — The Traditional Way
-        </h2>
-        <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <FadeIn>
+          <p className="text-sm font-medium uppercase tracking-wide text-primary">
+            Our Process
+          </p>
+          <h2 className="mt-2 max-w-xl font-display text-3xl text-dark md:text-4xl">
+            From Seed to Bottle — The Traditional Way
+          </h2>
+        </FadeIn>
+        <Stagger className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4" delay={0.1}>
           {STEPS.map((item) => (
-            <div key={item.step} className="rounded-lg bg-card p-5">
-              <p className="font-display text-3xl text-accent">{item.step}</p>
-              <h3 className="mt-3 font-display text-xl">{item.title}</h3>
-              <p className="mt-2 text-sm text-muted">{item.body}</p>
-            </div>
+            <StaggerItem key={item.step}>
+              <div className="rounded-lg bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
+                <p className="font-display text-3xl text-accent">{item.step}</p>
+                <h3 className="mt-3 font-display text-xl">{item.title}</h3>
+                <p className="mt-2 text-sm text-muted">{item.body}</p>
+              </div>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       </div>
     </section>
   );

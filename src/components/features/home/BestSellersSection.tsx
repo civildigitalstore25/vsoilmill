@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { ProductGrid } from "@/components/features/products/ProductGrid";
+import { FadeIn } from "@/components/shared/motion";
 import { ROUTES } from "@/constants/routes";
 import type { Product } from "@/types/product";
 
 export function BestSellersSection({ products }: { products: Product[] }) {
   return (
     <section className="mx-auto max-w-6xl px-4 py-8">
-      <div className="mb-8 flex items-end justify-between gap-4">
+      <FadeIn className="mb-8 flex items-end justify-between gap-4">
         <div>
           <p className="text-sm font-medium uppercase tracking-wide text-primary">
             Best Sellers
@@ -17,11 +18,11 @@ export function BestSellersSection({ products }: { products: Product[] }) {
         </div>
         <Link
           href={ROUTES.SHOP}
-          className="text-sm font-medium text-primary hover:underline"
+          className="text-sm font-medium text-primary transition-colors hover:underline"
         >
           View All Products →
         </Link>
-      </div>
+      </FadeIn>
       <ProductGrid products={products} />
     </section>
   );

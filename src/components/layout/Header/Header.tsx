@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Menu, ShoppingBag, User } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { AnnouncementBar } from "@/components/layout/Header/AnnouncementBar";
 import { CartDrawer } from "@/components/features/cart/CartDrawer";
@@ -12,9 +13,16 @@ import { useCartStore } from "@/hooks/useCartStore";
 import { cn } from "@/lib/utils/cn";
 
 export function Header() {
+  const { data: session } = useSession();
   const itemCount = useCartStore((s) => s.getItemCount());
   const [cartOpen, setCartOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const accountHref = session?.user
+    ? session.user.role === "admin"
+      ? ROUTES.ADMIN.DASHBOARD
+      : ROUTES.PROFILE
+    : ROUTES.LOGIN;
 
   return (
     <header className="sticky top-0 z-40 bg-cream/95 backdrop-blur">
@@ -29,7 +37,10 @@ export function Header() {
           <Menu className="h-6 w-6 text-dark" />
         </button>
 
-        <Link href={ROUTES.HOME} className="font-display text-2xl font-semibold text-primary">
+        <Link
+          href={ROUTES.HOME}
+          className="font-display text-2xl font-semibold text-primary"
+        >
           {UI.brand}
         </Link>
 
@@ -38,16 +49,27 @@ export function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-dark/80 hover:text-primary"
+              className="text-sm font-medium text-dark/80 transition-colors hover:text-primary"
             >
               {link.label}
             </Link>
           ))}
+          {session?.user ? (
+            <Link
+              href={ROUTES.ORDERS}
+              className="text-sm font-medium text-dark/80 transition-colors hover:text-primary"
+            >
+              My Orders
+            </Link>
+          ) : null}
         </nav>
 
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" asChild>
-            <Link href={ROUTES.LOGIN} aria-label="Account">
+            <Link
+              href={accountHref}
+              aria-label={session?.user ? "Account" : "Login"}
+            >
               <User className="h-5 w-5" />
             </Link>
           </Button>
@@ -85,6 +107,32 @@ export function Header() {
               {link.label}
             </Link>
           ))}
+          {session?.user ? (
+            <>
+              <Link
+                href={ROUTES.ORDERS}
+                className="text-sm font-medium text-dark"
+                onClick={() => setMobileOpen(false)}
+              >
+                My Orders
+              </Link>
+              <Link
+                href={accountHref}
+                className="text-sm font-medium text-dark"
+                onClick={() => setMobileOpen(false)}
+              >
+                {session.user.role === "admin" ? "Admin" : "Profile"}
+              </Link>
+            </>
+          ) : (
+            <Link
+              href={ROUTES.LOGIN}
+              className="text-sm font-medium text-dark"
+              onClick={() => setMobileOpen(false)}
+            >
+              Login
+            </Link>
+          )}
         </nav>
       </div>
 

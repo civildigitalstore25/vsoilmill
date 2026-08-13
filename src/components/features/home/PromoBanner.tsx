@@ -1,12 +1,23 @@
+"use client";
+
 import Link from "next/link";
+import { motion, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
 import { UI } from "@/constants/ui";
 
 export function PromoBanner() {
+  const reduce = useReducedMotion();
+
   return (
     <section className="mx-auto max-w-6xl px-4 pb-16">
-      <div className="rounded-2xl bg-gradient-to-r from-primary to-primary/80 px-8 py-12 text-center text-primary-foreground md:px-16">
+      <motion.div
+        className="rounded-2xl bg-gradient-to-r from-primary to-primary/80 px-8 py-12 text-center text-primary-foreground md:px-16"
+        initial={reduce ? false : { opacity: 0, scale: 0.96 }}
+        whileInView={reduce ? undefined : { opacity: 1, scale: 1 }}
+        viewport={{ once: true, amount: 0.4 }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+      >
         <h2 className="font-display text-3xl md:text-4xl">
           Your First Order Gets {UI.promoPercent}% Off
         </h2>
@@ -16,7 +27,7 @@ export function PromoBanner() {
         <Button size="lg" variant="accent" className="mt-6" asChild>
           <Link href={ROUTES.SHOP}>Shop Now & Save</Link>
         </Button>
-      </div>
+      </motion.div>
     </section>
   );
 }

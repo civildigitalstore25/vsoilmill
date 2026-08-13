@@ -1,11 +1,22 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { API_ENDPOINTS } from "@/constants/api";
+import { ROUTES } from "@/constants/routes";
 import { formatInr } from "@/lib/utils/format";
 import type { Order } from "@/types/order";
+
+const STATUS_OPTIONS = [
+  "PENDING",
+  "CONFIRMED",
+  "PROCESSING",
+  "SHIPPED",
+  "DELIVERED",
+  "CANCELLED",
+] as const;
 
 export function AdminOrdersClient({ orders }: { orders: Order[] }) {
   const router = useRouter();
@@ -24,6 +35,10 @@ export function AdminOrdersClient({ orders }: { orders: Order[] }) {
     router.refresh();
   }
 
+  if (orders.length === 0) {
+    return <p className="text-muted">No orders yet.</p>;
+  }
+
   return (
     <div className="space-y-4">
       {orders.map((order) => (
@@ -31,30 +46,39 @@ export function AdminOrdersClient({ orders }: { orders: Order[] }) {
           key={order._id}
           className="rounded-xl border border-border bg-card p-5"
         >
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <p className="font-medium">{order._id}</p>
-              <p className="text-sm text-muted">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-3">
+                <p className="font-medium text-dark">{order._id}</p>
+                <Link
+                  href={ROUTES.ADMIN.ORDER_DETAIL(order._id)}
+                  className="text-sm text-primary underline"
+                >
+                  View details
+                </Link>
+              </div>
+              <p className="mt-1 text-sm text-muted">
                 {order.shippingAddress.fullName} · {order.shippingAddress.phone}
               </p>
-              <p className="mt-1 text-sm">
-                {formatInr(order.pricing.total)} · {order.paymentStatus} ·{" "}
-                {order.status}
+              <p className="mt-1 text-sm text-muted">
+                {order.items.length} item(s) · {order.shippingAddress.city}
+              </p>
+              <p className="mt-2 text-sm font-semibold">
+                {formatInr(order.pricing.total)} · Payment {order.paymentStatus}{" "}
+                · {order.status}
               </p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {["CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"].map(
-                (status) => (
-                  <Button
-                    key={status}
-                    size="sm"
-                    variant="outline"
-                    onClick={() => updateStatus(order._id, status)}
-                  >
-                    {status}
-                  </Button>
-                ),
-              )}
+            <div className="flex max-w-md flex-wrap gap-2">
+              {STATUS_OPTIONS.map((status) => (
+                <Button
+                  key={status}
+                  size="sm"
+                  variant={order.status === status ? "default" : "outline"}
+                  onClick={() => updateStatus(order._id, status)}
+                >
+                  {status}
+                </Button>
+              ))}
             </div>
           </div>
         </div>

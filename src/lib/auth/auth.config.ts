@@ -2,6 +2,7 @@ import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
 export const authConfig = {
+  trustHost: true,
   session: { strategy: "jwt" },
   pages: {
     signIn: "/login",
@@ -18,10 +19,20 @@ export const authConfig = {
   ],
   callbacks: {
     authorized({ auth, request }) {
-      const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
-      if (!isAdminRoute) return true;
-      if (!auth?.user) return false;
-      return auth.user.role === "admin";
+      const path = request.nextUrl.pathname;
+      const isAdminRoute = path.startsWith("/admin");
+      const isProtectedUserRoute =
+        path.startsWith("/profile") || path.startsWith("/orders");
+
+      if (isAdminRoute) {
+        return Boolean(auth?.user && auth.user.role === "admin");
+      }
+
+      if (isProtectedUserRoute) {
+        return Boolean(auth?.user);
+      }
+
+      return true;
     },
     async jwt({ token, user }) {
       if (user) {
