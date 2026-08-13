@@ -1,0 +1,54 @@
+---
+description: Design token enforcement for VS OilMill color palette and typography
+globs: **/*.{ts,tsx,css}
+alwaysApply: false
+---
+
+# Design Tokens
+
+## Color Palette
+Never hardcode hex values. Use Tailwind token classes or CSS variables:
+
+| Token | Value | Tailwind Class |
+|---|---|---|
+| Primary Green | `#2d5a3d` | `text-primary`, `bg-primary`, `border-primary` |
+| Accent Gold | `#c4a35a` | `text-accent`, `bg-accent`, `border-accent` |
+| Cream | `#f7f3eb` | `text-cream`, `bg-cream` |
+| Dark | `#1a1a16` | `text-dark`, `bg-dark` |
+| Muted | `#6b6b5e` | `text-muted`, `bg-muted` |
+
+CSS variables available globally:
+```css
+var(--color-primary)  /* #2d5a3d */
+var(--color-accent)   /* #c4a35a */
+var(--color-cream)    /* #f7f3eb */
+var(--color-dark)     /* #1a1a16 */
+var(--color-muted)    /* #6b6b5e */
+```
+
+## Typography
+Use Tailwind typography classes only — never hardcode `font-family`, `font-size`, or `font-weight`:
+
+```tsx
+// ❌ BAD
+<h1 style={{ fontSize: '48px', fontWeight: 700, fontFamily: 'Playfair Display' }}>
+
+// ✅ GOOD
+<h1 className="font-display text-4xl font-bold text-dark">
+```
+
+- `font-display` — Fraunces (headings / brand)
+- `font-sans` — DM Sans (body / UI)
+
+## Spacing & Shadows
+Use the extended Tailwind / theme scale — never raw px/rem values in className strings for colors or fonts.
+
+## Examples
+
+```tsx
+// ❌ BAD — hardcoded color
+<button className="bg-[#2d5a3d] text-[#f7f3eb]">
+
+// ✅ GOOD — design token
+<button className="bg-primary text-cream">
+```

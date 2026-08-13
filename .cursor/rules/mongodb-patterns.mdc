@@ -1,0 +1,30 @@
+---
+description: MongoDB / Mongoose conventions for VS OilMill
+globs: src/{models,lib/db,app/api}/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# MongoDB / Mongoose Patterns
+
+## Layout
+- Models live in `src/models/` — one model per file (e.g. `Product.ts`, `Order.ts`).
+- Connection helper lives in `src/lib/db/mongoose.ts` — reuse a cached connection in serverless.
+- Data access helpers live in `src/lib/` (e.g. `src/lib/products/`, `src/lib/orders/`) — never query MongoDB from React components.
+
+## Rules
+- Always `await connectDb()` before using models in Route Handlers / Server Components.
+- Validate inputs with Zod at the API boundary before writing to MongoDB.
+- Use lean() for read-only list queries when hydration is not needed.
+- Prefer ObjectId refs + populate for relations (category, user, product).
+- Never expose password hashes or secrets in API responses.
+- Index `slug` (unique), payment IDs, and text fields used for search.
+
+## Model shape
+```ts
+// ✅ GOOD — typed schema + export
+import { Schema, model, models } from 'mongoose';
+import type { Product } from '@/types/product';
+
+const ProductSchema = new Schema<Product>({ /* ... */ }, { timestamps: true });
+export const ProductModel = models.Product ?? model('Product', ProductSchema);
+```

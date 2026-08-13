@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400" fill="none">
+  <rect width="400" height="400" fill="#ebe4d6"/>
+  <circle cx="200" cy="160" r="48" fill="#2d5a3d" opacity="0.85"/>
+  <rect x="140" y="220" width="120" height="90" rx="12" fill="#c4a35a" opacity="0.9"/>
+  <text x="200" y="360" text-anchor="middle" fill="#1a1a16" font-family="Georgia, serif" font-size="18">VS OilMill</text>
+</svg>

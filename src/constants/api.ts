@@ -1,0 +1,17 @@
+export const API_ENDPOINTS = {
+  PRODUCTS: "/api/products",
+  PRODUCT: (id: string) => `/api/products/${id}`,
+  CATEGORIES: "/api/categories",
+  CATEGORY: (id: string) => `/api/categories/${id}`,
+  ORDERS: "/api/orders",
+  ORDER: (id: string) => `/api/orders/${id}`,
+  REVIEWS: "/api/reviews",
+  PAYMENT_PHONEPE: "/api/payment/phonepe",
+  PAYMENT_STATUS: "/api/payment/phonepe/status",
+  PAYMENT_CALLBACK: "/api/payment/phonepe/callback",
+  AUTH_REGISTER: "/api/auth/register",
+  ADMIN_STATS: "/api/admin/stats",
+  ADMIN_USERS: "/api/admin/users",
+  ADMIN_ORDERS: "/api/admin/orders",
+  ADMIN_REVIEWS: "/api/admin/reviews",
+} as const;
