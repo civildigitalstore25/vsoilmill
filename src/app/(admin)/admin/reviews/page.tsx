@@ -8,10 +8,5 @@ export default async function AdminReviewsPage() {
     JSON.stringify(await ReviewModel.find().sort({ createdAt: -1 }).lean()),
   );
 
-  return (
-    <div>
-      <h1 className="mb-8 font-display text-3xl text-dark">Reviews</h1>
-      <AdminReviewsClient reviews={reviews} />
-    </div>
-  );
+  return <AdminReviewsClient reviews={reviews} />;
 }

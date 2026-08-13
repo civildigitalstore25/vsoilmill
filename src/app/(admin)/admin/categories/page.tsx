@@ -8,10 +8,5 @@ export default async function AdminCategoriesPage() {
     JSON.stringify(await CategoryModel.find().sort({ sortOrder: 1 }).lean()),
   );
 
-  return (
-    <div>
-      <h1 className="mb-8 font-display text-3xl text-dark">Categories</h1>
-      <AdminCategoriesClient categories={categories} />
-    </div>
-  );
+  return <AdminCategoriesClient categories={categories} />;
 }

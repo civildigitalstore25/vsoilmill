@@ -3,11 +3,13 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { AdminImageUploader } from "@/components/features/admin/AdminImageUploader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { API_ENDPOINTS } from "@/constants/api";
+import { ASSETS } from "@/constants/assets";
 import { ROUTES } from "@/constants/routes";
 import type { Category, Product } from "@/types/product";
 
@@ -20,6 +22,7 @@ export function AdminProductForm({
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [images, setImages] = useState<string[]>(product?.images ?? []);
   const [form, setForm] = useState({
     name: product?.name ?? "",
     shortDescription: product?.shortDescription ?? "",
@@ -30,7 +33,6 @@ export function AdminProductForm({
         : (product?.categoryId as Category | undefined)?._id ??
           categories[0]?._id ??
           "",
-    images: product?.images?.join(", ") ?? "/images/product-placeholder.svg",
     isActive: product?.isActive ?? true,
     isBestSeller: product?.isBestSeller ?? false,
     isNewArrival: product?.isNewArrival ?? false,
@@ -42,18 +44,20 @@ export function AdminProductForm({
     metaTitle: product?.seo?.metaTitle ?? "",
     metaDescription: product?.seo?.metaDescription ?? "",
     metaKeywords: product?.seo?.metaKeywords?.join(", ") ?? "",
+    ogImage: product?.seo?.ogImage ?? "",
   });
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
 
+    const cleanImages = images.map((s) => s.trim()).filter(Boolean);
     const payload = {
       name: form.name,
       shortDescription: form.shortDescription,
       description: form.description,
       categoryId: form.categoryId,
-      images: form.images.split(",").map((s) => s.trim()).filter(Boolean),
+      images: cleanImages.length ? cleanImages : [ASSETS.PLACEHOLDER_PRODUCT],
       isActive: form.isActive,
       isBestSeller: form.isBestSeller,
       isNewArrival: form.isNewArrival,
@@ -76,6 +80,7 @@ export function AdminProductForm({
         metaKeywords: form.metaKeywords
           ? form.metaKeywords.split(",").map((k) => k.trim()).filter(Boolean)
           : undefined,
+        ogImage: form.ogImage || cleanImages[0] || undefined,
       },
     };
 
@@ -101,7 +106,7 @@ export function AdminProductForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="mx-auto max-w-2xl space-y-4">
+    <form onSubmit={onSubmit} className="mx-auto max-w-2xl space-y-5">
       <div>
         <Label htmlFor="name">Product name</Label>
         <Input
@@ -153,6 +158,9 @@ export function AdminProductForm({
           required
         />
       </div>
+
+      <AdminImageUploader images={images} onChange={setImages} />
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <Label htmlFor="variantLabel">Primary variant label</Label>
@@ -217,15 +225,6 @@ export function AdminProductForm({
             required
           />
         </div>
-        <div>
-          <Label htmlFor="images">Images (comma-separated URLs)</Label>
-          <Input
-            id="images"
-            className="mt-1.5"
-            value={form.images}
-            onChange={(e) => setForm((f) => ({ ...f, images: e.target.value }))}
-          />
-        </div>
       </div>
 
       <fieldset className="space-y-3 rounded-lg border border-border p-4">
@@ -260,6 +259,18 @@ export function AdminProductForm({
             value={form.metaKeywords}
             onChange={(e) =>
               setForm((f) => ({ ...f, metaKeywords: e.target.value }))
+            }
+          />
+        </div>
+        <div>
+          <Label htmlFor="ogImage">OG image URL (optional)</Label>
+          <Input
+            id="ogImage"
+            className="mt-1.5"
+            placeholder="Defaults to first product image"
+            value={form.ogImage}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, ogImage: e.target.value }))
             }
           />
         </div>

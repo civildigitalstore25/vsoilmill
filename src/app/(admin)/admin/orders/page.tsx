@@ -8,10 +8,5 @@ export default async function AdminOrdersPage() {
     JSON.stringify(await OrderModel.find().sort({ createdAt: -1 }).lean()),
   );
 
-  return (
-    <div>
-      <h1 className="mb-8 font-display text-3xl text-dark">Orders</h1>
-      <AdminOrdersClient orders={orders} />
-    </div>
-  );
+  return <AdminOrdersClient orders={orders} />;
 }

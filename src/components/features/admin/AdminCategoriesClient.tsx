@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { AdminCard, AdminPageHeader } from "@/components/features/admin/AdminUi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,7 +27,6 @@ export function AdminCategoriesClient({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, badge, description }),
     });
-    const json = await res.json();
     if (!res.ok) {
       toast.error("Failed to create category");
       return;
@@ -36,7 +36,6 @@ export function AdminCategoriesClient({
     setBadge("");
     setDescription("");
     router.refresh();
-    return json;
   }
 
   async function removeCategory(id: string) {
@@ -51,59 +50,73 @@ export function AdminCategoriesClient({
   }
 
   return (
-    <div className="grid gap-10 lg:grid-cols-2">
-      <form onSubmit={createCategory} className="space-y-4 rounded-xl border border-border bg-card p-6">
-        <h2 className="font-display text-xl">Create category</h2>
-        <div>
-          <Label htmlFor="name">Name</Label>
-          <Input
-            id="name"
-            className="mt-1.5"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="badge">Badge</Label>
-          <Input
-            id="badge"
-            className="mt-1.5"
-            value={badge}
-            onChange={(e) => setBadge(e.target.value)}
-          />
-        </div>
-        <div>
-          <Label htmlFor="description">Description</Label>
-          <Input
-            id="description"
-            className="mt-1.5"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        </div>
-        <Button type="submit">Create</Button>
-      </form>
-
-      <div className="space-y-3">
-        {categories.map((category) => (
-          <div
-            key={category._id}
-            className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3"
-          >
+    <div>
+      <AdminPageHeader
+        title="Categories"
+        description="Create and organize shop collections customers browse."
+      />
+      <div className="grid gap-6 lg:grid-cols-5">
+        <AdminCard className="p-6 lg:col-span-2">
+          <h2 className="font-display text-xl text-dark">Create category</h2>
+          <form onSubmit={createCategory} className="mt-5 space-y-4">
             <div>
-              <p className="font-medium">{category.name}</p>
-              <p className="text-xs text-muted">{category.slug}</p>
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                className="mt-1.5"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
             </div>
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={() => removeCategory(category._id)}
-            >
-              Delete
+            <div>
+              <Label htmlFor="badge">Badge</Label>
+              <Input
+                id="badge"
+                className="mt-1.5"
+                placeholder="Popular"
+                value={badge}
+                onChange={(e) => setBadge(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Input
+                id="description"
+                className="mt-1.5"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+            <Button type="submit" className="w-full">
+              Create category
             </Button>
-          </div>
-        ))}
+          </form>
+        </AdminCard>
+
+        <div className="space-y-3 lg:col-span-3">
+          {categories.map((category) => (
+            <AdminCard
+              key={category._id}
+              className="flex items-center justify-between gap-4 px-5 py-4"
+            >
+              <div>
+                <p className="font-medium text-dark">{category.name}</p>
+                <p className="mt-1 text-xs text-muted">
+                  /{category.slug}
+                  {category.badge ? ` · ${category.badge}` : ""}
+                </p>
+              </div>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => removeCategory(category._id)}
+              >
+                Delete
+              </Button>
+            </AdminCard>
+          ))}
+        </div>
       </div>
     </div>
   );

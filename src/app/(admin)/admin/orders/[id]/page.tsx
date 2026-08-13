@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdminOrderStatusForm } from "@/components/features/admin/AdminOrderStatusForm";
+import { AdminCard, AdminPageHeader } from "@/components/features/admin/AdminUi";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
 import { connectDb } from "@/lib/db/mongoose";
@@ -18,20 +19,20 @@ export default async function AdminOrderDetailPage({ params }: Props) {
 
   return (
     <div>
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="font-display text-3xl text-dark">Order detail</h1>
-          <p className="mt-1 text-sm text-muted">{data._id}</p>
-        </div>
-        <Button variant="outline" asChild>
-          <Link href={ROUTES.ADMIN.ORDERS}>Back to orders</Link>
-        </Button>
-      </div>
+      <AdminPageHeader
+        title="Order detail"
+        description={data._id}
+        actions={
+          <Button variant="outline" asChild>
+            <Link href={ROUTES.ADMIN.ORDERS}>Back to orders</Link>
+          </Button>
+        }
+      />
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border border-border bg-card p-6">
-          <h2 className="font-display text-xl">Customer & shipping</h2>
-          <p className="mt-3 text-sm leading-relaxed text-muted">
+        <AdminCard className="p-6">
+          <h2 className="font-display text-xl text-dark">Customer & shipping</h2>
+          <p className="mt-4 text-sm leading-relaxed text-muted">
             {data.shippingAddress.fullName}
             <br />
             {data.shippingAddress.phone}
@@ -48,25 +49,28 @@ export default async function AdminOrderDetailPage({ params }: Props) {
             {data.shippingAddress.city}, {data.shippingAddress.state}{" "}
             {data.shippingAddress.pincode}
           </p>
-        </div>
+        </AdminCard>
 
-        <div className="rounded-xl border border-border bg-card p-6">
-          <h2 className="font-display text-xl">Payment & status</h2>
-          <p className="mt-3 text-sm text-muted">
+        <AdminCard className="p-6">
+          <h2 className="font-display text-xl text-dark">Payment & status</h2>
+          <p className="mt-4 text-sm text-muted">
             Payment: {data.paymentStatus}
             <br />
             Current status: {data.status}
             <br />
             PhonePe order: {data.phonepeMerchantOrderId ?? "—"}
           </p>
-          <div className="mt-4">
-            <AdminOrderStatusForm orderId={data._id} currentStatus={data.status} />
+          <div className="mt-5">
+            <AdminOrderStatusForm
+              orderId={data._id}
+              currentStatus={data.status}
+            />
           </div>
-        </div>
+        </AdminCard>
       </div>
 
-      <div className="mt-6 rounded-xl border border-border bg-card p-6">
-        <h2 className="font-display text-xl">Items</h2>
+      <AdminCard className="mt-6 p-6">
+        <h2 className="font-display text-xl text-dark">Items</h2>
         <ul className="mt-4 space-y-3 text-sm">
           {data.items.map(
             (item: {
@@ -77,7 +81,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
             }) => (
               <li
                 key={`${item.name}-${item.variantLabel}`}
-                className="flex justify-between gap-3 border-b border-border pb-3"
+                className="flex justify-between gap-3 rounded-xl bg-cream/50 px-4 py-3"
               >
                 <span>
                   {item.name} ({item.variantLabel}) × {item.quantity}
@@ -89,25 +93,25 @@ export default async function AdminOrderDetailPage({ params }: Props) {
             ),
           )}
         </ul>
-        <div className="mt-4 space-y-1 text-sm">
+        <div className="mt-5 space-y-2 border-t border-border pt-4 text-sm">
           <div className="flex justify-between">
-            <span>Subtotal</span>
+            <span className="text-muted">Subtotal</span>
             <span>{formatInr(data.pricing.subtotal)}</span>
           </div>
           <div className="flex justify-between">
-            <span>Shipping</span>
+            <span className="text-muted">Shipping</span>
             <span>{formatInr(data.pricing.shipping)}</span>
           </div>
           <div className="flex justify-between">
-            <span>Tax</span>
+            <span className="text-muted">Tax</span>
             <span>{formatInr(data.pricing.tax)}</span>
           </div>
-          <div className="flex justify-between text-base font-semibold">
+          <div className="flex justify-between font-display text-xl text-dark">
             <span>Total</span>
             <span>{formatInr(data.pricing.total)}</span>
           </div>
         </div>
-      </div>
+      </AdminCard>
     </div>
   );
 }

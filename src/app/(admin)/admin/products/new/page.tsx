@@ -1,4 +1,5 @@
 import { AdminProductForm } from "@/components/features/admin/AdminProductForm";
+import { AdminCard, AdminPageHeader } from "@/components/features/admin/AdminUi";
 import { connectDb } from "@/lib/db/mongoose";
 import { CategoryModel } from "@/models/Category";
 
@@ -10,8 +11,13 @@ export default async function AdminNewProductPage() {
 
   return (
     <div>
-      <h1 className="mb-8 font-display text-3xl text-dark">Add product</h1>
-      <AdminProductForm categories={categories} />
+      <AdminPageHeader
+        title="Add product"
+        description="Create a new oil or ghee listing with variants and SEO."
+      />
+      <AdminCard className="p-6 md:p-8">
+        <AdminProductForm categories={categories} />
+      </AdminCard>
     </div>
   );
 }

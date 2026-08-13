@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { AdminProductForm } from "@/components/features/admin/AdminProductForm";
+import { AdminCard, AdminPageHeader } from "@/components/features/admin/AdminUi";
 import { connectDb } from "@/lib/db/mongoose";
 import { CategoryModel } from "@/models/Category";
 import { ProductModel } from "@/models/Product";
@@ -17,11 +18,16 @@ export default async function AdminEditProductPage({ params }: Props) {
 
   return (
     <div>
-      <h1 className="mb-8 font-display text-3xl text-dark">Edit product</h1>
-      <AdminProductForm
-        categories={JSON.parse(JSON.stringify(categories))}
-        product={JSON.parse(JSON.stringify(product))}
+      <AdminPageHeader
+        title="Edit product"
+        description="Update pricing, variants, visibility, and SEO metadata."
       />
+      <AdminCard className="p-6 md:p-8">
+        <AdminProductForm
+          categories={JSON.parse(JSON.stringify(categories))}
+          product={JSON.parse(JSON.stringify(product))}
+        />
+      </AdminCard>
     </div>
   );
 }

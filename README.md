@@ -22,3 +22,7 @@ npm run dev
 ```
 
 Admin: `/admin` (seed credentials from `.env.local`)
+
+## Product images
+
+In **Admin → Products → Add/Edit**, paste Cloudinary/ImageKit (or any public) image URLs. No cloud API keys are required in env.
