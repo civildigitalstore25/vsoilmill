@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { OrderHistoryList } from "@/components/features/orders/OrderHistoryList";
 import { ProfileForm } from "@/components/features/profile/ProfileForm";
 import { AddressManager } from "@/components/features/profile/AddressManager";
+import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
 import { USER_ROLES } from "@/constants/auth";
 import { getPostLogoutRoute } from "@/lib/auth/post-login";
@@ -43,7 +44,7 @@ export function ProfileClient() {
           </p>
         </div>
 
-        {session?.user?.role === "admin" && (
+        {session?.user?.role === USER_ROLES.ADMIN && (
           <Link
             href={ROUTES.ADMIN.DASHBOARD}
             className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition-transform hover:scale-[1.02]"
@@ -101,32 +102,9 @@ export function ProfileClient() {
         {/* Content Pane */}
         <div className="lg:col-span-3">
           {tab === "account" ? (
-            <div className="rounded-xl border border-border bg-card p-6">
-              <h2 className="font-display text-2xl text-dark">Account info</h2>
-              <dl className="mt-6 space-y-4 text-sm">
-                <div>
-                  <dt className="text-muted">Name</dt>
-                  <dd className="mt-1 font-medium text-dark">
-                    {session?.user?.name ?? "—"}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-muted">Email</dt>
-                  <dd className="mt-1 font-medium text-dark">
-                    {session?.user?.email ?? "—"}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-muted">Role</dt>
-                  <dd className="mt-1 font-medium capitalize text-dark">
-                    {session?.user?.role ?? USER_ROLES.USER}
-                  </dd>
-                </div>
-              </dl>
-              <Button className="mt-8" variant="outline" asChild>
-                <Link href={ROUTES.ORDERS}>View all orders</Link>
-              </Button>
-            </div>
+            <ProfileForm />
+          ) : tab === "addresses" ? (
+            <AddressManager />
           ) : (
             <OrderHistoryList />
           )}
