@@ -7,6 +7,7 @@ import { signOut, useSession } from "next-auth/react";
 import { useState } from "react";
 import { ADMIN_COPY, ADMIN_NAV } from "@/constants/admin";
 import { ROUTES } from "@/constants/routes";
+import { getPostLogoutRoute } from "@/lib/auth/post-login";
 import { cn } from "@/lib/utils/cn";
 
 function SidebarNav({
@@ -85,7 +86,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             </Link>
             <button
               type="button"
-              onClick={() => signOut({ callbackUrl: ROUTES.HOME })}
+              onClick={() => signOut({ callbackUrl: getPostLogoutRoute() })}
               className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-cream/70 transition hover:bg-cream/10 hover:text-cream"
             >
               <LogOut className="h-4 w-4" />

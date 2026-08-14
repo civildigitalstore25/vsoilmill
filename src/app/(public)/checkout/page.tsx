@@ -12,6 +12,7 @@ import { CHECKOUT_COPY } from "@/constants/checkout";
 import { FREE_SHIPPING_THRESHOLD, GST_RATE } from "@/constants/seo";
 import { ROUTES } from "@/constants/routes";
 import { useCartStore } from "@/hooks/useCartStore";
+import { useRequireLogin } from "@/hooks/useRequireLogin";
 import { formatInr } from "@/lib/utils/format";
 import {
   buildCartWhatsAppMessage,
@@ -39,6 +40,7 @@ export default function CheckoutPage() {
   const [address, setAddress] = useState<ShippingAddress>(EMPTY_ADDRESS);
   const [couponCode, setCouponCode] = useState("");
   const [loading, setLoading] = useState(false);
+  const { requireLogin } = useRequireLogin();
 
   const discount =
     couponCode.trim().toUpperCase() === "PURE10"
@@ -57,6 +59,7 @@ export default function CheckoutPage() {
   }
 
   async function handlePay() {
+    if (!requireLogin()) return;
     if (!address.fullName || !address.phone || !address.line1 || !address.city || !address.state || !address.pincode) {
       toast.error("Please fill all required address fields");
       return;

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
+import { USER_ROLES } from "@/constants/auth";
 import { auth } from "@/lib/auth/auth";
 import { connectDb } from "@/lib/db/mongoose";
 import { formatInr } from "@/lib/utils/format";
@@ -22,7 +23,7 @@ export default async function OrderDetailPage({ params }: Props) {
 
   const data = JSON.parse(JSON.stringify(order));
   const isOwner =
-    data.userId === session.user.id || session.user.role === "admin";
+    data.userId === session.user.id || session.user.role === USER_ROLES.ADMIN;
   if (!isOwner) notFound();
 
   return (

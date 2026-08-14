@@ -9,10 +9,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { CheckoutButton } from "@/components/features/cart/CheckoutButton";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
 import { CHECKOUT_COPY } from "@/constants/checkout";
 import { useCartStore } from "@/hooks/useCartStore";
+import { useRequireLogin } from "@/hooks/useRequireLogin";
 import { formatInr } from "@/lib/utils/format";
 import {
   buildCartWhatsAppMessage,
@@ -30,6 +32,7 @@ export function CartDrawer({
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const removeItem = useCartStore((s) => s.removeItem);
   const subtotal = useCartStore((s) => s.getSubtotal());
+  const { requireLogin } = useRequireLogin();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -121,23 +124,25 @@ export function CartDrawer({
                 <span>Subtotal</span>
                 <span>{formatInr(subtotal)}</span>
               </div>
-              <Button asChild className="w-full" onClick={() => onOpenChange(false)}>
-                <Link href={ROUTES.CHECKOUT}>Checkout</Link>
-              </Button>
+              <CheckoutButton
+                className="w-full"
+                onBeforeNavigate={() => onOpenChange(false)}
+              >
+                {CHECKOUT_COPY.CHECKOUT}
+              </CheckoutButton>
               <Button
                 variant="whatsapp"
                 className="w-full"
-                asChild
+                onClick={() => {
+                  if (!requireLogin()) return;
+                  window.open(
+                    buildWhatsAppUrl(buildCartWhatsAppMessage(items, subtotal)),
+                    "_blank",
+                    "noopener,noreferrer",
+                  );
+                }}
               >
-                <a
-                  href={buildWhatsAppUrl(
-                    buildCartWhatsAppMessage(items, subtotal),
-                  )}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {CHECKOUT_COPY.WHATSAPP_CTA}
-                </a>
+                {CHECKOUT_COPY.WHATSAPP_CTA}
               </Button>
             </div>
           </>

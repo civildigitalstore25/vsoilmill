@@ -10,6 +10,7 @@ import { ASSETS } from "@/constants/assets";
 import { CHECKOUT_COPY } from "@/constants/checkout";
 import { ROUTES } from "@/constants/routes";
 import { useCartStore } from "@/hooks/useCartStore";
+import { useRequireLogin } from "@/hooks/useRequireLogin";
 import { cn } from "@/lib/utils/cn";
 import { formatInr } from "@/lib/utils/format";
 import {
@@ -21,6 +22,7 @@ import type { Product } from "@/types/product";
 export function ProductDetailClient({ product }: { product: Product }) {
   const router = useRouter();
   const addItem = useCartStore((s) => s.addItem);
+  const { requireLogin } = useRequireLogin();
   const [variantIndex, setVariantIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const variant = product.variants[variantIndex];
@@ -51,6 +53,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
   }
 
   function buyNow() {
+    if (!requireLogin()) return;
     addToCart();
     router.push(ROUTES.CHECKOUT);
   }
@@ -138,29 +141,35 @@ export function ProductDetailClient({ product }: { product: Product }) {
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Button size="lg" className="flex-1" onClick={addToCart}>
-            Add to Cart
+            {CHECKOUT_COPY.ADD_TO_CART}
           </Button>
           <Button size="lg" variant="accent" className="flex-1" onClick={buyNow}>
-            Buy Now
+            {CHECKOUT_COPY.BUY_NOW}
           </Button>
         </div>
 
         {variant ? (
-          <Button size="lg" variant="whatsapp" className="mt-3 w-full" asChild>
-            <a
-              href={buildWhatsAppUrl(
-                buildProductWhatsAppMessage(
-                  product.name,
-                  variant.label,
-                  variant.price,
-                  quantity,
+          <Button
+            size="lg"
+            variant="whatsapp"
+            className="mt-3 w-full"
+            onClick={() => {
+              if (!requireLogin()) return;
+              window.open(
+                buildWhatsAppUrl(
+                  buildProductWhatsAppMessage(
+                    product.name,
+                    variant.label,
+                    variant.price,
+                    quantity,
+                  ),
                 ),
-              )}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {CHECKOUT_COPY.WHATSAPP_CTA}
-            </a>
+                "_blank",
+                "noopener,noreferrer",
+              );
+            }}
+          >
+            {CHECKOUT_COPY.WHATSAPP_CTA}
           </Button>
         ) : null}
 

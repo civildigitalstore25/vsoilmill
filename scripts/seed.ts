@@ -6,6 +6,7 @@ import { CategoryModel } from "../src/models/Category";
 import { ProductModel } from "../src/models/Product";
 import { ReviewModel } from "../src/models/Review";
 import { slugify } from "../src/lib/utils/format";
+import { AUTH, USER_ROLES } from "../src/constants/auth";
 
 const categories = [
   {
@@ -230,13 +231,13 @@ async function seed() {
 
   const adminEmail = process.env.ADMIN_EMAIL ?? "admin@vsoilmill.com";
   const adminPassword = process.env.ADMIN_PASSWORD ?? "Admin@12345";
-  const passwordHash = await bcrypt.hash(adminPassword, 10);
+  const passwordHash = await bcrypt.hash(adminPassword, AUTH.bcryptRounds);
 
   await UserModel.create({
     name: "VS OilMill Admin",
     email: adminEmail,
     passwordHash,
-    role: "admin",
+    role: USER_ROLES.ADMIN,
     phone: "8438775451",
   });
 

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
 import { connectDb } from "@/lib/db/mongoose";
 import { OrderModel } from "@/models/Order";
+import { USER_ROLES } from "@/constants/auth";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -22,7 +23,7 @@ export async function GET(_request: Request, { params }: Params) {
     const data = JSON.parse(JSON.stringify(order));
     if (
       data.userId !== session.user.id &&
-      session.user.role !== "admin"
+      session.user.role !== USER_ROLES.ADMIN
     ) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }

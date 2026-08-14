@@ -4,6 +4,7 @@ import { connectDb } from "@/lib/db/mongoose";
 import { ProductModel } from "@/models/Product";
 import { slugify } from "@/lib/utils/format";
 import { z } from "zod";
+import { USER_ROLES } from "@/constants/auth";
 
 const productSchema = z.object({
   name: z.string().min(2),
@@ -41,7 +42,7 @@ const productSchema = z.object({
 
 async function requireAdmin() {
   const session = await auth();
-  if (!session?.user || session.user.role !== "admin") {
+  if (!session?.user || session.user.role !== USER_ROLES.ADMIN) {
     return null;
   }
   return session;

@@ -1,14 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, ShoppingBag, User } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { Menu, ShoppingBag } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
 import { useState } from "react";
 import { AnnouncementBar } from "@/components/layout/Header/AnnouncementBar";
+import { ProfileMenu } from "@/components/layout/Header/ProfileMenu";
 import { CartDrawer } from "@/components/features/cart/CartDrawer";
 import { Button } from "@/components/ui/button";
+import {
+  ACCOUNT_MENU,
+  getSignedInAccountLinks,
+  getSignedOutAccountLinks,
+} from "@/constants/account";
 import { NAV_LINKS, UI } from "@/constants/ui";
 import { ROUTES } from "@/constants/routes";
+import { getPostLogoutRoute } from "@/lib/auth/post-login";
 import { useCartStore } from "@/hooks/useCartStore";
 import { cn } from "@/lib/utils/cn";
 
@@ -18,11 +25,9 @@ export function Header() {
   const [cartOpen, setCartOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const accountHref = session?.user
-    ? session.user.role === "admin"
-      ? ROUTES.ADMIN.DASHBOARD
-      : ROUTES.PROFILE
-    : ROUTES.LOGIN;
+  const accountLinks = session?.user
+    ? getSignedInAccountLinks(session.user.role)
+    : getSignedOutAccountLinks();
 
   return (
     <header className="sticky top-0 z-40 bg-cream/95 backdrop-blur">
@@ -54,25 +59,10 @@ export function Header() {
               {link.label}
             </Link>
           ))}
-          {session?.user ? (
-            <Link
-              href={ROUTES.ORDERS}
-              className="text-sm font-medium text-dark/80 transition-colors hover:text-primary"
-            >
-              My Orders
-            </Link>
-          ) : null}
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" asChild>
-            <Link
-              href={accountHref}
-              aria-label={session?.user ? "Account" : "Login"}
-            >
-              <User className="h-5 w-5" />
-            </Link>
-          </Button>
+          <ProfileMenu />
           <Button
             variant="ghost"
             size="icon"
@@ -107,32 +97,25 @@ export function Header() {
               {link.label}
             </Link>
           ))}
-          {session?.user ? (
-            <>
-              <Link
-                href={ROUTES.ORDERS}
-                className="text-sm font-medium text-dark"
-                onClick={() => setMobileOpen(false)}
-              >
-                My Orders
-              </Link>
-              <Link
-                href={accountHref}
-                className="text-sm font-medium text-dark"
-                onClick={() => setMobileOpen(false)}
-              >
-                {session.user.role === "admin" ? "Admin" : "Profile"}
-              </Link>
-            </>
-          ) : (
+          {accountLinks.map((link) => (
             <Link
-              href={ROUTES.LOGIN}
+              key={link.href}
+              href={link.href}
               className="text-sm font-medium text-dark"
               onClick={() => setMobileOpen(false)}
             >
-              Login
+              {link.label}
             </Link>
-          )}
+          ))}
+          {session?.user ? (
+            <button
+              type="button"
+              className="text-left text-sm font-medium text-destructive"
+              onClick={() => signOut({ callbackUrl: getPostLogoutRoute() })}
+            >
+              {ACCOUNT_MENU.signOut}
+            </button>
+          ) : null}
         </nav>
       </div>
 

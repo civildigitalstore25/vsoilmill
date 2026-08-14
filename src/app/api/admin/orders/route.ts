@@ -1,43 +1,154 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { auth } from "@/lib/auth/auth";
+import { AUTH_ERRORS } from "@/constants/auth";
+import { ASSETS } from "@/constants/assets";
+import { DEFAULT_SHIPPING_COUNTRY } from "@/constants/checkout";
+import { requireAdmin } from "@/lib/auth/require-admin";
+import { calculatePricing } from "@/lib/orders/pricing";
 import { connectDb } from "@/lib/db/mongoose";
 import { OrderModel } from "@/models/Order";
+import { ProductModel } from "@/models/Product";
+import { OrderStatus, PaymentStatus } from "@/types/order";
 
-const schema = z.object({
+const statusEnum = z.nativeEnum(OrderStatus);
+const paymentEnum = z.nativeEnum(PaymentStatus);
+
+const patchSchema = z.object({
   id: z.string(),
-  status: z.enum([
-    "PENDING",
-    "CONFIRMED",
-    "PROCESSING",
-    "SHIPPED",
-    "DELIVERED",
-    "CANCELLED",
-  ]),
+  status: statusEnum.optional(),
+  paymentStatus: paymentEnum.optional(),
+  notes: z.string().optional(),
 });
 
-export async function PATCH(request: Request) {
-  const session = await auth();
-  if (!session?.user || session.user.role !== "admin") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+const createSchema = z.object({
+  shippingAddress: z.object({
+    fullName: z.string().min(2),
+    phone: z.string().min(10),
+    email: z.string().email().optional().or(z.literal("")),
+    line1: z.string().min(3),
+    line2: z.string().optional(),
+    city: z.string().min(2),
+    state: z.string().min(2),
+    pincode: z.string().min(6),
+    country: z.string().default(DEFAULT_SHIPPING_COUNTRY),
+  }),
+  items: z
+    .array(
+      z.object({
+        productId: z.string(),
+        variantId: z.string(),
+        quantity: z.number().int().positive(),
+      }),
+    )
+    .min(1),
+  status: statusEnum.optional(),
+  paymentStatus: paymentEnum.optional(),
+  notes: z.string().optional(),
+});
+
+type LeanProduct = {
+  _id: { toString(): string };
+  name: string;
+  images?: string[];
+  variants: {
+    _id: { toString(): string };
+    label: string;
+    price: number;
+  }[];
+};
+
+export async function POST(request: Request) {
+  const admin = await requireAdmin();
+  if (!admin.ok) return admin.response;
 
   try {
-    const body = await request.json();
-    const parsed = schema.safeParse(body);
+    const parsed = createSchema.safeParse(await request.json());
     if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+      return NextResponse.json(
+        { error: AUTH_ERRORS.invalidInput },
+        { status: 400 },
+      );
     }
+
     await connectDb();
-    const order = await OrderModel.findByIdAndUpdate(
-      parsed.data.id,
-      { status: parsed.data.status },
-      { new: true },
-    ).lean();
+    const lineItems = [];
+    for (const item of parsed.data.items) {
+      const product = (await ProductModel.findById(
+        item.productId,
+      ).lean()) as LeanProduct | null;
+      if (!product) {
+        return NextResponse.json(
+          { error: AUTH_ERRORS.invalidInput },
+          { status: 400 },
+        );
+      }
+      const variant = product.variants.find(
+        (entry: LeanProduct["variants"][number]) =>
+          String(entry._id) === item.variantId,
+      );
+      if (!variant) {
+        return NextResponse.json(
+          { error: AUTH_ERRORS.invalidInput },
+          { status: 400 },
+        );
+      }
+      lineItems.push({
+        productId: product._id,
+        variantId: String(variant._id),
+        name: product.name,
+        variantLabel: variant.label,
+        image: product.images?.[0] ?? ASSETS.PLACEHOLDER_PRODUCT,
+        price: variant.price,
+        quantity: item.quantity,
+      });
+    }
+
+    const subtotal = lineItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0,
+    );
+    const order = await OrderModel.create({
+      items: lineItems,
+      shippingAddress: {
+        ...parsed.data.shippingAddress,
+        email: parsed.data.shippingAddress.email || undefined,
+      },
+      pricing: calculatePricing(subtotal),
+      status: parsed.data.status ?? OrderStatus.PENDING,
+      paymentStatus: parsed.data.paymentStatus ?? PaymentStatus.PENDING,
+      notes: parsed.data.notes,
+    });
+
     return NextResponse.json({ data: JSON.parse(JSON.stringify(order)) });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed" },
+      { error: error instanceof Error ? error.message : AUTH_ERRORS.createFailed },
+      { status: 500 },
+    );
+  }
+}
+
+export async function PATCH(request: Request) {
+  const admin = await requireAdmin();
+  if (!admin.ok) return admin.response;
+
+  try {
+    const parsed = patchSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: AUTH_ERRORS.invalidInput },
+        { status: 400 },
+      );
+    }
+    const { id, ...updates } = parsed.data;
+    await connectDb();
+    const order = await OrderModel.findByIdAndUpdate(id, updates, {
+      new: true,
+    }).lean();
+    return NextResponse.json({ data: JSON.parse(JSON.stringify(order)) });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : AUTH_ERRORS.updateFailed },
       { status: 500 },
     );
   }

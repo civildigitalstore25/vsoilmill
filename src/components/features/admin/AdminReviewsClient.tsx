@@ -4,11 +4,27 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { AdminCard, AdminPageHeader } from "@/components/features/admin/AdminUi";
 import { Button } from "@/components/ui/button";
+import { ADMIN_ACTIONS, ADMIN_REVIEWS_COPY } from "@/constants/admin";
 import { API_ENDPOINTS } from "@/constants/api";
 import type { Review } from "@/types/review";
 
 export function AdminReviewsClient({ reviews }: { reviews: Review[] }) {
   const router = useRouter();
+
+  async function removeReview(id: string) {
+    if (!confirm(ADMIN_ACTIONS.confirmDelete)) return;
+    const res = await fetch(API_ENDPOINTS.ADMIN_REVIEWS, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (!res.ok) {
+      toast.error(ADMIN_ACTIONS.deleteFailed);
+      return;
+    }
+    toast.success(ADMIN_REVIEWS_COPY.deleted);
+    router.refresh();
+  }
 
   async function setApproved(id: string, isApproved: boolean) {
     const res = await fetch(API_ENDPOINTS.ADMIN_REVIEWS, {
@@ -17,22 +33,22 @@ export function AdminReviewsClient({ reviews }: { reviews: Review[] }) {
       body: JSON.stringify({ id, isApproved }),
     });
     if (!res.ok) {
-      toast.error("Update failed");
+      toast.error(ADMIN_ACTIONS.updateFailed);
       return;
     }
-    toast.success(isApproved ? "Approved" : "Hidden");
+    toast.success(isApproved ? ADMIN_REVIEWS_COPY.approve : ADMIN_REVIEWS_COPY.hide);
     router.refresh();
   }
 
   return (
     <div>
       <AdminPageHeader
-        title="Reviews"
-        description="Approve customer feedback before it appears on product pages."
+        title={ADMIN_REVIEWS_COPY.title}
+        description={ADMIN_REVIEWS_COPY.description}
       />
       {reviews.length === 0 ? (
         <AdminCard className="px-6 py-16 text-center text-sm text-muted">
-          No reviews yet.
+          {ADMIN_REVIEWS_COPY.empty}
         </AdminCard>
       ) : (
         <div className="space-y-4">
@@ -46,7 +62,9 @@ export function AdminReviewsClient({ reviews }: { reviews: Review[] }) {
                       {review.rating}/5
                     </span>
                     <span className="text-xs text-muted">
-                      {review.isApproved ? "Approved" : "Pending"}
+                      {review.isApproved
+                        ? ADMIN_REVIEWS_COPY.approved
+                        : ADMIN_REVIEWS_COPY.pending}
                     </span>
                   </div>
                   <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
@@ -55,14 +73,21 @@ export function AdminReviewsClient({ reviews }: { reviews: Review[] }) {
                 </div>
                 <div className="flex gap-2">
                   <Button size="sm" onClick={() => setApproved(review._id, true)}>
-                    Approve
+                    {ADMIN_REVIEWS_COPY.approve}
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => setApproved(review._id, false)}
                   >
-                    Hide
+                    {ADMIN_REVIEWS_COPY.hide}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => removeReview(review._id)}
+                  >
+                    {ADMIN_ACTIONS.delete}
                   </Button>
                 </div>
               </div>

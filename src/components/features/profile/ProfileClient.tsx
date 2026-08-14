@@ -8,6 +8,8 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { OrderHistoryList } from "@/components/features/orders/OrderHistoryList";
 import { ROUTES } from "@/constants/routes";
+import { USER_ROLES } from "@/constants/auth";
+import { getPostLogoutRoute } from "@/lib/auth/post-login";
 import { cn } from "@/lib/utils/cn";
 
 type Tab = "account" | "orders";
@@ -48,7 +50,7 @@ export function ProfileClient() {
               {label}
             </button>
           ))}
-          {session?.user?.role === "admin" ? (
+          {session?.user?.role === USER_ROLES.ADMIN ? (
             <Link
               href={ROUTES.ADMIN.DASHBOARD}
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-primary hover:bg-cream-dark"
@@ -58,7 +60,7 @@ export function ProfileClient() {
           ) : null}
           <button
             type="button"
-            onClick={() => signOut({ callbackUrl: ROUTES.HOME })}
+            onClick={() => signOut({ callbackUrl: getPostLogoutRoute() })}
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-destructive hover:bg-cream-dark"
           >
             <LogOut className="h-4 w-4" />
@@ -86,7 +88,7 @@ export function ProfileClient() {
                 <div>
                   <dt className="text-muted">Role</dt>
                   <dd className="mt-1 font-medium capitalize text-dark">
-                    {session?.user?.role ?? "user"}
+                    {session?.user?.role ?? USER_ROLES.USER}
                   </dd>
                 </div>
               </dl>

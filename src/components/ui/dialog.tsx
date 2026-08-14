@@ -3,6 +3,7 @@
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
+import { UI } from "@/constants/ui";
 import { cn } from "@/lib/utils/cn";
 
 export const Dialog = DialogPrimitive.Root;
@@ -19,7 +20,7 @@ export function DialogContent({
       <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-dark/50" />
       <DialogPrimitive.Content
         className={cn(
-          "fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-cream p-6 shadow-xl",
+          "fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col overflow-y-auto bg-cream p-6 shadow-xl",
           className,
         )}
         {...props}
@@ -27,7 +28,7 @@ export function DialogContent({
         {children}
         <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100">
           <X className="h-5 w-5" />
-          <span className="sr-only">Close</span>
+          <span className="sr-only">{UI.close}</span>
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>
     </DialogPrimitive.Portal>

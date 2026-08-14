@@ -1,4 +1,5 @@
 import { Schema, model, models, type InferSchemaType } from "mongoose";
+import { USER_ROLES } from "@/constants/auth";
 
 const AddressSchema = new Schema(
   {
@@ -19,9 +20,14 @@ const UserSchema = new Schema(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true, lowercase: true },
-    passwordHash: { type: String, required: true },
+    passwordHash: { type: String, required: false },
     phone: String,
-    role: { type: String, enum: ["user", "admin"], default: "user" },
+    image: String,
+    role: {
+      type: String,
+      enum: [USER_ROLES.USER, USER_ROLES.ADMIN],
+      default: USER_ROLES.USER,
+    },
     addresses: { type: [AddressSchema], default: [] },
   },
   { timestamps: true },

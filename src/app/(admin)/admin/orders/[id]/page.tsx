@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AdminOrderDeleteButton } from "@/components/features/admin/AdminOrderDeleteButton";
 import { AdminOrderStatusForm } from "@/components/features/admin/AdminOrderStatusForm";
 import { AdminCard, AdminPageHeader } from "@/components/features/admin/AdminUi";
 import { Button } from "@/components/ui/button";
+import { ADMIN_ORDERS_COPY } from "@/constants/admin";
 import { ROUTES } from "@/constants/routes";
 import { connectDb } from "@/lib/db/mongoose";
 import { formatInr } from "@/lib/utils/format";
@@ -20,18 +22,25 @@ export default async function AdminOrderDetailPage({ params }: Props) {
   return (
     <div>
       <AdminPageHeader
-        title="Order detail"
+        title={ADMIN_ORDERS_COPY.detailTitle}
         description={data._id}
         actions={
-          <Button variant="outline" asChild>
-            <Link href={ROUTES.ADMIN.ORDERS}>Back to orders</Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" asChild>
+              <Link href={ROUTES.ADMIN.ORDERS}>
+                {ADMIN_ORDERS_COPY.backToOrders}
+              </Link>
+            </Button>
+            <AdminOrderDeleteButton id={data._id} />
+          </div>
         }
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <AdminCard className="p-6">
-          <h2 className="font-display text-xl text-dark">Customer & shipping</h2>
+          <h2 className="font-display text-xl text-dark">
+            {ADMIN_ORDERS_COPY.customerTitle}
+          </h2>
           <p className="mt-4 text-sm leading-relaxed text-muted">
             {data.shippingAddress.fullName}
             <br />
@@ -52,25 +61,26 @@ export default async function AdminOrderDetailPage({ params }: Props) {
         </AdminCard>
 
         <AdminCard className="p-6">
-          <h2 className="font-display text-xl text-dark">Payment & status</h2>
+          <h2 className="font-display text-xl text-dark">
+            {ADMIN_ORDERS_COPY.paymentTitle}
+          </h2>
           <p className="mt-4 text-sm text-muted">
-            Payment: {data.paymentStatus}
-            <br />
-            Current status: {data.status}
-            <br />
-            PhonePe order: {data.phonepeMerchantOrderId ?? "—"}
+            {ADMIN_ORDERS_COPY.phonepeOrder}: {data.phonepeMerchantOrderId ?? "—"}
           </p>
           <div className="mt-5">
             <AdminOrderStatusForm
               orderId={data._id}
               currentStatus={data.status}
+              currentPaymentStatus={data.paymentStatus}
             />
           </div>
         </AdminCard>
       </div>
 
       <AdminCard className="mt-6 p-6">
-        <h2 className="font-display text-xl text-dark">Items</h2>
+        <h2 className="font-display text-xl text-dark">
+          {ADMIN_ORDERS_COPY.itemsTitle}
+        </h2>
         <ul className="mt-4 space-y-3 text-sm">
           {data.items.map(
             (item: {
@@ -95,19 +105,19 @@ export default async function AdminOrderDetailPage({ params }: Props) {
         </ul>
         <div className="mt-5 space-y-2 border-t border-border pt-4 text-sm">
           <div className="flex justify-between">
-            <span className="text-muted">Subtotal</span>
+            <span className="text-muted">{ADMIN_ORDERS_COPY.subtotal}</span>
             <span>{formatInr(data.pricing.subtotal)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted">Shipping</span>
+            <span className="text-muted">{ADMIN_ORDERS_COPY.shipping}</span>
             <span>{formatInr(data.pricing.shipping)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted">Tax</span>
+            <span className="text-muted">{ADMIN_ORDERS_COPY.tax}</span>
             <span>{formatInr(data.pricing.tax)}</span>
           </div>
           <div className="flex justify-between font-display text-xl text-dark">
-            <span>Total</span>
+            <span>{ADMIN_ORDERS_COPY.total}</span>
             <span>{formatInr(data.pricing.total)}</span>
           </div>
         </div>
