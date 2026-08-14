@@ -14,6 +14,7 @@ function serializeUser(user: {
   name: string;
   email: string;
   phone?: string;
+  image?: string;
   role: string;
   createdAt: Date;
 }) {
@@ -22,6 +23,7 @@ function serializeUser(user: {
     name: user.name,
     email: user.email,
     phone: user.phone,
+    image: user.image,
     role: user.role,
     createdAt: user.createdAt,
   };

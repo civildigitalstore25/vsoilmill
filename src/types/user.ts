@@ -7,6 +7,7 @@ export interface AdminUser {
   name: string;
   email: string;
   phone?: string;
+  image?: string;
   role: UserRole;
   createdAt: string;
 }
@@ -37,6 +38,12 @@ export interface ShippingAddress {
   state: string;
   pincode: string;
   country: string;
+}
+
+export interface UserAvatarProps {
+  image?: string | null;
+  name: string;
+  className?: string;
 }
 
 export interface UserProfile {

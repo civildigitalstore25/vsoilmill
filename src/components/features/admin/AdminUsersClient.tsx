@@ -13,6 +13,7 @@ import {
   AdminStatusPill,
 } from "@/components/features/admin/AdminUi";
 import { Button } from "@/components/ui/button";
+import { UserAvatar } from "@/components/shared/UserAvatar";
 import { ADMIN_ACTIONS, ADMIN_USERS_COPY } from "@/constants/admin";
 import { API_ENDPOINTS } from "@/constants/api";
 import { USER_ROLE_OPTIONS, USER_ROLES } from "@/constants/auth";
@@ -115,9 +116,7 @@ export function AdminUsersClient({ users }: { users: AdminUser[] }) {
                     >
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
-                            {user.name.slice(0, 1).toUpperCase()}
-                          </span>
+                          <UserAvatar image={user.image} name={user.name} />
                           <span className="font-medium text-dark">
                             {user.name}
                           </span>

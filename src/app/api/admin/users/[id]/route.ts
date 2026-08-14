@@ -99,6 +99,7 @@ export async function PUT(request: Request, { params }: Params) {
         name: target.name,
         email: target.email,
         phone: target.phone,
+        image: target.image,
         role: target.role,
       },
     });
