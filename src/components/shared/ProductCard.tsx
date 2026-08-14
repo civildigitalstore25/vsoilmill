@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,13 @@ export function ProductCard({ product }: { product: Product }) {
   const addItem = useCartStore((s) => s.addItem);
   const [variantIndex, setVariantIndex] = useState(0);
   const variant = product.variants[variantIndex] ?? product.variants[0];
-  const image = product.images[0] ?? ASSETS.PLACEHOLDER_PRODUCT;
+  const initialImage = product.images[0] || ASSETS.PLACEHOLDER_PRODUCT;
+  const [imgSrc, setImgSrc] = useState(initialImage);
+
+  useEffect(() => {
+    setImgSrc(product.images[0] || ASSETS.PLACEHOLDER_PRODUCT);
+  }, [product.images]);
+
   const discount =
     variant && variant.originalPrice > variant.price
       ? Math.round(
@@ -35,7 +41,7 @@ export function ProductCard({ product }: { product: Product }) {
       slug: product.slug,
       name: product.name,
       variantLabel: variant.label,
-      image,
+      image: imgSrc,
       price: variant.price,
       originalPrice: variant.originalPrice,
       stock: variant.stock,
@@ -51,9 +57,11 @@ export function ProductCard({ product }: { product: Product }) {
           className="relative mb-4 aspect-square overflow-hidden rounded-lg bg-cream-dark"
         >
           <Image
-            src={image}
+            src={imgSrc}
             alt={product.name}
             fill
+            unoptimized
+            onError={() => setImgSrc(ASSETS.PLACEHOLDER_PRODUCT)}
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
           />
           {discount > 0 ? (

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth/auth";
 import { connectDb } from "@/lib/db/mongoose";
 import { ProductModel } from "@/models/Product";
@@ -33,13 +34,30 @@ export async function PUT(request: Request, { params }: Params) {
     const { id } = await params;
     const body = await request.json();
     await connectDb();
-    if (body.name && !body.slug) body.slug = slugify(body.name);
+
+    if (body.name && !body.slug) {
+      body.slug = slugify(body.name);
+    }
+
     const product = await ProductModel.findByIdAndUpdate(id, body, {
       new: true,
+      runValidators: true,
     }).lean();
+
     if (!product) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
+
+    const productObj = product as { slug?: string };
+
+    // Revalidate public page caches
+    revalidatePath("/", "layout");
+    revalidatePath("/shop");
+    revalidatePath("/bestsellers");
+    if (productObj.slug) {
+      revalidatePath(`/products/${productObj.slug}`);
+    }
+
     return NextResponse.json({ data: JSON.parse(JSON.stringify(product)) });
   } catch (error) {
     return NextResponse.json(
@@ -58,7 +76,15 @@ export async function DELETE(_request: Request, { params }: Params) {
   try {
     const { id } = await params;
     await connectDb();
-    await ProductModel.findByIdAndDelete(id);
+    const deletedProduct = (await ProductModel.findByIdAndDelete(id)) as { slug?: string } | null;
+
+    revalidatePath("/", "layout");
+    revalidatePath("/shop");
+    revalidatePath("/bestsellers");
+    if (deletedProduct?.slug) {
+      revalidatePath(`/products/${deletedProduct.slug}`);
+    }
+
     return NextResponse.json({ data: { ok: true } });
   } catch (error) {
     return NextResponse.json(

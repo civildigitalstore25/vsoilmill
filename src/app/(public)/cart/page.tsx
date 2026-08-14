@@ -34,7 +34,7 @@ export default function CartPage() {
             className="flex gap-4 rounded-lg border border-border bg-card p-4"
           >
             <div className="relative h-20 w-20 overflow-hidden rounded-md bg-cream-dark">
-              <Image src={item.image} alt={item.name} fill className="object-cover" />
+              <Image src={item.image} alt={item.name} fill unoptimized className="object-cover" />
             </div>
             <div className="flex-1">
               <p className="font-medium">{item.name}</p>

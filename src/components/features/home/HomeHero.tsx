@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -36,61 +37,85 @@ export function HomeHero() {
         transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      <div className="relative mx-auto flex max-w-6xl flex-col gap-8 px-4 py-20 md:py-28">
-        <motion.p
-          className="text-sm font-medium uppercase tracking-[0.2em] text-primary"
-          initial={reduce ? false : { opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: EASE }}
-        >
-          {UI.since}
-        </motion.p>
-        <motion.h1
-          className="max-w-3xl font-display text-4xl leading-tight text-dark md:text-6xl"
-          initial={reduce ? false : { opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.75, delay: 0.08, ease: EASE }}
-        >
-          Pure, Unrefined{" "}
-          <span className="text-primary">Wooden-Pressed</span> Oils From Our Mill
-        </motion.h1>
-        <motion.p
-          className="max-w-xl text-lg text-muted"
-          initial={reduce ? false : { opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.16, ease: EASE }}
-        >
-          {SITE_DESCRIPTION}
-        </motion.p>
+      <div className="relative mx-auto grid max-w-6xl grid-cols-1 items-start gap-8 px-4 pb-10 pt-4 md:grid-cols-[0.9fr_1.3fr] md:gap-6 md:pb-14 md:pt-6">
+        {/* Left column: copy */}
+        <div className="flex flex-col gap-8">
+          <motion.p
+            className="text-sm font-medium uppercase tracking-[0.2em] text-primary"
+            initial={reduce ? false : { opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: EASE }}
+          >
+            {UI.since}
+          </motion.p>
+          <motion.h1
+            className="max-w-xl font-display text-4xl leading-tight text-dark md:text-6xl"
+            initial={reduce ? false : { opacity: 0, y: 28 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.75, delay: 0.08, ease: EASE }}
+          >
+            Pure, Unrefined{" "}
+            <span className="text-primary">Wooden-Pressed</span> Oils From Our Mill
+          </motion.h1>
+          <motion.p
+            className="max-w-xl text-lg text-muted"
+            initial={reduce ? false : { opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.16, ease: EASE }}
+          >
+            {SITE_DESCRIPTION}
+          </motion.p>
+          <motion.div
+            className="flex flex-wrap gap-3"
+            initial={reduce ? false : { opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.65, delay: 0.24, ease: EASE }}
+          >
+            <Button size="lg" asChild>
+              <Link href={ROUTES.BESTSELLERS}>Shop Best Sellers</Link>
+            </Button>
+            <Button size="lg" variant="whatsapp" asChild>
+              <a
+                href={buildWhatsAppUrl("Hi VS OilMill! I want to place an order.")}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Order via WhatsApp
+              </a>
+            </Button>
+          </motion.div>
+          <motion.div
+            className="flex flex-wrap gap-6 text-sm text-dark/80"
+            initial={reduce ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.35 }}
+          >
+            <span>★★★★★ {UI.trustRating}</span>
+            <span>Trusted by {UI.trustFamilies} families</span>
+            <span>{UI.trustYears} Yrs of Tradition</span>
+            <span>FSSAI Certified</span>
+          </motion.div>
+        </div>
+
+        {/* Right column: showcase image */}
         <motion.div
-          className="flex flex-wrap gap-3"
-          initial={reduce ? false : { opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.65, delay: 0.24, ease: EASE }}
+          className="relative order-first mx-auto aspect-square w-full max-w-xl md:order-last md:max-w-none md:-mr-16 md:scale-125"
+          initial={reduce ? false : { opacity: 0, scale: 0.94, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.15, ease: EASE }}
         >
-          <Button size="lg" asChild>
-            <Link href={ROUTES.BESTSELLERS}>Shop Best Sellers</Link>
-          </Button>
-          <Button size="lg" variant="whatsapp" asChild>
-            <a
-              href={buildWhatsAppUrl("Hi VS OilMill! I want to place an order.")}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Order via WhatsApp
-            </a>
-          </Button>
-        </motion.div>
-        <motion.div
-          className="flex flex-wrap gap-6 text-sm text-dark/80"
-          initial={reduce ? false : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.35 }}
-        >
-          <span>★★★★★ {UI.trustRating}</span>
-          <span>Trusted by {UI.trustFamilies} families</span>
-          <span>{UI.trustYears} Yrs of Tradition</span>
-          <span>FSSAI Certified</span>
+          <div
+            aria-hidden
+            className="absolute inset-0 -z-10 scale-90 rounded-full bg-primary/15 blur-2xl"
+          />
+          <Image
+            src="https://ik.imagekit.io/mnm0iz0ng2/banner/1.png"
+            alt="VS OilMill wooden-pressed oil bottles"
+            fill
+            priority
+            sizes="(min-width: 768px) 40vw, 80vw"
+            className="object-contain drop-shadow-2xl"
+          />
         </motion.div>
       </div>
     </section>

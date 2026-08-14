@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg15kg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff8e7"/>
+      <stop offset="50%" stop-color="#fef3d6"/>
+      <stop offset="100%" stop-color="#fae4b2"/>
+    </linearGradient>
+    <linearGradient id="tinBody" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#d1d5db"/>
+      <stop offset="25%" stop-color="#f3f4f6"/>
+      <stop offset="50%" stop-color="#e5e7eb"/>
+      <stop offset="75%" stop-color="#9ca3af"/>
+      <stop offset="100%" stop-color="#6b7280"/>
+    </linearGradient>
+    <linearGradient id="goldOil" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="50%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#92400e"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#78350f" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="600" fill="url(#bg15kg)"/>
+  
+  <!-- Subtle decorative oil rings -->
+  <circle cx="400" cy="300" r="220" fill="none" stroke="#f59e0b" stroke-opacity="0.12" stroke-width="40"/>
+  <circle cx="400" cy="300" r="270" fill="none" stroke="#f59e0b" stroke-opacity="0.06" stroke-width="20"/>
+
+  <!-- 15kg Tin Body -->
+  <g filter="url(#shadow)">
+    <!-- Main Metal Tin Box -->
+    <rect x="280" y="160" width="240" height="320" rx="16" fill="url(#tinBody)" stroke="#9ca3af" stroke-width="3"/>
+    <!-- Top Rim & Cap -->
+    <rect x="290" y="145" width="220" height="20" rx="6" fill="#e5e7eb" stroke="#6b7280" stroke-width="2"/>
+    <ellipse cx="400" cy="140" rx="25" ry="10" fill="#d97706" stroke="#92400e" stroke-width="2"/>
+    <ellipse cx="400" cy="138" rx="15" ry="6" fill="#fbbf24"/>
+    
+    <!-- Handle -->
+    <path d="M 330 145 C 330 110, 470 110, 470 145" fill="none" stroke="#4b5563" stroke-width="8" stroke-linecap="round"/>
+
+    <!-- Front Label -->
+    <rect x="305" y="210" width="190" height="220" rx="10" fill="#ffffff" stroke="#fbbf24" stroke-width="2"/>
+    <rect x="315" y="220" width="170" height="200" rx="6" fill="#fffbe8"/>
+    
+    <!-- Label Stamp / Emblem -->
+    <circle cx="400" cy="275" r="35" fill="url(#goldOil)"/>
+    <path d="M 400 248 C 400 248 375 285 400 298 C 425 285 400 248 400 248 Z" fill="#ffffff"/>
+    
+    <!-- Text on Label -->
+    <text x="400" y="335" font-family="sans-serif" font-weight="900" font-size="22" text-anchor="middle" fill="#78350f" letter-spacing="1">15 KG TIN</text>
+    <text x="400" y="360" font-family="sans-serif" font-weight="600" font-size="13" text-anchor="middle" fill="#92400e" letter-spacing="2">BULK VALUE PACK</text>
+    <text x="400" y="385" font-family="sans-serif" font-weight="500" font-size="11" text-anchor="middle" fill="#b45309">PURE WOODEN PRESSED</text>
+    
+    <!-- Metallic Ribs on Tin -->
+    <line x1="280" y1="190" x2="520" y2="190" stroke="#9ca3af" stroke-width="2"/>
+    <line x1="280" y1="450" x2="520" y2="450" stroke="#9ca3af" stroke-width="2"/>
+  </g>
+
+  <!-- Golden Oil Drop floating accent -->
+  <g transform="translate(530, 220)" filter="url(#shadow)">
+    <path d="M 25 0 C 25 0 0 35 25 50 C 50 35 25 0 25 0 Z" fill="url(#goldOil)"/>
+    <circle cx="20" cy="38" r="4" fill="#ffffff" opacity="0.6"/>
+  </g>
+</svg>

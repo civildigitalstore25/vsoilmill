@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,12 @@ export function ProductDetailClient({ product }: { product: Product }) {
   const [variantIndex, setVariantIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const variant = product.variants[variantIndex];
-  const image = product.images[0] ?? ASSETS.PLACEHOLDER_PRODUCT;
+  const initialImage = product.images[0] || ASSETS.PLACEHOLDER_PRODUCT;
+  const [imgSrc, setImgSrc] = useState(initialImage);
+
+  useEffect(() => {
+    setImgSrc(product.images[0] || ASSETS.PLACEHOLDER_PRODUCT);
+  }, [product.images]);
 
   const discount = useMemo(() => {
     if (!variant || variant.originalPrice <= variant.price) return 0;
@@ -41,7 +46,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
       slug: product.slug,
       name: product.name,
       variantLabel: variant.label,
-      image,
+      image: imgSrc,
       price: variant.price,
       originalPrice: variant.originalPrice,
       stock: variant.stock,
@@ -58,7 +63,15 @@ export function ProductDetailClient({ product }: { product: Product }) {
   return (
     <div className="grid gap-10 lg:grid-cols-2">
       <div className="relative aspect-square overflow-hidden rounded-xl bg-cream-dark">
-        <Image src={image} alt={product.name} fill className="object-cover" priority />
+        <Image
+          src={imgSrc}
+          alt={product.name}
+          fill
+          unoptimized
+          onError={() => setImgSrc(ASSETS.PLACEHOLDER_PRODUCT)}
+          className="object-cover"
+          priority
+        />
       </div>
 
       <div>

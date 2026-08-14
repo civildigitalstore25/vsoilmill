@@ -23,16 +23,19 @@ export function AdminProductForm({
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<string[]>(product?.images ?? []);
+
+  const initialCategoryId =
+    typeof product?.categoryId === "string"
+      ? product.categoryId
+      : typeof product?.categoryId === "object" && product?.categoryId !== null
+        ? (product.categoryId as { _id?: string })._id ?? categories[0]?._id ?? ""
+        : categories[0]?._id ?? "";
+
   const [form, setForm] = useState({
     name: product?.name ?? "",
     shortDescription: product?.shortDescription ?? "",
     description: product?.description ?? "",
-    categoryId:
-      typeof product?.categoryId === "string"
-        ? product.categoryId
-        : (product?.categoryId as Category | undefined)?._id ??
-          categories[0]?._id ??
-          "",
+    categoryId: initialCategoryId,
     isActive: product?.isActive ?? true,
     isBestSeller: product?.isBestSeller ?? false,
     isNewArrival: product?.isNewArrival ?? false,
@@ -95,11 +98,11 @@ export function AdminProductForm({
       );
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Save failed");
-      toast.success(product ? "Product updated" : "Product created");
+      toast.success(product ? "Product updated successfully" : "Product created successfully");
       router.push(ROUTES.ADMIN.PRODUCTS);
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed");
+      toast.error(error instanceof Error ? error.message : "Failed to save product");
     } finally {
       setLoading(false);
     }

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth/auth";
 import { connectDb } from "@/lib/db/mongoose";
 import { ProductModel } from "@/models/Product";
@@ -85,6 +86,12 @@ export async function POST(request: Request) {
       ...parsed.data,
       slug: parsed.data.slug || slugify(parsed.data.name),
     });
+
+    // Revalidate public caches so newly created products appear immediately
+    revalidatePath("/", "layout");
+    revalidatePath("/shop");
+    revalidatePath("/bestsellers");
+
     return NextResponse.json({ data: JSON.parse(JSON.stringify(product)) });
   } catch (error) {
     return NextResponse.json(

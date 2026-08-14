@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, ShoppingBag, User } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { Menu, ShoppingBag, LogOut, Shield } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
 import { useState } from "react";
 import { AnnouncementBar } from "@/components/layout/Header/AnnouncementBar";
 import { CartDrawer } from "@/components/features/cart/CartDrawer";
+import { ProfileDropdown } from "@/components/features/profile/ProfileDropdown";
 import { Button } from "@/components/ui/button";
 import { NAV_LINKS, UI } from "@/constants/ui";
 import { ROUTES } from "@/constants/routes";
@@ -18,16 +19,12 @@ export function Header() {
   const [cartOpen, setCartOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const accountHref = session?.user
-    ? session.user.role === "admin"
-      ? ROUTES.ADMIN.DASHBOARD
-      : ROUTES.PROFILE
-    : ROUTES.LOGIN;
+  const isAdmin = session?.user?.role === "admin";
 
   return (
-    <header className="sticky top-0 z-40 bg-cream/95 backdrop-blur">
+    <header className="sticky top-0 z-40 bg-cream/95 backdrop-blur border-b border-border/50">
       <AnnouncementBar />
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
         <button
           type="button"
           className="md:hidden"
@@ -44,6 +41,7 @@ export function Header() {
           {UI.brand}
         </Link>
 
+        {/* Main Desktop Navigation */}
         <nav className="hidden items-center gap-6 md:flex">
           {NAV_LINKS.map((link) => (
             <Link
@@ -54,25 +52,12 @@ export function Header() {
               {link.label}
             </Link>
           ))}
-          {session?.user ? (
-            <Link
-              href={ROUTES.ORDERS}
-              className="text-sm font-medium text-dark/80 transition-colors hover:text-primary"
-            >
-              My Orders
-            </Link>
-          ) : null}
         </nav>
 
+        {/* Actions (Profile Dropdown & Cart) */}
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" asChild>
-            <Link
-              href={accountHref}
-              aria-label={session?.user ? "Account" : "Login"}
-            >
-              <User className="h-5 w-5" />
-            </Link>
-          </Button>
+          <ProfileDropdown />
+
           <Button
             variant="ghost"
             size="icon"
@@ -80,7 +65,7 @@ export function Header() {
             aria-label="Open cart"
             onClick={() => setCartOpen(true)}
           >
-            <ShoppingBag className="h-5 w-5" />
+            <ShoppingBag className="h-5 w-5 text-dark" />
             {itemCount > 0 ? (
               <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-xs font-semibold text-accent-foreground">
                 {itemCount}
@@ -90,9 +75,10 @@ export function Header() {
         </div>
       </div>
 
+      {/* Mobile Drawer Menu */}
       <div
         className={cn(
-          "border-t border-border px-4 py-3 md:hidden",
+          "border-t border-border px-4 py-4 md:hidden bg-card",
           mobileOpen ? "block" : "hidden",
         )}
       >
@@ -101,37 +87,78 @@ export function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-dark"
+              className="text-sm font-medium text-dark py-1"
               onClick={() => setMobileOpen(false)}
             >
               {link.label}
             </Link>
           ))}
+
           {session?.user ? (
-            <>
+            <div className="mt-2 pt-3 border-t border-border space-y-2.5">
+              <p className="text-xs font-bold uppercase tracking-wider text-muted">
+                Account & Navigation ({isAdmin ? "Admin" : "User"})
+              </p>
+
+              {isAdmin && (
+                <Link
+                  href={ROUTES.ADMIN.DASHBOARD}
+                  className="flex items-center gap-2 rounded-lg bg-amber-100 p-2.5 text-xs font-bold text-amber-900 border border-amber-300 hover:bg-amber-200"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <Shield className="h-4 w-4 text-amber-700" /> Go to Admin Dashboard
+                </Link>
+              )}
+
               <Link
-                href={ROUTES.ORDERS}
-                className="text-sm font-medium text-dark"
+                href={`${ROUTES.PROFILE}?tab=account`}
+                className="block text-sm font-medium text-dark py-1"
+                onClick={() => setMobileOpen(false)}
+              >
+                Profile Maintain
+              </Link>
+              <Link
+                href={`${ROUTES.PROFILE}?tab=addresses`}
+                className="block text-sm font-medium text-dark py-1"
+                onClick={() => setMobileOpen(false)}
+              >
+                Saved Addresses
+              </Link>
+              <Link
+                href={`${ROUTES.PROFILE}?tab=orders`}
+                className="block text-sm font-medium text-dark py-1"
                 onClick={() => setMobileOpen(false)}
               >
                 My Orders
               </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileOpen(false);
+                  signOut({ callbackUrl: ROUTES.HOME });
+                }}
+                className="flex items-center gap-2 text-sm font-semibold text-destructive py-2"
+              >
+                <LogOut className="h-4 w-4" /> Sign Out
+              </button>
+            </div>
+          ) : (
+            <div className="mt-2 pt-3 border-t border-border flex gap-3">
               <Link
-                href={accountHref}
-                className="text-sm font-medium text-dark"
+                href={ROUTES.LOGIN}
+                className="flex-1 rounded-lg bg-primary py-2 text-center text-sm font-semibold text-primary-foreground"
                 onClick={() => setMobileOpen(false)}
               >
-                {session.user.role === "admin" ? "Admin" : "Profile"}
+                Login
               </Link>
-            </>
-          ) : (
-            <Link
-              href={ROUTES.LOGIN}
-              className="text-sm font-medium text-dark"
-              onClick={() => setMobileOpen(false)}
-            >
-              Login
-            </Link>
+              <Link
+                href={ROUTES.REGISTER}
+                className="flex-1 rounded-lg border border-border py-2 text-center text-sm font-semibold text-dark hover:bg-cream-dark"
+                onClick={() => setMobileOpen(false)}
+              >
+                Register
+              </Link>
+            </div>
           )}
         </nav>
       </div>
