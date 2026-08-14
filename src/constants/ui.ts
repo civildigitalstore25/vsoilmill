@@ -14,6 +14,7 @@ export const UI = {
   trustRating: "4.9",
   promoCode: "PURE10",
   promoPercent: 10,
+  close: "Close",
 } as const;
 
 export const NAV_LINKS = [

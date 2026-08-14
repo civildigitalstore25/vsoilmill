@@ -1,3 +1,6 @@
+import { Plus } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 
 export function AdminPageHeader({
@@ -22,6 +25,33 @@ export function AdminPageHeader({
       {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
     </div>
   );
+}
+
+export function AdminAddButton({
+  label,
+  onClick,
+  href,
+}: {
+  label: string;
+  onClick?: () => void;
+  href?: string;
+}) {
+  const content = (
+    <>
+      <Plus className="h-4 w-4" />
+      {label}
+    </>
+  );
+
+  if (href) {
+    return (
+      <Button asChild>
+        <Link href={href}>{content}</Link>
+      </Button>
+    );
+  }
+
+  return <Button onClick={onClick}>{content}</Button>;
 }
 
 export function AdminCard({

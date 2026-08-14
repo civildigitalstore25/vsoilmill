@@ -3,7 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCartStore } from "@/hooks/useCartStore";
+import { CheckoutButton } from "@/components/features/cart/CheckoutButton";
 import { Button } from "@/components/ui/button";
+import { CHECKOUT_COPY } from "@/constants/checkout";
 import { ROUTES } from "@/constants/routes";
 import { formatInr } from "@/lib/utils/format";
 
@@ -69,9 +71,7 @@ export default function CartPage() {
       </div>
       <div className="mt-8 flex items-center justify-between border-t border-border pt-6">
         <p className="text-lg font-semibold">Subtotal: {formatInr(subtotal)}</p>
-        <Button asChild>
-          <Link href={ROUTES.CHECKOUT}>Proceed to checkout</Link>
-        </Button>
+        <CheckoutButton>{CHECKOUT_COPY.PROCEED}</CheckoutButton>
       </div>
     </div>
   );

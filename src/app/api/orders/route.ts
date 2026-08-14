@@ -45,6 +45,10 @@ export async function POST(request: Request) {
     }
 
     const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const subtotal = parsed.data.items.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0,
@@ -57,7 +61,7 @@ export async function POST(request: Request) {
 
     await connectDb();
     const order = await OrderModel.create({
-      userId: session?.user?.id,
+      userId: session.user.id,
       items: parsed.data.items,
       shippingAddress: {
         ...parsed.data.shippingAddress,

@@ -9,6 +9,8 @@ import { OrderHistoryList } from "@/components/features/orders/OrderHistoryList"
 import { ProfileForm } from "@/components/features/profile/ProfileForm";
 import { AddressManager } from "@/components/features/profile/AddressManager";
 import { ROUTES } from "@/constants/routes";
+import { USER_ROLES } from "@/constants/auth";
+import { getPostLogoutRoute } from "@/lib/auth/post-login";
 import { cn } from "@/lib/utils/cn";
 
 type Tab = "account" | "addresses" | "orders";
@@ -77,8 +79,7 @@ export function ProfileClient() {
               {label}
             </button>
           ))}
-
-          {session?.user?.role === "admin" ? (
+          {session?.user?.role === USER_ROLES.ADMIN ? (
             <Link
               href={ROUTES.ADMIN.DASHBOARD}
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-primary hover:bg-cream-dark"
@@ -87,24 +88,48 @@ export function ProfileClient() {
               Admin Portal
             </Link>
           ) : null}
-
-          <div className="pt-2 border-t border-border mt-2">
-            <button
-              type="button"
-              onClick={() => signOut({ callbackUrl: ROUTES.HOME })}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-destructive hover:bg-red-50 transition-colors"
-            >
-              <LogOut className="h-4 w-4" />
-              Sign Out
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => signOut({ callbackUrl: getPostLogoutRoute() })}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-destructive hover:bg-cream-dark"
+          >
+            <LogOut className="h-4 w-4" />
+            Sign out
+          </button>
         </aside>
 
         {/* Content Pane */}
         <div className="lg:col-span-3">
-          {tab === "account" && <ProfileForm />}
-          {tab === "addresses" && <AddressManager />}
-          {tab === "orders" && <OrderHistoryList />}
+          {tab === "account" ? (
+            <div className="rounded-xl border border-border bg-card p-6">
+              <h2 className="font-display text-2xl text-dark">Account info</h2>
+              <dl className="mt-6 space-y-4 text-sm">
+                <div>
+                  <dt className="text-muted">Name</dt>
+                  <dd className="mt-1 font-medium text-dark">
+                    {session?.user?.name ?? "—"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-muted">Email</dt>
+                  <dd className="mt-1 font-medium text-dark">
+                    {session?.user?.email ?? "—"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-muted">Role</dt>
+                  <dd className="mt-1 font-medium capitalize text-dark">
+                    {session?.user?.role ?? USER_ROLES.USER}
+                  </dd>
+                </div>
+              </dl>
+              <Button className="mt-8" variant="outline" asChild>
+                <Link href={ROUTES.ORDERS}>View all orders</Link>
+              </Button>
+            </div>
+          ) : (
+            <OrderHistoryList />
+          )}
         </div>
       </div>
     </div>

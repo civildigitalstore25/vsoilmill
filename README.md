@@ -16,12 +16,19 @@ Modern ecommerce storefront for VS OilMill — wooden-pressed oils & A2 ghee.
 ```bash
 npm install
 cp .env.example .env.local
-# set MONGODB_URI and AUTH_SECRET
+# set MONGODB_URI, AUTH_SECRET, and Google OAuth keys
 npm run seed
 npm run dev
 ```
 
 Admin: `/admin` (seed credentials from `.env.local`)
+
+### Auth
+
+- Email/password and Google sign-in are both enabled
+- Public registration always creates a **user** role
+- Admins can add users and change roles at `/admin/users`
+- Google redirect URI: `{AUTH_URL}/api/auth/callback/google`
 
 ## Product images
 

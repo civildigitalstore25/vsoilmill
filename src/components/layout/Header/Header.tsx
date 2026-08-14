@@ -5,11 +5,18 @@ import { Menu, ShoppingBag, LogOut, Shield } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { useState } from "react";
 import { AnnouncementBar } from "@/components/layout/Header/AnnouncementBar";
+import { ProfileMenu } from "@/components/layout/Header/ProfileMenu";
 import { CartDrawer } from "@/components/features/cart/CartDrawer";
 import { ProfileDropdown } from "@/components/features/profile/ProfileDropdown";
 import { Button } from "@/components/ui/button";
+import {
+  ACCOUNT_MENU,
+  getSignedInAccountLinks,
+  getSignedOutAccountLinks,
+} from "@/constants/account";
 import { NAV_LINKS, UI } from "@/constants/ui";
 import { ROUTES } from "@/constants/routes";
+import { getPostLogoutRoute } from "@/lib/auth/post-login";
 import { useCartStore } from "@/hooks/useCartStore";
 import { cn } from "@/lib/utils/cn";
 

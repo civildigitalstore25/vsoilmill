@@ -34,6 +34,31 @@ export interface OrderPricing {
   total: number;
 }
 
+export interface AdminProductOption {
+  _id: string;
+  name: string;
+  images: string[];
+  variants: {
+    _id: string;
+    label: string;
+    price: number;
+  }[];
+}
+
+export interface AdminCreateOrderItemInput {
+  productId: string;
+  variantId: string;
+  quantity: number;
+}
+
+export interface AdminCreateOrderInput {
+  shippingAddress: ShippingAddress;
+  items: AdminCreateOrderItemInput[];
+  status?: OrderStatus;
+  paymentStatus?: PaymentStatus;
+  notes?: string;
+}
+
 export interface Order {
   _id: string;
   userId?: string;

@@ -12,6 +12,8 @@ export const API_ENDPOINTS = {
   AUTH_REGISTER: "/api/auth/register",
   ADMIN_STATS: "/api/admin/stats",
   ADMIN_USERS: "/api/admin/users",
+  ADMIN_USER: (id: string) => `/api/admin/users/${id}`,
   ADMIN_ORDERS: "/api/admin/orders",
+  ADMIN_ORDER: (id: string) => `/api/admin/orders/${id}`,
   ADMIN_REVIEWS: "/api/admin/reviews",
 } as const;

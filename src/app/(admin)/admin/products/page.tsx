@@ -1,12 +1,13 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
 import {
+  AdminAddButton,
   AdminCard,
   AdminPageHeader,
   AdminStatusPill,
 } from "@/components/features/admin/AdminUi";
 import { AdminProductDeleteButton } from "@/components/features/admin/AdminProductDeleteButton";
 import { Button } from "@/components/ui/button";
+import { ADMIN_ACTIONS, ADMIN_PRODUCTS_COPY } from "@/constants/admin";
 import { ROUTES } from "@/constants/routes";
 import { connectDb } from "@/lib/db/mongoose";
 import { formatInr } from "@/lib/utils/format";
@@ -21,15 +22,13 @@ export default async function AdminProductsPage() {
   return (
     <div>
       <AdminPageHeader
-        title="Products"
-        description="Manage oils, ghee, variants, pricing, and SEO."
+        title={ADMIN_PRODUCTS_COPY.title}
+        description={ADMIN_PRODUCTS_COPY.description}
         actions={
-          <Button asChild>
-            <Link href={ROUTES.ADMIN.PRODUCT_NEW}>
-              <Plus className="h-4 w-4" />
-              Add product
-            </Link>
-          </Button>
+          <AdminAddButton
+            label={ADMIN_PRODUCTS_COPY.addButton}
+            href={ROUTES.ADMIN.PRODUCT_NEW}
+          />
         }
       />
 
@@ -76,7 +75,7 @@ export default async function AdminProductsPage() {
                       <div className="flex gap-2">
                         <Button size="sm" variant="outline" asChild>
                           <Link href={ROUTES.ADMIN.PRODUCT_EDIT(product._id)}>
-                            Edit
+                            {ADMIN_ACTIONS.edit}
                           </Link>
                         </Button>
                         <AdminProductDeleteButton id={product._id} />

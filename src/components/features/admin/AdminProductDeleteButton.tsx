@@ -3,25 +3,26 @@
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { ADMIN_ACTIONS } from "@/constants/admin";
 import { API_ENDPOINTS } from "@/constants/api";
 
 export function AdminProductDeleteButton({ id }: { id: string }) {
   const router = useRouter();
 
   async function onDelete() {
-    if (!confirm("Delete this product?")) return;
+    if (!confirm(ADMIN_ACTIONS.confirmDelete)) return;
     const res = await fetch(API_ENDPOINTS.PRODUCT(id), { method: "DELETE" });
     if (!res.ok) {
-      toast.error("Delete failed");
+      toast.error(ADMIN_ACTIONS.deleteFailed);
       return;
     }
-    toast.success("Product deleted");
+    toast.success(ADMIN_ACTIONS.deleted);
     router.refresh();
   }
 
   return (
     <Button size="sm" variant="destructive" onClick={onDelete}>
-      Delete
+      {ADMIN_ACTIONS.delete}
     </Button>
   );
 }

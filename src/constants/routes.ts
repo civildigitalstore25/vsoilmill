@@ -12,6 +12,7 @@ export const ROUTES = {
   PROFILE: "/profile",
   LOGIN: "/login",
   REGISTER: "/register",
+  AUTH_COMPLETE: "/login/complete",
   ABOUT: "/about",
   CONTACT: "/contact",
   FAQS: "/faqs",
@@ -20,6 +21,7 @@ export const ROUTES = {
   SHIPPING: "/shipping",
   REFUND: "/refund",
   ADMIN: {
+    ROOT: "/admin",
     DASHBOARD: "/admin/dashboard",
     PRODUCTS: "/admin/products",
     PRODUCT_NEW: "/admin/products/new",

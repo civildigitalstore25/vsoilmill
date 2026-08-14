@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { connectDb } from "@/lib/db/mongoose";
+import { auth } from "@/lib/auth/auth";
 import { createPhonePePayment } from "@/lib/payment/phonepe";
 import { OrderModel } from "@/models/Order";
 import { PaymentStatus } from "@/types/order";
@@ -17,10 +18,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid orderId" }, { status: 400 });
     }
 
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     await connectDb();
     const order = await OrderModel.findById(parsed.data.orderId);
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+    if (String(order.userId) !== session.user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
