@@ -13,14 +13,89 @@ import type { Category, Product } from "@/types/product";
 type MainTab = "bestsellers" | "newarrivals" | "all";
 
 export function HomeProductShowcase({
-  products,
-  categories,
+  products = [],
+  categories = [],
 }: {
   products: Product[];
   categories: Category[];
 }) {
   const [activeTab, setActiveTab] = useState<MainTab>("all");
   const [selectedCategorySlug, setSelectedCategorySlug] = useState<string>("all");
+
+  // Robust category matching helper handling objects, string IDs, slugs, and case-insensitivity
+  const matchesCategory = (p: Product, targetSlug: string): boolean => {
+    if (!targetSlug || targetSlug === "all") return true;
+    if (!p || !p.categoryId) return false;
+
+    const cleanTarget = decodeURIComponent(targetSlug).trim().toLowerCase();
+
+    // Helper to safely compare IDs as strings (handles Mongoose ObjectIds and string IDs)
+    const idEquals = (id1: unknown, id2: unknown): boolean => {
+      if (id1 === undefined || id1 === null || id2 === undefined || id2 === null) return false;
+      return String(id1).trim().toLowerCase() === String(id2).trim().toLowerCase();
+    };
+
+    // Helper to safely compare slugs with variation fallback (e.g., pure-cow-ghee vs pure-ghee)
+    const slugEquals = (s1?: string, s2?: string): boolean => {
+      if (!s1 || !s2) return false;
+      const clean1 = decodeURIComponent(s1).trim().toLowerCase();
+      const clean2 = decodeURIComponent(s2).trim().toLowerCase();
+      if (clean1 === clean2) return true;
+      const norm1 = clean1.replace(/[^a-z0-9]/g, "");
+      const norm2 = clean2.replace(/[^a-z0-9]/g, "");
+      return norm1 === norm2 || (norm1.length > 3 && norm2.length > 3 && (norm1.includes(norm2) || norm2.includes(norm1)));
+    };
+
+    // Find the category object for targetSlug from categories list (if available)
+    const targetCat = categories.find(
+      (c) =>
+        slugEquals(c.slug, cleanTarget) ||
+        idEquals(c._id, targetSlug) ||
+        slugEquals(c.name, cleanTarget),
+    );
+
+    const targetCatId = targetCat?._id;
+    const targetCatSlug = targetCat?.slug || cleanTarget;
+
+    // Extract product category ID & slug
+    let pCatId: unknown = null;
+    let pCatSlug: string | undefined = undefined;
+
+    if (typeof p.categoryId === "object" && p.categoryId !== null) {
+      const catObj = p.categoryId as Category;
+      pCatId = catObj._id;
+      pCatSlug = catObj.slug;
+    } else if (typeof p.categoryId === "string") {
+      const strVal = p.categoryId;
+      pCatId = strVal;
+      pCatSlug = strVal;
+    }
+
+    // Direct slug matching
+    if (pCatSlug && (slugEquals(pCatSlug, targetCatSlug) || slugEquals(pCatSlug, cleanTarget))) return true;
+
+    // Direct ID matching
+    if (pCatId && (idEquals(pCatId, targetCatId) || idEquals(pCatId, targetSlug))) return true;
+
+    // Look up product's category in categories array if p.categoryId was string ID
+    if (pCatId) {
+      const matchedCat = categories.find(
+        (c) => idEquals(c._id, pCatId) || slugEquals(c.slug, String(pCatId)),
+      );
+      if (matchedCat) {
+        if (slugEquals(matchedCat.slug, targetCatSlug)) return true;
+        if (slugEquals(matchedCat.slug, cleanTarget)) return true;
+        if (idEquals(matchedCat._id, targetCatId)) return true;
+      }
+    }
+
+    return false;
+  };
+
+  const getCategoryCount = (categorySlug: string): number => {
+    if (categorySlug === "all") return products.length;
+    return products.filter((p) => matchesCategory(p, categorySlug)).length;
+  };
 
   const bestSellerCount = useMemo(
     () => products.filter((p) => p.isBestSeller).length,
@@ -43,15 +118,25 @@ export function HomeProductShowcase({
     }
 
     if (selectedCategorySlug !== "all") {
-      result = result.filter((p) => {
-        if (!p.categoryId) return false;
-        if (typeof p.categoryId === "string") return p.categoryId === selectedCategorySlug;
-        return p.categoryId.slug === selectedCategorySlug || p.categoryId._id === selectedCategorySlug;
-      });
+      result = result.filter((p) => matchesCategory(p, selectedCategorySlug));
     }
 
     return result;
-  }, [products, activeTab, selectedCategorySlug]);
+  }, [products, activeTab, selectedCategorySlug, categories]);
+
+  // Handle selecting a category pill
+  const handleCategorySelect = (slug: string) => {
+    setSelectedCategorySlug(slug);
+    // When a category pill is selected, set activeTab to "all" so all items in that category are shown
+    setActiveTab("all");
+  };
+
+  // Handle selecting a main tab (All / Bestsellers / New Arrivals)
+  const handleTabSelect = (tab: MainTab) => {
+    setActiveTab(tab);
+    // When switching main tabs, reset category filter to "all" to show all matching products across categories
+    setSelectedCategorySlug("all");
+  };
 
   return (
     <section className="w-full px-4 sm:px-6 md:px-8 lg:px-10 py-12 md:py-16 bg-cream/20">
@@ -71,10 +156,7 @@ export function HomeProductShowcase({
       <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3 mb-6">
         <button
           type="button"
-          onClick={() => {
-            setActiveTab("all");
-            setSelectedCategorySlug("all");
-          }}
+          onClick={() => handleTabSelect("all")}
           className={cn(
             "flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 border shadow-2xs",
             activeTab === "all"
@@ -98,10 +180,7 @@ export function HomeProductShowcase({
 
         <button
           type="button"
-          onClick={() => {
-            setActiveTab("bestsellers");
-            setSelectedCategorySlug("all");
-          }}
+          onClick={() => handleTabSelect("bestsellers")}
           className={cn(
             "flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 border shadow-2xs",
             activeTab === "bestsellers"
@@ -127,10 +206,7 @@ export function HomeProductShowcase({
 
         <button
           type="button"
-          onClick={() => {
-            setActiveTab("newarrivals");
-            setSelectedCategorySlug("all");
-          }}
+          onClick={() => handleTabSelect("newarrivals")}
           className={cn(
             "flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 border shadow-2xs",
             activeTab === "newarrivals"
@@ -160,31 +236,46 @@ export function HomeProductShowcase({
         <div className="flex items-center justify-center flex-wrap gap-2 mb-8 px-2 max-w-4xl mx-auto">
           <button
             type="button"
-            onClick={() => setSelectedCategorySlug("all")}
+            onClick={() => handleCategorySelect("all")}
             className={cn(
-              "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all border",
+              "flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all border",
               selectedCategorySlug === "all"
-                ? "border-primary bg-primary/10 text-primary font-bold"
+                ? "border-primary bg-primary/10 text-primary font-bold shadow-xs"
                 : "border-border/60 bg-card/80 text-muted hover:text-dark hover:border-border",
             )}
           >
-            All Categories
+            <span>All Categories</span>
+            <span className="text-[10px] opacity-75">({products.length})</span>
           </button>
-          {categories.map((cat) => (
-            <button
-              key={cat._id}
-              type="button"
-              onClick={() => setSelectedCategorySlug(cat.slug)}
-              className={cn(
-                "px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all border",
-                selectedCategorySlug === cat.slug
-                  ? "border-primary bg-primary/10 text-primary font-bold shadow-xs"
-                  : "border-border/60 bg-card/80 text-muted hover:text-dark hover:border-border",
-              )}
-            >
-              {cat.name}
-            </button>
-          ))}
+          {categories.map((cat) => {
+            const count = getCategoryCount(cat.slug);
+            const isSelected = selectedCategorySlug.toLowerCase() === cat.slug.toLowerCase();
+            return (
+              <button
+                key={cat._id}
+                type="button"
+                onClick={() => handleCategorySelect(cat.slug)}
+                className={cn(
+                  "flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all border",
+                  isSelected
+                    ? "border-primary bg-primary/10 text-primary font-bold shadow-xs"
+                    : "border-border/60 bg-card/80 text-muted hover:text-dark hover:border-border",
+                )}
+              >
+                <span>{cat.name}</span>
+                <span
+                  className={cn(
+                    "text-[10px] px-1.5 py-0.2 rounded-full font-medium",
+                    isSelected
+                      ? "bg-primary/20 text-primary"
+                      : "bg-muted/15 text-muted-foreground",
+                  )}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
         </div>
       )}
 
@@ -226,3 +317,4 @@ export function HomeProductShowcase({
     </section>
   );
 }
+

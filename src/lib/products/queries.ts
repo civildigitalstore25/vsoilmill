@@ -20,12 +20,19 @@ export async function getProducts(filters?: {
   if (filters?.newArrival) query.isNewArrival = true;
 
   if (filters?.categorySlug) {
-    const category = (await CategoryModel.findOne({
-      slug: filters.categorySlug,
-      isActive: true,
-    }).lean()) as { _id: unknown } | null;
+    const cleanSlug = decodeURIComponent(filters.categorySlug).trim().toLowerCase();
+    const categories = await CategoryModel.find({ isActive: true }).lean();
+    const normTarget = cleanSlug.replace(/[^a-z0-9]/g, "");
+
+    const category = categories.find((c) => {
+      const cClean = c.slug.trim().toLowerCase();
+      if (cClean === cleanSlug) return true;
+      const cNorm = cClean.replace(/[^a-z0-9]/g, "");
+      return cNorm === normTarget || (cNorm.length > 3 && normTarget.length > 3 && (cNorm.includes(normTarget) || normTarget.includes(cNorm)));
+    });
+
     if (!category) return [];
-    query.categoryId = category._id;
+    query.categoryId = { $in: [category._id, String(category._id)] };
   }
 
   const products = await ProductModel.find(query)
@@ -38,7 +45,9 @@ export async function getProducts(filters?: {
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
   await connectDb();
-  const product = await ProductModel.findOne({ slug, isActive: true })
+  const cleanSlug = decodeURIComponent(slug).trim();
+  const slugRegex = new RegExp(`^${cleanSlug.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i");
+  const product = await ProductModel.findOne({ slug: slugRegex, isActive: true })
     .populate("categoryId")
     .lean();
   if (!product) return null;
@@ -58,7 +67,17 @@ export async function getCategoryBySlug(
   slug: string,
 ): Promise<Category | null> {
   await connectDb();
-  const category = await CategoryModel.findOne({ slug, isActive: true }).lean();
+  const cleanSlug = decodeURIComponent(slug).trim().toLowerCase();
+  const categories = await CategoryModel.find({ isActive: true }).lean();
+  const normTarget = cleanSlug.replace(/[^a-z0-9]/g, "");
+
+  const category = categories.find((c) => {
+    const cClean = c.slug.trim().toLowerCase();
+    if (cClean === cleanSlug) return true;
+    const cNorm = cClean.replace(/[^a-z0-9]/g, "");
+    return cNorm === normTarget || (cNorm.length > 3 && normTarget.length > 3 && (cNorm.includes(normTarget) || normTarget.includes(cNorm)));
+  });
+
   if (!category) return null;
   return JSON.parse(JSON.stringify(category)) as Category;
 }

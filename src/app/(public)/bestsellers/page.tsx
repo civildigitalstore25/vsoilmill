@@ -11,6 +11,9 @@ export const metadata: Metadata = buildPageMetadata({
   path: "/bestsellers",
 });
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function BestsellersPage() {
   let products: Product[] = [];
   try {

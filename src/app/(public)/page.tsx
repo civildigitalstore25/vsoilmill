@@ -8,6 +8,9 @@ import { WhyUsSection } from "@/components/features/home/WhyUsSection";
 import { getCategories, getProducts } from "@/lib/products/queries";
 import type { Category, Product } from "@/types/product";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function HomePage() {
   let categories: Category[] = [];
   let products: Product[] = [];

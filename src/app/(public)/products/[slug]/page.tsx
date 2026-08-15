@@ -9,16 +9,10 @@ import {
 import { getProductBySlug, getProducts } from "@/lib/products/queries";
 import type { Category } from "@/types/product";
 
-type Props = { params: Promise<{ slug: string }> };
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-export async function generateStaticParams() {
-  try {
-    const products = await getProducts();
-    return products.map((p) => ({ slug: p.slug }));
-  } catch {
-    return [];
-  }
-}
+type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
