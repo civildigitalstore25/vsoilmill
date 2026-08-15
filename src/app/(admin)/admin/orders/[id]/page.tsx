@@ -10,6 +10,8 @@ import { connectDb } from "@/lib/db/mongoose";
 import { formatInr } from "@/lib/utils/format";
 import { OrderModel } from "@/models/Order";
 
+export const dynamic = "force-dynamic";
+
 type Props = { params: Promise<{ id: string }> };
 
 export default async function AdminOrderDetailPage({ params }: Props) {

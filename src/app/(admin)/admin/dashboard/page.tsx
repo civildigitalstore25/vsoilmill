@@ -19,6 +19,8 @@ import { OrderModel } from "@/models/Order";
 import { ProductModel } from "@/models/Product";
 import { UserModel } from "@/models/User";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminDashboardPage() {
   await connectDb();
   const [orderCount, productCount, userCount, paidOrders, recentOrders] =

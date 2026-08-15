@@ -1,22 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Menu, ShoppingBag, LogOut, Shield } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { useState } from "react";
 import { AnnouncementBar } from "@/components/layout/Header/AnnouncementBar";
-import { ProfileMenu } from "@/components/layout/Header/ProfileMenu";
+import { HeaderCategoriesDropdown, CATEGORIES_NAV } from "@/components/layout/Header/HeaderCategoriesDropdown";
 import { CartDrawer } from "@/components/features/cart/CartDrawer";
 import { ProfileDropdown } from "@/components/features/profile/ProfileDropdown";
 import { Button } from "@/components/ui/button";
-import {
-  ACCOUNT_MENU,
-  getSignedInAccountLinks,
-  getSignedOutAccountLinks,
-} from "@/constants/account";
-import { NAV_LINKS, UI } from "@/constants/ui";
+import { ASSETS } from "@/constants/assets";
+import { NAV_LINKS } from "@/constants/ui";
 import { ROUTES } from "@/constants/routes";
-import { getPostLogoutRoute } from "@/lib/auth/post-login";
 import { useCartStore } from "@/hooks/useCartStore";
 import { cn } from "@/lib/utils/cn";
 
@@ -43,13 +39,22 @@ export function Header() {
 
         <Link
           href={ROUTES.HOME}
-          className="font-display text-2xl font-semibold text-primary"
+          className="flex items-center gap-2 shrink-0"
         >
-          {UI.brand}
+          <Image
+            src={ASSETS.LOGO}
+            alt="VS OilMill Logo"
+            width={180}
+            height={52}
+            priority
+            unoptimized
+            className="h-10 sm:h-12 w-auto object-contain rounded-md transition-opacity hover:opacity-90"
+          />
         </Link>
 
         {/* Main Desktop Navigation */}
         <nav className="hidden items-center gap-6 md:flex">
+          <HeaderCategoriesDropdown />
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
@@ -85,21 +90,41 @@ export function Header() {
       {/* Mobile Drawer Menu */}
       <div
         className={cn(
-          "border-t border-border px-4 py-4 md:hidden bg-card",
+          "border-t border-border px-4 py-4 md:hidden bg-card max-h-[85vh] overflow-y-auto",
           mobileOpen ? "block" : "hidden",
         )}
       >
         <nav className="flex flex-col gap-3">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-sm font-medium text-dark py-1"
-              onClick={() => setMobileOpen(false)}
-            >
-              {link.label}
-            </Link>
-          ))}
+          <div className="space-y-1">
+            <p className="text-xs font-bold uppercase tracking-wider text-muted mb-2">
+              Categories
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {CATEGORIES_NAV.map((cat) => (
+                <Link
+                  key={cat.slug}
+                  href={`/categories/${cat.slug}`}
+                  className="rounded-lg bg-cream-dark/40 px-3 py-2 text-xs font-medium text-dark hover:bg-cream-dark"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  {cat.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-border">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="block text-sm font-medium text-dark py-1.5"
+                onClick={() => setMobileOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
 
           {session?.user ? (
             <div className="mt-2 pt-3 border-t border-border space-y-2.5">

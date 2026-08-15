@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { USER_ROLES } from "@/constants/auth";
 import { auth } from "@/lib/auth/auth";
@@ -46,6 +47,9 @@ export async function POST(request: Request) {
       ...parsed.data,
       slug: parsed.data.slug || slugify(parsed.data.name),
     });
+
+    revalidatePath("/", "layout");
+    revalidatePath("/shop");
     return NextResponse.json({ data: JSON.parse(JSON.stringify(category)) });
   } catch (error) {
     return NextResponse.json(

@@ -2,6 +2,8 @@ import { AdminReviewsClient } from "@/components/features/admin/AdminReviewsClie
 import { connectDb } from "@/lib/db/mongoose";
 import { ReviewModel } from "@/models/Review";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminReviewsPage() {
   await connectDb();
   const reviews = JSON.parse(

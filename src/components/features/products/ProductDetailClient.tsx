@@ -17,6 +17,7 @@ import {
   buildProductWhatsAppMessage,
   buildWhatsAppUrl,
 } from "@/lib/utils/whatsapp";
+import { getProductImageUrl } from "@/lib/utils/image";
 import type { Product } from "@/types/product";
 
 export function ProductDetailClient({ product }: { product: Product }) {
@@ -26,12 +27,12 @@ export function ProductDetailClient({ product }: { product: Product }) {
   const [variantIndex, setVariantIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const variant = product.variants[variantIndex];
-  const initialImage = product.images[0] || ASSETS.PLACEHOLDER_PRODUCT;
+  const initialImage = getProductImageUrl(product);
   const [imgSrc, setImgSrc] = useState(initialImage);
 
   useEffect(() => {
-    setImgSrc(product.images[0] || ASSETS.PLACEHOLDER_PRODUCT);
-  }, [product.images]);
+    setImgSrc(getProductImageUrl(product));
+  }, [product]);
 
   const discount = useMemo(() => {
     if (!variant || variant.originalPrice <= variant.price) return 0;

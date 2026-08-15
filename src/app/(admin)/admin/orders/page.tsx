@@ -3,6 +3,8 @@ import { connectDb } from "@/lib/db/mongoose";
 import { OrderModel } from "@/models/Order";
 import { ProductModel } from "@/models/Product";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminOrdersPage() {
   await connectDb();
   const [orders, products] = await Promise.all([

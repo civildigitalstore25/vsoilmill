@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductGrid } from "@/components/features/products/ProductGrid";
+import { CategoryHero } from "@/components/features/categories/CategoryHero";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import {
   getCategories,
@@ -40,10 +41,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function CategoryPage({ params }: Props) {
   const { slug } = await params;
   let category: Category | null = null;
+  let allCategories: Category[] = [];
   let products: Product[] = [];
 
   try {
-    category = await getCategoryBySlug(slug);
+    const [fetchedCategory, fetchedCategories] = await Promise.all([
+      getCategoryBySlug(slug),
+      getCategories(),
+    ]);
+
+    category = fetchedCategory;
+    allCategories = fetchedCategories;
+
     if (category) {
       products = await getProducts({ categorySlug: slug });
     }
@@ -54,12 +63,19 @@ export default async function CategoryPage({ params }: Props) {
   if (!category) notFound();
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12">
-      <h1 className="font-display text-4xl text-dark">{category.name}</h1>
-      {category.description ? (
-        <p className="mt-2 text-muted">{category.description}</p>
-      ) : null}
-      <div className="mt-10">
+    <div className="mx-auto max-w-6xl px-4 py-8 space-y-10">
+      <CategoryHero category={category} allCategories={allCategories} />
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-between border-b border-border pb-4">
+          <h2 className="font-display text-2xl font-bold text-dark">
+            Products in {category.name}
+          </h2>
+          <span className="text-xs font-semibold text-muted bg-cream-dark px-3 py-1 rounded-full">
+            {products.length} product{products.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+
         <ProductGrid products={products} />
       </div>
     </div>

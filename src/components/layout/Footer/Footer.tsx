@@ -1,5 +1,7 @@
 import Link from "next/link";
+import Image from "next/image";
 import { FOOTER_POLICY_LINKS, NAV_LINKS, UI } from "@/constants/ui";
+import { ASSETS } from "@/constants/assets";
 import { ROUTES } from "@/constants/routes";
 
 export function Footer() {
@@ -7,7 +9,16 @@ export function Footer() {
     <footer className="mt-20 border-t border-border bg-dark text-cream">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 md:grid-cols-3">
         <div>
-          <p className="font-display text-2xl text-accent">{UI.brand}</p>
+          <Link href={ROUTES.HOME} className="inline-block mb-3">
+            <Image
+              src={ASSETS.LOGO}
+              alt="VS OilMill Logo"
+              width={160}
+              height={48}
+              unoptimized
+              className="h-10 w-auto object-contain rounded-md"
+            />
+          </Link>
           <p className="mt-3 text-sm text-cream/70">{UI.since}</p>
           <p className="mt-4 text-sm leading-relaxed text-cream/80">{UI.address}</p>
           <p className="mt-3 text-sm">Phone: {UI.phoneDisplay}</p>

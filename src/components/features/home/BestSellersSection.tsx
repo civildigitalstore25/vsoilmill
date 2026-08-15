@@ -6,19 +6,19 @@ import type { Product } from "@/types/product";
 
 export function BestSellersSection({ products }: { products: Product[] }) {
   return (
-    <section className="mx-auto max-w-6xl px-4 py-8">
+    <section className="w-full px-4 sm:px-6 md:px-8 lg:px-10 py-12 md:py-16">
       <FadeIn className="mb-8 flex items-end justify-between gap-4">
         <div>
-          <p className="text-sm font-medium uppercase tracking-wide text-primary">
+          <p className="text-sm font-semibold uppercase tracking-wider text-primary">
             Best Sellers
           </p>
-          <h2 className="mt-2 font-display text-3xl text-dark md:text-4xl">
+          <h2 className="mt-2 font-display text-3xl font-extrabold text-dark md:text-4xl">
             Our Most Loved Products
           </h2>
         </div>
         <Link
           href={ROUTES.SHOP}
-          className="text-sm font-medium text-primary transition-colors hover:underline"
+          className="text-sm font-semibold text-primary transition-colors hover:underline"
         >
           View All Products →
         </Link>

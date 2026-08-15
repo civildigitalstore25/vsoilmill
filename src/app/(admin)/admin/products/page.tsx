@@ -11,12 +11,20 @@ import { ADMIN_ACTIONS, ADMIN_PRODUCTS_COPY } from "@/constants/admin";
 import { ROUTES } from "@/constants/routes";
 import { connectDb } from "@/lib/db/mongoose";
 import { formatInr } from "@/lib/utils/format";
+import { getProductImageUrl } from "@/lib/utils/image";
 import { ProductModel } from "@/models/Product";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminProductsPage() {
   await connectDb();
   const products = JSON.parse(
-    JSON.stringify(await ProductModel.find().sort({ createdAt: -1 }).lean()),
+    JSON.stringify(
+      await ProductModel.find()
+        .populate("categoryId")
+        .sort({ createdAt: -1 })
+        .lean(),
+    ),
   );
 
   return (
@@ -49,22 +57,38 @@ export default async function AdminProductsPage() {
                   _id: string;
                   name: string;
                   shortDescription?: string;
+                  images?: string[];
+                  categoryId?: { slug?: string; image?: string };
                   variants: { price: number; label: string }[];
                   isActive: boolean;
                   isBestSeller?: boolean;
-                }) => (
-                  <tr
-                    key={product._id}
-                    className="border-b border-border/70 transition hover:bg-cream/40"
-                  >
-                    <td className="px-5 py-4">
-                      <p className="font-medium text-dark">{product.name}</p>
-                      <p className="mt-1 text-xs text-muted">
-                        {product.shortDescription ??
-                          `${product.variants.length} variant(s)`}
-                        {product.isBestSeller ? " · Bestseller" : ""}
-                      </p>
-                    </td>
+                }) => {
+                  const thumb = getProductImageUrl(product);
+                  return (
+                    <tr
+                      key={product._id}
+                      className="border-b border-border/70 transition hover:bg-cream/40"
+                    >
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-border bg-cream-dark">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={thumb}
+                              alt={product.name}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <div>
+                            <p className="font-medium text-dark">{product.name}</p>
+                            <p className="mt-0.5 text-xs text-muted">
+                              {product.shortDescription ??
+                                `${product.variants.length} variant(s)`}
+                              {product.isBestSeller ? " · Bestseller" : ""}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
                     <td className="px-5 py-4 font-semibold text-dark">
                       {formatInr(product.variants[0]?.price ?? 0)}
                     </td>
@@ -81,8 +105,9 @@ export default async function AdminProductsPage() {
                         <AdminProductDeleteButton id={product._id} />
                       </div>
                     </td>
-                  </tr>
-                ),
+                    </tr>
+                  );
+                },
               )}
             </tbody>
           </table>

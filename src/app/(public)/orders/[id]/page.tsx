@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Package, MapPin, CreditCard, Calendar, CheckCircle2, Clock, Truck, AlertCircle } from "lucide-react";
+import { ArrowLeft, Package, MapPin, CreditCard, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
 import { USER_ROLES } from "@/constants/auth";

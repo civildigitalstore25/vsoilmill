@@ -11,6 +11,7 @@ import type { Category } from "@/types/product";
 
 const emptyForm = {
   name: "",
+  image: "",
   badge: "",
   description: "",
   isActive: true,
@@ -34,6 +35,7 @@ export function AdminCategoryForm({
     }
     setForm({
       name: category.name,
+      image: category.image ?? "",
       badge: category.badge ?? "",
       description: category.description ?? "",
       isActive: category.isActive,
@@ -75,6 +77,32 @@ export function AdminCategoryForm({
           onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
           required
         />
+      </div>
+      <div>
+        <Label htmlFor="image">Category Image URL</Label>
+        <Input
+          id="image"
+          className="mt-1.5"
+          placeholder="https://ik.imagekit.io/... or https://res.cloudinary.com/..."
+          value={form.image}
+          onChange={(e) => setForm((f) => ({ ...f, image: e.target.value }))}
+        />
+        {form.image ? (
+          <div className="mt-2 flex items-center gap-3">
+            <div className="relative h-16 w-16 overflow-hidden rounded-lg border border-border bg-cream-dark">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={form.image}
+                alt="Category preview"
+                className="h-full w-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = "none";
+                }}
+              />
+            </div>
+            <span className="text-xs text-muted truncate max-w-xs">{form.image}</span>
+          </div>
+        ) : null}
       </div>
       <div>
         <Label htmlFor="badge">{ADMIN_CATEGORY_COPY.badge}</Label>

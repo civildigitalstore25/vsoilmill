@@ -12,18 +12,19 @@ import { ASSETS } from "@/constants/assets";
 import { useCartStore } from "@/hooks/useCartStore";
 import { cn } from "@/lib/utils/cn";
 import { formatInr } from "@/lib/utils/format";
+import { getProductImageUrl } from "@/lib/utils/image";
 import type { Product } from "@/types/product";
 
 export function ProductCard({ product }: { product: Product }) {
   const addItem = useCartStore((s) => s.addItem);
   const [variantIndex, setVariantIndex] = useState(0);
   const variant = product.variants[variantIndex] ?? product.variants[0];
-  const initialImage = product.images[0] || ASSETS.PLACEHOLDER_PRODUCT;
+  const initialImage = getProductImageUrl(product);
   const [imgSrc, setImgSrc] = useState(initialImage);
 
   useEffect(() => {
-    setImgSrc(product.images[0] || ASSETS.PLACEHOLDER_PRODUCT);
-  }, [product.images]);
+    setImgSrc(getProductImageUrl(product));
+  }, [product]);
 
   const discount =
     variant && variant.originalPrice > variant.price

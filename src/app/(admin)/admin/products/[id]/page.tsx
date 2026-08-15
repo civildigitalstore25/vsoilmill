@@ -5,6 +5,8 @@ import { connectDb } from "@/lib/db/mongoose";
 import { CategoryModel } from "@/models/Category";
 import { ProductModel } from "@/models/Product";
 
+export const dynamic = "force-dynamic";
+
 type Props = { params: Promise<{ id: string }> };
 
 export default async function AdminEditProductPage({ params }: Props) {

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth/auth";
 import { connectDb } from "@/lib/db/mongoose";
 import { CategoryModel } from "@/models/Category";
@@ -24,6 +25,9 @@ export async function PUT(request: Request, { params }: Params) {
     if (!category) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
+
+    revalidatePath("/", "layout");
+    revalidatePath("/shop");
     return NextResponse.json({ data: JSON.parse(JSON.stringify(category)) });
   } catch (error) {
     return NextResponse.json(
@@ -43,6 +47,9 @@ export async function DELETE(_request: Request, { params }: Params) {
     const { id } = await params;
     await connectDb();
     await CategoryModel.findByIdAndDelete(id);
+
+    revalidatePath("/", "layout");
+    revalidatePath("/shop");
     return NextResponse.json({ data: { ok: true } });
   } catch (error) {
     return NextResponse.json(

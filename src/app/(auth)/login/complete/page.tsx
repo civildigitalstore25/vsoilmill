@@ -3,6 +3,8 @@ import { ROUTES } from "@/constants/routes";
 import { auth } from "@/lib/auth/auth";
 import { getPostLoginRoute } from "@/lib/auth/post-login";
 
+export const dynamic = "force-dynamic";
+
 export default async function LoginCompletePage() {
   const session = await auth();
   if (!session?.user) {

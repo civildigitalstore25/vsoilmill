@@ -2,6 +2,8 @@ import { AdminCategoriesClient } from "@/components/features/admin/AdminCategori
 import { connectDb } from "@/lib/db/mongoose";
 import { CategoryModel } from "@/models/Category";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminCategoriesPage() {
   await connectDb();
   const categories = JSON.parse(

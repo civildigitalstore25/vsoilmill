@@ -11,16 +11,23 @@ import { ROUTES } from "@/constants/routes";
 import type { Category } from "@/types/product";
 
 const DEFAULT_CATEGORY_IMAGES: Record<string, string> = {
-  "15-kg-tins": "/images/categories/15kg-tins.svg",
-  "5-litre-cans": "/images/categories/5l-cans.svg",
-  "1-litre-bottles": "/images/categories/1l-bottles.svg",
-  "uthukuli-ghee": "/images/categories/uthukuli-ghee.svg",
-  "herbal-oils": "/images/categories/herbal-oils.svg",
+  "wood-pressed-oils":
+    "https://ik.imagekit.io/mnm0iz0ng2/category/Wooden-Pressed.jpg",
+  "pure-cow-ghee":
+    "https://ik.imagekit.io/mnm0iz0ng2/category/pure_ghee.png",
+  "traditional-oils":
+    "https://ik.imagekit.io/mnm0iz0ng2/category/traditional.jpg",
+  "oil-cakes":
+    "https://ik.imagekit.io/mnm0iz0ng2/category/cake.jpeg",
+  "combo-offers":
+    "https://ik.imagekit.io/mnm0iz0ng2/category/combo.jpg",
+  "home-cleaning":
+    "https://ik.imagekit.io/mnm0iz0ng2/category/clean_tool.png",
 };
 
 export function CategoryStrip({ categories }: { categories: Category[] }) {
   return (
-    <section className="mx-auto max-w-6xl px-4 py-16">
+    <section className="w-full px-4 sm:px-6 md:px-8 lg:px-10 py-12 md:py-16">
       <FadeIn>
         <p className="text-sm font-semibold uppercase tracking-wider text-primary">
           Shop by Category
@@ -29,12 +36,18 @@ export function CategoryStrip({ categories }: { categories: Category[] }) {
           Everything Pure, Nothing Else
         </h2>
       </FadeIn>
-      <Stagger className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-5" delay={0.1}>
+      <Stagger
+        className="mt-8 grid gap-4 sm:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-6"
+        delay={0.1}
+      >
         {categories.map((category) => {
+          const isSvgImage = category.image?.endsWith(".svg");
+          const isUnsplash = category.image?.includes("unsplash.com");
           const imageUrl =
-            category.image ||
             DEFAULT_CATEGORY_IMAGES[category.slug] ||
-            "/images/product-placeholder.svg";
+            (category.image && !isSvgImage && !isUnsplash
+              ? category.image
+              : DEFAULT_CATEGORY_IMAGES["wood-pressed-oils"]);
 
           return (
             <StaggerItem key={category._id}>
@@ -43,30 +56,28 @@ export function CategoryStrip({ categories }: { categories: Category[] }) {
                   href={ROUTES.CATEGORY(category.slug)}
                   className="group relative flex flex-col h-full overflow-hidden rounded-2xl border border-border/70 bg-card transition-all duration-300 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10"
                 >
-                  {/* Category Image Header */}
-                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-gradient-to-br from-amber-500/10 via-amber-100/20 to-amber-500/5 p-4">
+                  {/* Category Image Header - Full Screen Width & Balanced Height */}
+                  <div className="relative aspect-[4/3] sm:aspect-square md:aspect-[4/3] h-48 sm:h-56 md:h-64 w-full overflow-hidden bg-cream-dark/20">
                     {category.badge && (
                       <div className="absolute top-3 left-3 z-10">
-                        <Badge className="bg-amber-600/90 text-white backdrop-blur-md font-medium text-[11px] px-2.5 py-0.5 shadow-sm">
+                        <Badge className="bg-amber-600/95 text-white backdrop-blur-md font-semibold text-xs px-3 py-1 shadow-md">
                           {category.badge}
                         </Badge>
                       </div>
                     )}
-                    <div className="relative h-full w-full transform transition-transform duration-500 group-hover:scale-105">
-                      <Image
-                        src={imageUrl}
-                        alt={category.name}
-                        fill
-                        className="object-contain object-center"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 20vw"
-                      />
-                    </div>
+                    <Image
+                      src={imageUrl}
+                      alt={category.name}
+                      fill
+                      className="object-cover object-center transition-transform duration-500 group-hover:scale-108 w-full"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    />
                   </div>
 
                   {/* Category Details */}
-                  <div className="flex flex-1 flex-col justify-between p-4 bg-card">
+                  <div className="flex flex-1 flex-col justify-between p-4 sm:p-5 bg-card">
                     <div>
-                      <h3 className="font-display text-base font-bold text-dark transition-colors group-hover:text-primary">
+                      <h3 className="font-display text-base sm:text-lg font-bold text-dark transition-colors group-hover:text-primary">
                         {category.name}
                       </h3>
                       {category.description && (
@@ -75,10 +86,10 @@ export function CategoryStrip({ categories }: { categories: Category[] }) {
                         </p>
                       )}
                     </div>
-                    <div className="mt-3 flex items-center text-xs font-semibold text-primary opacity-90 transition-all group-hover:translate-x-1">
+                    <div className="mt-4 flex items-center text-xs font-bold text-primary transition-all group-hover:translate-x-1">
                       <span>Explore Collection</span>
                       <svg
-                        className="ml-1 h-3.5 w-3.5"
+                        className="ml-1.5 h-4 w-4"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
