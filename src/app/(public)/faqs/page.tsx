@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { FAQS } from "@/constants/faqs";
+import { LAYOUT } from "@/constants/layout";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -11,7 +13,8 @@ export const metadata: Metadata = buildPageMetadata({
 
 export default function FaqsPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12">
+    <PageContainer className="py-12">
+      <div className={LAYOUT.narrow}>
       <h1 className="font-display text-4xl text-dark">FAQs</h1>
       <div className="mt-10 space-y-6">
         {FAQS.map((faq) => (
@@ -21,6 +24,7 @@ export default function FaqsPage() {
           </div>
         ))}
       </div>
-    </div>
+      </div>
+    </PageContainer>
   );
 }

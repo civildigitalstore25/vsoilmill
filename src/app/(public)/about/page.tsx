@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { LAYOUT } from "@/constants/layout";
 import { UI } from "@/constants/ui";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 
@@ -11,7 +13,8 @@ export const metadata: Metadata = buildPageMetadata({
 
 export default function AboutPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12">
+    <PageContainer className="py-12">
+      <div className={LAYOUT.narrow}>
       <h1 className="font-display text-4xl text-dark">About VS OilMill</h1>
       <p className="mt-4 text-lg text-muted">{UI.since}</p>
       <div className="mt-8 space-y-4 leading-relaxed text-dark/80">
@@ -30,6 +33,7 @@ export default function AboutPage() {
           India.
         </p>
       </div>
-    </div>
+      </div>
+    </PageContainer>
   );
 }

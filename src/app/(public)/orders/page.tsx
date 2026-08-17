@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { OrderHistoryList } from "@/components/features/orders/OrderHistoryList";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { ROUTES } from "@/constants/routes";
 import { auth } from "@/lib/auth/auth";
 import { buildPageMetadata } from "@/lib/seo/metadata";
@@ -18,8 +19,8 @@ export default async function OrdersPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12">
+    <PageContainer className="py-12">
       <OrderHistoryList />
-    </div>
+    </PageContainer>
   );
 }

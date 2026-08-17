@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Package, MapPin, CreditCard, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { ROUTES } from "@/constants/routes";
 import { USER_ROLES } from "@/constants/auth";
 import { auth } from "@/lib/auth/auth";
@@ -40,7 +41,7 @@ export default async function OrderDetailPage({ params }: Props) {
   const isPaid = data.paymentStatus?.toUpperCase() === "PAID";
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10">
+    <PageContainer className="py-10">
       {/* Header Navigation */}
       <div className="flex items-center justify-between border-b border-border pb-6">
         <div>
@@ -182,6 +183,6 @@ export default async function OrderDetailPage({ params }: Props) {
           </div>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }

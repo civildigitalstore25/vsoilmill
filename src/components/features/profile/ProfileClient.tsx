@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { OrderHistoryList } from "@/components/features/orders/OrderHistoryList";
 import { ProfileForm } from "@/components/features/profile/ProfileForm";
 import { AddressManager } from "@/components/features/profile/AddressManager";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { ROUTES } from "@/constants/routes";
 import { USER_ROLES } from "@/constants/auth";
 import { getPostLogoutRoute } from "@/lib/auth/post-login";
@@ -34,7 +35,7 @@ export function ProfileClient() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10">
+    <PageContainer className="py-10">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-6">
         <div>
           <h1 className="font-display text-4xl text-dark">My Account</h1>
@@ -109,6 +110,6 @@ export function ProfileClient() {
           )}
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }

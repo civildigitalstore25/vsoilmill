@@ -9,8 +9,10 @@ import { AnnouncementBar } from "@/components/layout/Header/AnnouncementBar";
 import { HeaderCategoriesDropdown, CATEGORIES_NAV } from "@/components/layout/Header/HeaderCategoriesDropdown";
 import { CartDrawer } from "@/components/features/cart/CartDrawer";
 import { ProfileDropdown } from "@/components/features/profile/ProfileDropdown";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { Button } from "@/components/ui/button";
 import { ASSETS } from "@/constants/assets";
+import { LAYOUT } from "@/constants/layout";
 import { NAV_LINKS } from "@/constants/ui";
 import { ROUTES } from "@/constants/routes";
 import { useCartStore } from "@/hooks/useCartStore";
@@ -27,7 +29,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 bg-cream/95 backdrop-blur border-b border-border/50">
       <AnnouncementBar />
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+      <PageContainer className="flex items-center justify-between gap-4 py-3">
         <button
           type="button"
           className="md:hidden"
@@ -85,12 +87,13 @@ export function Header() {
             ) : null}
           </Button>
         </div>
-      </div>
+      </PageContainer>
 
       {/* Mobile Drawer Menu */}
       <div
         className={cn(
-          "border-t border-border px-4 py-4 md:hidden bg-card max-h-[85vh] overflow-y-auto",
+          "border-t border-border py-4 md:hidden bg-card max-h-[85vh] overflow-y-auto",
+          LAYOUT.container,
           mobileOpen ? "block" : "hidden",
         )}
       >

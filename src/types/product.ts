@@ -51,3 +51,8 @@ export interface ProductCardProps {
   product: Product;
   onAddToCart?: (productId: string, variantId: string) => void;
 }
+
+export interface ProductGridProps {
+  products: Product[];
+  resetKey?: string;
+}

@@ -6,6 +6,7 @@ import { ExternalLink, LogOut, Menu, X } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { useState } from "react";
 import { ADMIN_COPY, ADMIN_NAV } from "@/constants/admin";
+import { LAYOUT } from "@/constants/layout";
 import { ROUTES } from "@/constants/routes";
 import { getPostLogoutRoute } from "@/lib/auth/post-login";
 import { cn } from "@/lib/utils/cn";
@@ -127,7 +128,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         ) : null}
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 border-b border-border/70 bg-cream/80 px-4 py-4 backdrop-blur-md md:px-8">
+          <header className={cn("sticky top-0 z-30 border-b border-border/70 bg-cream/80 py-4 backdrop-blur-md", LAYOUT.container)}>
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <button
@@ -160,7 +161,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               </div>
             </div>
           </header>
-          <main className="flex-1 px-4 py-6 md:px-8 md:py-8">{children}</main>
+          <main className={cn("flex-1 py-6 md:py-8", LAYOUT.container)}>{children}</main>
         </div>
       </div>
     </div>

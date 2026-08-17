@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { FOOTER_POLICY_LINKS, NAV_LINKS, UI } from "@/constants/ui";
 import { ASSETS } from "@/constants/assets";
 import { ROUTES } from "@/constants/routes";
@@ -7,7 +8,7 @@ import { ROUTES } from "@/constants/routes";
 export function Footer() {
   return (
     <footer className="mt-20 border-t border-border bg-dark text-cream">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 md:grid-cols-3">
+      <PageContainer className="grid gap-10 py-14 md:grid-cols-3">
         <div>
           <Link href={ROUTES.HOME} className="inline-block mb-3">
             <Image
@@ -58,9 +59,11 @@ export function Footer() {
             ))}
           </ul>
         </div>
-      </div>
-      <div className="border-t border-cream/10 py-4 text-center text-xs text-cream/50">
-        © {new Date().getFullYear()} {UI.brand}. All rights reserved.
+      </PageContainer>
+      <div className="border-t border-cream/10">
+        <PageContainer className="py-4 text-center text-xs text-cream/50">
+          © {new Date().getFullYear()} {UI.brand}. All rights reserved.
+        </PageContainer>
       </div>
     </footer>
   );

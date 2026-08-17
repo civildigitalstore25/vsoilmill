@@ -34,7 +34,7 @@ export const CATEGORIES_NAV = [
     color: "text-emerald-600 bg-emerald-50",
   },
   {
-    name: "Combo Offers 🎁",
+    name: "Combo Offers",
     slug: "combo-offers",
     tagline: "Value Packs & Special Deals",
     icon: Gift,

@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { LAYOUT } from "@/constants/layout";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 
 export function PolicyPage({
@@ -13,7 +15,8 @@ export function PolicyPage({
   path: string;
 }) {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12">
+    <PageContainer className="py-12">
+      <div className={LAYOUT.narrow}>
       <h1 className="font-display text-4xl text-dark">{title}</h1>
       <p className="mt-4 text-muted">{intro}</p>
       <div className="mt-10 space-y-8">
@@ -25,7 +28,8 @@ export function PolicyPage({
         ))}
       </div>
       <span className="sr-only">{path}</span>
-    </div>
+      </div>
+    </PageContainer>
   );
 }
 

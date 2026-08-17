@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { LAYOUT } from "@/constants/layout";
 import { UI } from "@/constants/ui";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
@@ -14,7 +16,8 @@ export const metadata: Metadata = buildPageMetadata({
 
 export default function ContactPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12">
+    <PageContainer className="py-12">
+      <div className={LAYOUT.narrow}>
       <h1 className="font-display text-4xl text-dark">Contact Us</h1>
       <p className="mt-4 text-muted">
         We are happy to help with orders, bulk enquiries, and product questions.
@@ -37,6 +40,7 @@ export default function ContactPage() {
           </Link>
         </Button>
       </div>
-    </div>
+      </div>
+    </PageContainer>
   );
 }

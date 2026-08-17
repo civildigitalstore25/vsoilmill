@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { LAYOUT } from "@/constants/layout";
 import { ROUTES } from "@/constants/routes";
 import { UI } from "@/constants/ui";
 
@@ -10,9 +12,10 @@ export function PromoBanner() {
   const reduce = useReducedMotion();
 
   return (
-    <section className="mx-auto max-w-6xl px-4 pb-16">
-      <motion.div
-        className="rounded-2xl bg-gradient-to-r from-primary to-primary/80 px-8 py-12 text-center text-primary-foreground md:px-16"
+    <section className={LAYOUT.sectionY}>
+      <PageContainer>
+        <motion.div
+          className="w-full rounded-2xl bg-gradient-to-r from-primary to-primary/80 px-8 py-12 text-center text-primary-foreground md:px-16"
         initial={reduce ? false : { opacity: 0, scale: 0.96 }}
         whileInView={reduce ? undefined : { opacity: 1, scale: 1 }}
         viewport={{ once: true, amount: 0.4 }}
@@ -28,6 +31,7 @@ export function PromoBanner() {
           <Link href={ROUTES.SHOP}>Shop Now & Save</Link>
         </Button>
       </motion.div>
+      </PageContainer>
     </section>
   );
 }

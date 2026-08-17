@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductGrid } from "@/components/features/products/ProductGrid";
 import { CategoryHero } from "@/components/features/categories/CategoryHero";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import {
   getCategories,
@@ -57,7 +58,7 @@ export default async function CategoryPage({ params }: Props) {
   if (!category) notFound();
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 space-y-10">
+    <PageContainer className="space-y-10 py-8">
       <CategoryHero category={category} allCategories={allCategories} />
 
       <div className="space-y-4">
@@ -72,6 +73,6 @@ export default async function CategoryPage({ params }: Props) {
 
         <ProductGrid products={products} />
       </div>
-    </div>
+    </PageContainer>
   );
 }

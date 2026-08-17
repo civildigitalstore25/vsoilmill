@@ -3,6 +3,7 @@ import {
   Stagger,
   StaggerItem,
 } from "@/components/shared/motion";
+import { PageContainer } from "@/components/layout/PageContainer";
 
 const FEATURES = [
   {
@@ -26,12 +27,12 @@ const FEATURES = [
 export function WhyUsSection() {
   return (
     <section className="bg-dark py-16 text-cream">
-      <div className="mx-auto max-w-6xl px-4">
+      <PageContainer>
         <FadeIn>
           <p className="text-sm font-medium uppercase tracking-wide text-accent">
             Why VS Oil Mill
           </p>
-          <h2 className="mt-2 max-w-2xl font-display text-3xl md:text-4xl">
+          <h2 className="mt-2 max-w-2xl font-display text-3xl text-cream md:text-4xl">
             Not All Oils Are Created Equal
           </h2>
           <p className="mt-4 max-w-2xl text-cream/70">
@@ -40,10 +41,10 @@ export function WhyUsSection() {
             Chekku method preserves every natural nutrient and aroma.
           </p>
         </FadeIn>
-        <Stagger className="mt-10 grid gap-6 md:grid-cols-2" delay={0.1}>
+        <Stagger className="mt-10 grid w-full gap-6 md:grid-cols-2" delay={0.1}>
           {FEATURES.map((feature) => (
             <StaggerItem key={feature.title}>
-              <div className="rounded-lg border border-cream/10 p-5 transition-colors hover:border-accent/40">
+              <div className="h-full rounded-lg border border-cream/10 p-5 transition-colors hover:border-accent/40">
                 <h3 className="font-display text-xl text-accent">
                   {feature.title}
                 </h3>
@@ -52,7 +53,7 @@ export function WhyUsSection() {
             </StaggerItem>
           ))}
         </Stagger>
-      </div>
+      </PageContainer>
     </section>
   );
 }

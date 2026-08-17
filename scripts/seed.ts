@@ -47,7 +47,7 @@ const categories = [
     sortOrder: 4,
   },
   {
-    name: "Combo Offers 🎁",
+    name: "Combo Offers ",
     slug: "combo-offers",
     description: "Value Packs & Special Deals",
     image:

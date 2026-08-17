@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion, type HTMLMotionProps } from "framer-motion";
 import { cn } from "@/lib/utils/cn";
+import type { StaggerProps } from "@/types/motion";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -16,7 +17,7 @@ export function FadeIn({
 
   return (
     <motion.div
-      className={cn(className)}
+      className={cn("w-full", className)}
       initial={reduce ? false : { opacity: 0, y }}
       whileInView={reduce ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
@@ -32,19 +33,18 @@ export function Stagger({
   children,
   className,
   delay = 0,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  delay?: number;
-}) {
+  trigger = "view",
+}: StaggerProps) {
   const reduce = useReducedMotion();
+  const useMount = trigger === "mount";
 
   return (
     <motion.div
-      className={cn(className)}
+      className={cn("w-full", className)}
       initial={reduce ? false : "hidden"}
-      whileInView={reduce ? undefined : "show"}
-      viewport={{ once: true, amount: 0.15 }}
+      animate={reduce || !useMount ? undefined : "show"}
+      whileInView={reduce || useMount ? undefined : "show"}
+      viewport={useMount ? undefined : { once: true, amount: 0.15 }}
       variants={{
         hidden: {},
         show: {
@@ -68,7 +68,7 @@ export function StaggerItem({
 
   return (
     <motion.div
-      className={cn(className)}
+      className={cn("h-full w-full", className)}
       variants={
         reduce
           ? undefined

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCartStore } from "@/hooks/useCartStore";
 import { CheckoutButton } from "@/components/features/cart/CheckoutButton";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { Button } from "@/components/ui/button";
 import { CHECKOUT_COPY } from "@/constants/checkout";
 import { ROUTES } from "@/constants/routes";
@@ -17,17 +18,17 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-20 text-center">
+      <PageContainer className="py-20 text-center">
         <h1 className="font-display text-3xl">Your cart is empty</h1>
         <Button className="mt-6" asChild>
           <Link href={ROUTES.SHOP}>Continue shopping</Link>
         </Button>
-      </div>
+      </PageContainer>
     );
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12">
+    <PageContainer className="py-12">
       <h1 className="font-display text-4xl text-dark">Cart</h1>
       <div className="mt-8 space-y-4">
         {items.map((item) => (
@@ -73,6 +74,6 @@ export default function CartPage() {
         <p className="text-lg font-semibold">Subtotal: {formatInr(subtotal)}</p>
         <CheckoutButton>{CHECKOUT_COPY.PROCEED}</CheckoutButton>
       </div>
-    </div>
+    </PageContainer>
   );
 }

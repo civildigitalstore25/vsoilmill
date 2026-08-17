@@ -3,6 +3,7 @@ import {
   Stagger,
   StaggerItem,
 } from "@/components/shared/motion";
+import { PageContainer } from "@/components/layout/PageContainer";
 
 const STEPS = [
   {
@@ -30,7 +31,7 @@ const STEPS = [
 export function ProcessSection() {
   return (
     <section className="bg-primary/5 py-16">
-      <div className="mx-auto max-w-6xl px-4">
+      <PageContainer>
         <FadeIn>
           <p className="text-sm font-medium uppercase tracking-wide text-primary">
             Our Process
@@ -50,7 +51,7 @@ export function ProcessSection() {
             </StaggerItem>
           ))}
         </Stagger>
-      </div>
+      </PageContainer>
     </section>
   );
 }

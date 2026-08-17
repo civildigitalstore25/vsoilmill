@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { ROUTES } from "@/constants/routes";
 import { connectDb } from "@/lib/db/mongoose";
 import { formatInr } from "@/lib/utils/format";
@@ -17,7 +18,7 @@ export default async function OrderConfirmationPage({ params }: Props) {
   const data = JSON.parse(JSON.stringify(order));
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-16 text-center">
+    <PageContainer className="py-16 text-center">
       <h1 className="font-display text-4xl text-dark">Thank you!</h1>
       <p className="mt-3 text-muted">
         Order <span className="font-medium text-dark">{data._id}</span> is{" "}
@@ -38,6 +39,6 @@ export default async function OrderConfirmationPage({ params }: Props) {
       <Button className="mt-8" asChild>
         <Link href={ROUTES.SHOP}>Continue shopping</Link>
       </Button>
-    </div>
+    </PageContainer>
   );
 }

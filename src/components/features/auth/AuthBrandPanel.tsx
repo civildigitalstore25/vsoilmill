@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { AUTH_COPY, AUTH_HIGHLIGHTS } from "@/constants/auth";
+import { LAYOUT } from "@/constants/layout";
 import { ROUTES } from "@/constants/routes";
 import { UI } from "@/constants/ui";
+import { cn } from "@/lib/utils/cn";
 
 export function AuthMobileBar() {
   return (
-    <div className="flex items-center justify-between border-b border-border px-4 py-3 lg:hidden">
+    <div className={cn(LAYOUT.container, "flex items-center justify-between border-b border-border py-3 lg:hidden")}>
       <Link
         href={ROUTES.HOME}
         className="font-display text-xl font-semibold text-primary"

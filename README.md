@@ -18,6 +18,9 @@ npm install
 cp .env.example .env.local
 # set MONGODB_URI, AUTH_SECRET, and Google OAuth keys
 npm run seed
+or 
+npx tsx --env-file=.env.local scripts/seed.ts
+
 npm run dev
 ```
 

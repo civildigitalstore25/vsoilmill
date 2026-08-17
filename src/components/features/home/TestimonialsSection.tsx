@@ -3,6 +3,7 @@ import {
   Stagger,
   StaggerItem,
 } from "@/components/shared/motion";
+import { PageContainer } from "@/components/layout/PageContainer";
 
 const STORIES = [
   {
@@ -30,7 +31,8 @@ const STORIES = [
 
 export function TestimonialsSection() {
   return (
-    <section className="mx-auto max-w-6xl px-4 py-16">
+    <section className="py-16">
+      <PageContainer>
       <FadeIn>
         <p className="text-sm font-medium uppercase tracking-wide text-primary">
           Customer Stories
@@ -62,6 +64,7 @@ export function TestimonialsSection() {
           </StaggerItem>
         ))}
       </Stagger>
+      </PageContainer>
     </section>
   );
 }

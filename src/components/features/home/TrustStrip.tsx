@@ -1,5 +1,6 @@
 import { Leaf, FlaskConical, ShieldCheck, Truck } from "lucide-react";
 import { Stagger, StaggerItem } from "@/components/shared/motion";
+import { PageContainer } from "@/components/layout/PageContainer";
 
 const FEATURES = [
   {
@@ -27,7 +28,8 @@ const FEATURES = [
 export function TrustStrip() {
   return (
     <section className="border-y border-border bg-card">
-      <Stagger className="w-full grid gap-6 px-4 sm:px-6 md:px-8 lg:px-10 py-10 sm:grid-cols-2 lg:grid-cols-4">
+      <PageContainer>
+      <Stagger className="grid gap-6 py-10 sm:grid-cols-2 lg:grid-cols-4">
         {FEATURES.map(({ icon: Icon, title, description }) => (
           <StaggerItem key={title}>
             <div className="flex gap-3">
@@ -40,6 +42,7 @@ export function TrustStrip() {
           </StaggerItem>
         ))}
       </Stagger>
+      </PageContainer>
     </section>
   );
 }

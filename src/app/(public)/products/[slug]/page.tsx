@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductDetailClient } from "@/components/features/products/ProductDetailClient";
 import { ProductReviews } from "@/components/features/reviews/ProductReviews";
+import { PageContainer } from "@/components/layout/PageContainer";
 import {
   buildProductJsonLd,
   buildProductMetadata,
@@ -44,13 +45,13 @@ export default async function ProductPage({ params }: Props) {
   const jsonLd = buildProductJsonLd(product, category?.name);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12">
+    <PageContainer className="py-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <ProductDetailClient product={product} />
       <ProductReviews productId={product._id} />
-    </div>
+    </PageContainer>
   );
 }

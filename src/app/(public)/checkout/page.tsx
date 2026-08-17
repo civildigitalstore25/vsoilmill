@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { API_ENDPOINTS } from "@/constants/api";
 import { CHECKOUT_COPY } from "@/constants/checkout";
 import { FREE_SHIPPING_THRESHOLD, GST_RATE } from "@/constants/seo";
@@ -119,17 +120,17 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-20 text-center">
+      <PageContainer className="py-20 text-center">
         <h1 className="font-display text-3xl">Nothing to checkout</h1>
         <Button className="mt-6" asChild>
           <Link href={ROUTES.SHOP}>Shop products</Link>
         </Button>
-      </div>
+      </PageContainer>
     );
   }
 
   return (
-    <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 lg:grid-cols-5">
+    <PageContainer className="grid gap-10 py-12 lg:grid-cols-5">
       <div className="lg:col-span-3">
         <h1 className="font-display text-4xl text-dark">
           {CHECKOUT_COPY.ADDRESS_TITLE}
@@ -232,6 +233,6 @@ export default function CheckoutPage() {
           </a>
         </Button>
       </aside>
-    </div>
+    </PageContainer>
   );
 }
