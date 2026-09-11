@@ -38,6 +38,7 @@ export interface ShippingAddress {
   state: string;
   pincode: string;
   country: string;
+  isDefault?: boolean;
 }
 
 export interface UserAvatarProps {

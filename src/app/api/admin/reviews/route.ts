@@ -4,6 +4,7 @@ import { USER_ROLES } from "@/constants/auth";
 import { auth } from "@/lib/auth/auth";
 import { connectDb } from "@/lib/db/mongoose";
 import { ReviewModel } from "@/models/Review";
+import { recalculateProductReviewStats } from "@/lib/reviews/stats";
 
 const schema = z.object({
   id: z.string(),
@@ -31,7 +32,11 @@ export async function PATCH(request: Request) {
       parsed.data.id,
       { isApproved: parsed.data.isApproved },
       { new: true },
-    ).lean();
+    );
+    if (!review) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    await recalculateProductReviewStats(String(review.productId));
     return NextResponse.json({ data: JSON.parse(JSON.stringify(review)) });
   } catch (error) {
     return NextResponse.json(
@@ -53,7 +58,10 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
     }
     await connectDb();
-    await ReviewModel.findByIdAndDelete(parsed.data.id);
+    const review = await ReviewModel.findByIdAndDelete(parsed.data.id);
+    if (review) {
+      await recalculateProductReviewStats(String(review.productId));
+    }
     return NextResponse.json({ data: { ok: true } });
   } catch (error) {
     return NextResponse.json(

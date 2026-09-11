@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { PAYMENT_ERRORS } from "@/constants/payment";
 import { connectDb } from "@/lib/db/mongoose";
 import { auth } from "@/lib/auth/auth";
 import { createPhonePePayment } from "@/lib/payment/phonepe";
 import { OrderModel } from "@/models/Order";
-import { PaymentStatus } from "@/types/order";
 
 const schema = z.object({
   orderId: z.string().min(1),
@@ -21,6 +21,13 @@ export async function POST(request: Request) {
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!process.env.PHONEPE_CLIENT_ID || !process.env.PHONEPE_CLIENT_SECRET) {
+      return NextResponse.json(
+        { error: PAYMENT_ERRORS.CREDENTIALS_MISSING },
+        { status: 503 },
+      );
     }
 
     await connectDb();
@@ -45,20 +52,10 @@ export async function POST(request: Request) {
     });
 
     if ("error" in result) {
-      // Demo/dev fallback when credentials missing
-      if (!process.env.PHONEPE_CLIENT_ID || !process.env.PHONEPE_CLIENT_SECRET) {
-        order.paymentStatus = PaymentStatus.PAID;
-        order.status = "CONFIRMED";
-        await order.save();
-        return NextResponse.json({
-          data: {
-            demoMode: true,
-            orderId: order._id,
-            message: result.error,
-          },
-        });
-      }
-      return NextResponse.json({ error: result.error }, { status: 502 });
+      return NextResponse.json(
+        { error: result.error || PAYMENT_ERRORS.INIT_FAILED },
+        { status: 502 },
+      );
     }
 
     return NextResponse.json({

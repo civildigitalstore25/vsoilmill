@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { connectDb } from "@/lib/db/mongoose";
+import { auth } from "@/lib/auth/auth";
 import { ReviewModel } from "@/models/Review";
-import { ProductModel } from "@/models/Product";
+import { OrderModel } from "@/models/Order";
+import { recalculateProductReviewStats } from "@/lib/reviews/stats";
+import { PaymentStatus } from "@/types/order";
 
 const schema = z.object({
   productId: z.string(),
@@ -40,35 +43,28 @@ export async function POST(request: Request) {
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
     }
+
+    const session = await auth();
     await connectDb();
+
+    let isVerified = false;
+    if (session?.user?.id) {
+      const purchased = await OrderModel.exists({
+        userId: session.user.id,
+        paymentStatus: PaymentStatus.PAID,
+        "items.productId": parsed.data.productId,
+      });
+      isVerified = Boolean(purchased);
+    }
+
     const review = await ReviewModel.create({
       ...parsed.data,
+      userId: session?.user?.id,
       isApproved: false,
-      isVerified: false,
+      isVerified,
     });
 
-    const stats = await ReviewModel.aggregate([
-      {
-        $match: {
-          productId: review.productId,
-          isApproved: true,
-        },
-      },
-      {
-        $group: {
-          _id: "$productId",
-          averageRating: { $avg: "$rating" },
-          reviewCount: { $sum: 1 },
-        },
-      },
-    ]);
-
-    if (stats[0]) {
-      await ProductModel.findByIdAndUpdate(parsed.data.productId, {
-        averageRating: Math.round(stats[0].averageRating * 10) / 10,
-        reviewCount: stats[0].reviewCount,
-      });
-    }
+    await recalculateProductReviewStats(parsed.data.productId);
 
     return NextResponse.json({ data: JSON.parse(JSON.stringify(review)) });
   } catch (error) {

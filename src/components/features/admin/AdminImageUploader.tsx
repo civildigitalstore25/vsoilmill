@@ -118,8 +118,11 @@ export function AdminImageUploader({
         </div>
       )}
 
-      {/* Input box to add new image URL */}
+      {/* Input box to add new image URL (paste-only by design — no upload API keys) */}
       <div className="space-y-2">
+        <p className="text-xs text-muted">
+          Paste a public HTTPS image URL (ImageKit, Cloudinary, etc.). File upload is not enabled.
+        </p>
         <div className="flex flex-col gap-2 sm:flex-row">
           <div className="relative flex-1">
             <Link2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />

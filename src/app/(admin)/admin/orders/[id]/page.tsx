@@ -74,6 +74,8 @@ export default async function AdminOrderDetailPage({ params }: Props) {
               orderId={data._id}
               currentStatus={data.status}
               currentPaymentStatus={data.paymentStatus}
+              trackingNumber={data.trackingNumber ?? ""}
+              courier={data.courier ?? ""}
             />
           </div>
         </AdminCard>

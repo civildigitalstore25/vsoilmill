@@ -28,7 +28,11 @@ function GoogleMark() {
   );
 }
 
-export function GoogleSignInButton() {
+type Props = { enabled?: boolean };
+
+export function GoogleSignInButton({ enabled = true }: Props) {
+  if (!enabled) return null;
+
   return (
     <Button
       type="button"

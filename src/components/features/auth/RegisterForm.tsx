@@ -28,7 +28,7 @@ const emptyForm = {
   confirmPassword: "",
 };
 
-export function RegisterForm() {
+export function RegisterForm({ googleEnabled = false }: { googleEnabled?: boolean }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState(emptyForm);
@@ -92,8 +92,8 @@ export function RegisterForm() {
         title={AUTH_COPY.registerTitle}
         subtitle={AUTH_COPY.registerSubtitle}
       />
-      <GoogleSignInButton />
-      <AuthDivider />
+      <GoogleSignInButton enabled={googleEnabled} />
+      {googleEnabled ? <AuthDivider /> : null}
       <form onSubmit={onSubmit} className="space-y-2.5">
         <div>
           <Label htmlFor="name">{AUTH_COPY.name}</Label>

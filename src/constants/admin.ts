@@ -161,6 +161,13 @@ export const ADMIN_ORDERS_COPY = {
   shipping: "Shipping",
   tax: "Tax",
   total: "Total",
+  courierLabel: "Courier",
+  trackingLabel: "Tracking number",
+  saveTracking: "Save tracking",
+  refundButton: "Mark refunded",
+  refundConfirm: "Refund this order and restore stock?",
+  refunded: "Order refunded",
+  refundFailed: "Refund failed",
 } as const;
 
 export const ADMIN_PRODUCTS_COPY = {

@@ -12,6 +12,7 @@ const AddressSchema = new Schema(
     state: { type: String, required: true },
     pincode: { type: String, required: true },
     country: { type: String, default: "India" },
+    isDefault: { type: Boolean, default: false },
   },
   { _id: false },
 );
@@ -29,6 +30,8 @@ const UserSchema = new Schema(
       default: USER_ROLES.USER,
     },
     addresses: { type: [AddressSchema], default: [] },
+    passwordResetTokenHash: String,
+    passwordResetExpiresAt: Date,
   },
   { timestamps: true },
 );

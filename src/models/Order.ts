@@ -59,6 +59,9 @@ const OrderSchema = new Schema(
     phonepeTransactionId: String,
     couponCode: String,
     notes: String,
+    stockDecremented: { type: Boolean, default: false },
+    trackingNumber: String,
+    courier: String,
   },
   { timestamps: true },
 );

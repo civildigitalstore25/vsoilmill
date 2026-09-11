@@ -9,7 +9,7 @@ export const config = {
     "/profile",
     "/profile/:path*",
     "/orders",
-    "/orders/:id",
+    "/orders/:path*",
     "/checkout",
     "/checkout/:path*",
   ],

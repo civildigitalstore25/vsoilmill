@@ -18,8 +18,11 @@ import { Label } from "@/components/ui/label";
 import { AUTH, AUTH_COPY, AUTH_PROVIDERS } from "@/constants/auth";
 import { ROUTES } from "@/constants/routes";
 import { getPostLoginRoute } from "@/lib/auth/post-login";
+import Link from "next/link";
 
-export function LoginForm() {
+type LoginFormProps = { googleEnabled?: boolean };
+
+export function LoginForm({ googleEnabled = false }: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
@@ -61,8 +64,8 @@ export function LoginForm() {
         title={AUTH_COPY.loginTitle}
         subtitle={AUTH_COPY.loginSubtitle}
       />
-      <GoogleSignInButton />
-      <AuthDivider />
+      <GoogleSignInButton enabled={googleEnabled} />
+      {googleEnabled ? <AuthDivider /> : null}
       <form onSubmit={onSubmit} className="space-y-2.5">
         <div>
           <Label htmlFor="email">{AUTH_COPY.email}</Label>
@@ -77,7 +80,15 @@ export function LoginForm() {
           />
         </div>
         <div>
-          <Label htmlFor="password">{AUTH_COPY.password}</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password">{AUTH_COPY.password}</Label>
+            <Link
+              href={ROUTES.FORGOT_PASSWORD}
+              className="text-xs text-primary underline-offset-2 hover:underline"
+            >
+              {AUTH_COPY.forgotPassword}
+            </Link>
+          </div>
           <PasswordInput
             id="password"
             autoComplete="current-password"

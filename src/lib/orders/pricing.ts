@@ -1,11 +1,13 @@
-import { FREE_SHIPPING_THRESHOLD, GST_RATE } from "@/constants/seo";
+import { GST_RATE } from "@/constants/seo";
+import { FREE_SHIPPING_THRESHOLD, SHIPPING_FEE } from "@/constants/shipping";
 import type { OrderPricing } from "@/types/order";
 
 export function calculatePricing(
   subtotal: number,
   discount = 0,
 ): OrderPricing {
-  const shipping = subtotal - discount >= FREE_SHIPPING_THRESHOLD ? 0 : 99;
+  const shipping =
+    subtotal - discount >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
   const taxable = Math.max(subtotal - discount, 0);
   const tax = Math.round(taxable * GST_RATE);
   const total = taxable + shipping + tax;

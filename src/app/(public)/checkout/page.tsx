@@ -2,18 +2,22 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { CheckoutSavedAddresses } from "@/components/features/checkout/CheckoutSavedAddresses";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { API_ENDPOINTS } from "@/constants/api";
 import { CHECKOUT_COPY } from "@/constants/checkout";
-import { FREE_SHIPPING_THRESHOLD, GST_RATE } from "@/constants/seo";
+import { UI } from "@/constants/ui";
+import { GST_RATE } from "@/constants/seo";
+import { FREE_SHIPPING_THRESHOLD, SHIPPING_FEE } from "@/constants/shipping";
 import { ROUTES } from "@/constants/routes";
 import { useCartStore } from "@/hooks/useCartStore";
 import { useRequireLogin } from "@/hooks/useRequireLogin";
+import { previewCouponDiscount } from "@/lib/orders/coupons";
 import { formatInr } from "@/lib/utils/format";
 import {
   buildCartWhatsAppMessage,
@@ -39,16 +43,36 @@ export default function CheckoutPage() {
   const clearCart = useCartStore((s) => s.clearCart);
   const subtotal = useCartStore((s) => s.getSubtotal());
   const [address, setAddress] = useState<ShippingAddress>(EMPTY_ADDRESS);
+  const [savedAddresses, setSavedAddresses] = useState<ShippingAddress[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [couponCode, setCouponCode] = useState("");
   const [loading, setLoading] = useState(false);
   const { requireLogin } = useRequireLogin();
 
-  const discount =
-    couponCode.trim().toUpperCase() === "PURE10"
-      ? Math.round(subtotal * 0.1)
-      : 0;
+  useEffect(() => {
+    async function loadAddresses() {
+      try {
+        const res = await fetch(API_ENDPOINTS.USER_ADDRESSES);
+        if (!res.ok) return;
+        const json = await res.json();
+        const list = (json.data ?? []) as ShippingAddress[];
+        setSavedAddresses(list);
+        const defaultIdx = list.findIndex((a) => a.isDefault);
+        const idx = defaultIdx >= 0 ? defaultIdx : list.length ? 0 : -1;
+        if (idx >= 0) {
+          setSelectedIndex(idx);
+          setAddress({ ...EMPTY_ADDRESS, ...list[idx], country: list[idx].country || "India" });
+        }
+      } catch {
+        // ignore — guest form still works after login
+      }
+    }
+    void loadAddresses();
+  }, []);
+
+  const discount = previewCouponDiscount(couponCode, subtotal);
   const shipping =
-    subtotal - discount >= FREE_SHIPPING_THRESHOLD ? 0 : 99;
+    subtotal - discount >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
   const tax = Math.round(Math.max(subtotal - discount, 0) * GST_RATE);
   const total = Math.max(subtotal - discount, 0) + shipping + tax;
 
@@ -56,6 +80,7 @@ export default function CheckoutPage() {
     key: K,
     value: ShippingAddress[K],
   ) {
+    setSelectedIndex(null);
     setAddress((prev) => ({ ...prev, [key]: value }));
   }
 
@@ -75,10 +100,6 @@ export default function CheckoutPage() {
           items: items.map((i) => ({
             productId: i.productId,
             variantId: i.variantId,
-            name: i.name,
-            variantLabel: i.variantLabel,
-            image: i.image,
-            price: i.price,
             quantity: i.quantity,
           })),
           shippingAddress: address,
@@ -87,7 +108,11 @@ export default function CheckoutPage() {
       });
       const orderJson = await orderRes.json();
       if (!orderRes.ok || !orderJson.data) {
-        throw new Error(orderJson.error ?? "Failed to create order");
+        throw new Error(
+          typeof orderJson.error === "string"
+            ? orderJson.error
+            : "Failed to create order",
+        );
       }
 
       const payRes = await fetch(API_ENDPOINTS.PAYMENT_PHONEPE, {
@@ -96,13 +121,6 @@ export default function CheckoutPage() {
         body: JSON.stringify({ orderId: orderJson.data._id }),
       });
       const payJson = await payRes.json();
-
-      if (payJson.data?.demoMode) {
-        clearCart();
-        toast.success("Order placed (PhonePe demo mode)");
-        router.push(ROUTES.ORDER_CONFIRMATION(orderJson.data._id));
-        return;
-      }
 
       if (payJson.data?.redirectUrl) {
         clearCart();
@@ -135,7 +153,17 @@ export default function CheckoutPage() {
         <h1 className="font-display text-4xl text-dark">
           {CHECKOUT_COPY.ADDRESS_TITLE}
         </h1>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2">
+        <div className="mt-8">
+          <CheckoutSavedAddresses
+            addresses={savedAddresses}
+            selectedIndex={selectedIndex}
+            onSelect={(index, addr) => {
+              setSelectedIndex(index);
+              setAddress({ ...EMPTY_ADDRESS, ...addr, country: addr.country || "India" });
+            }}
+          />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
           {(
             [
               ["fullName", "Full name", true],
@@ -186,7 +214,7 @@ export default function CheckoutPage() {
           <Input
             id="coupon"
             className="mt-1.5"
-            placeholder="PURE10"
+            placeholder={UI.promoCode}
             value={couponCode}
             onChange={(e) => setCouponCode(e.target.value)}
           />

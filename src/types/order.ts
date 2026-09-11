@@ -71,6 +71,9 @@ export interface Order {
   phonepeTransactionId?: string;
   couponCode?: string;
   notes?: string;
+  stockDecremented?: boolean;
+  trackingNumber?: string;
+  courier?: string;
   createdAt: string;
   updatedAt: string;
 }

@@ -11,13 +11,17 @@ export default async function LoginPage() {
     redirect(getPostLoginRoute());
   }
 
+  const googleEnabled = Boolean(
+    process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET,
+  );
+
   return (
     <Suspense
       fallback={
         <div className="py-20 text-center text-muted">{AUTH_COPY.loading}</div>
       }
     >
-      <LoginForm />
+      <LoginForm googleEnabled={googleEnabled} />
     </Suspense>
   );
 }

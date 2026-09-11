@@ -1,10 +1,21 @@
 import { NextResponse } from "next/server";
+import { PAYMENT_ERRORS } from "@/constants/payment";
 import { connectDb } from "@/lib/db/mongoose";
+import { markOrderPaid } from "@/lib/orders/mark-paid";
+import { verifyPhonePeCallbackAuth } from "@/lib/payment/callback-auth";
 import { OrderModel } from "@/models/Order";
 import { PaymentStatus } from "@/types/order";
 
 export async function POST(request: Request) {
   try {
+    const authResult = verifyPhonePeCallbackAuth(request);
+    if (!authResult.ok) {
+      return NextResponse.json(
+        { error: authResult.error },
+        { status: 401 },
+      );
+    }
+
     const body = await request.json().catch(() => ({}));
     const merchantOrderId =
       body?.data?.merchantTransactionId ??
@@ -31,11 +42,11 @@ export async function POST(request: Request) {
       code === "SUCCESS";
 
     if (success) {
-      order.paymentStatus = PaymentStatus.PAID;
-      order.status = "CONFIRMED";
-      order.phonepeTransactionId =
-        body?.data?.transactionId ?? body?.transactionId;
-      await order.save();
+      await markOrderPaid({
+        orderId: String(order._id),
+        transactionId:
+          body?.data?.transactionId ?? body?.transactionId ?? undefined,
+      });
     } else {
       order.paymentStatus = PaymentStatus.FAILED;
       await order.save();
@@ -44,7 +55,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ data: { ok: true } });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Callback failed" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : PAYMENT_ERRORS.CALLBACK_UNAUTHORIZED,
+      },
       { status: 500 },
     );
   }

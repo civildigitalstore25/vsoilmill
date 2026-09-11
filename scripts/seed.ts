@@ -315,8 +315,8 @@ async function seed() {
       isBestSeller: product.isBestSeller ?? false,
       isNewArrival: product.isNewArrival ?? false,
       seo: product.seo ?? {},
-      averageRating: 4.8,
-      reviewCount: 12,
+      averageRating: 0,
+      reviewCount: 0,
     });
   }
 

@@ -1,4 +1,6 @@
 import { connectDb } from "@/lib/db/mongoose";
+import { getCouponDiscount } from "@/lib/orders/coupons";
+import { resolveOrderItemsFromCatalog } from "@/lib/orders/inventory";
 import { calculatePricing } from "@/lib/orders/pricing";
 import { OrderModel } from "@/models/Order";
 import { auth } from "@/lib/auth/auth";
@@ -11,10 +13,6 @@ const orderSchema = z.object({
       z.object({
         productId: z.string(),
         variantId: z.string(),
-        name: z.string(),
-        variantLabel: z.string(),
-        image: z.string().optional(),
-        price: z.number().positive(),
         quantity: z.number().int().positive(),
       }),
     )
@@ -49,28 +47,34 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const subtotal = parsed.data.items.reduce(
+    await connectDb();
+    const resolved = await resolveOrderItemsFromCatalog(parsed.data.items);
+    if ("error" in resolved) {
+      return NextResponse.json({ error: resolved.error }, { status: 400 });
+    }
+
+    const subtotal = resolved.items.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0,
     );
-    const discount =
-      parsed.data.couponCode?.toUpperCase() === "PURE10"
-        ? Math.round(subtotal * 0.1)
-        : 0;
-    const pricing = calculatePricing(subtotal, discount);
+    const coupon = getCouponDiscount(parsed.data.couponCode, subtotal);
+    if (coupon.error) {
+      return NextResponse.json({ error: coupon.error }, { status: 400 });
+    }
+    const pricing = calculatePricing(subtotal, coupon.discount);
 
-    await connectDb();
     const order = await OrderModel.create({
       userId: session.user.id,
-      items: parsed.data.items,
+      items: resolved.items.map(({ sku: _sku, ...item }) => item),
       shippingAddress: {
         ...parsed.data.shippingAddress,
         email: parsed.data.shippingAddress.email || undefined,
       },
       pricing,
-      couponCode: parsed.data.couponCode,
+      couponCode: coupon.code,
       status: "PENDING",
       paymentStatus: "PENDING",
+      stockDecremented: false,
     });
 
     return NextResponse.json({ data: JSON.parse(JSON.stringify(order)) });

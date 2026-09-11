@@ -14,7 +14,17 @@ const addressSchema = z.object({
   state: z.string().min(2, "State is required"),
   pincode: z.string().min(6, "Valid pincode is required"),
   country: z.string().default("India"),
+  isDefault: z.boolean().optional(),
 });
+
+function clearOtherDefaults(
+  addresses: Array<{ isDefault?: boolean }>,
+  keepIndex: number,
+) {
+  addresses.forEach((addr, i) => {
+    if (i !== keepIndex) addr.isDefault = false;
+  });
+}
 
 export async function GET() {
   const session = await auth();
@@ -52,19 +62,22 @@ export async function POST(request: Request) {
     }
 
     await connectDb();
-    const user = await UserModel.findByIdAndUpdate(
-      session.user.id,
-      { $push: { addresses: parsed.data } },
-      { new: true },
-    )
-      .select("addresses")
-      .lean();
+    const user = await UserModel.findById(session.user.id);
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
 
-    const addresses = (user as { addresses?: unknown[] } | null)?.addresses ?? [];
+    const next = { ...parsed.data, isDefault: Boolean(parsed.data.isDefault) };
+    if (next.isDefault || user.addresses.length === 0) {
+      clearOtherDefaults(user.addresses, -1);
+      next.isDefault = true;
+    }
+    user.addresses.push(next);
+    await user.save();
 
     return NextResponse.json({
       message: "Address added successfully",
-      data: JSON.parse(JSON.stringify(addresses)),
+      data: JSON.parse(JSON.stringify(user.addresses)),
     });
   } catch (error) {
     return NextResponse.json(
@@ -106,7 +119,12 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Address index out of bounds" }, { status: 400 });
     }
 
-    user.addresses[index] = parsed.data;
+    const next = { ...parsed.data, isDefault: Boolean(parsed.data.isDefault) };
+    user.addresses[index] = next;
+    if (next.isDefault) {
+      clearOtherDefaults(user.addresses, index);
+      user.addresses[index].isDefault = true;
+    }
     await user.save();
 
     return NextResponse.json({
@@ -146,7 +164,11 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Address index out of bounds" }, { status: 400 });
     }
 
+    const wasDefault = user.addresses[index]?.isDefault;
     user.addresses.splice(index, 1);
+    if (wasDefault && user.addresses[0]) {
+      user.addresses[0].isDefault = true;
+    }
     await user.save();
 
     return NextResponse.json({

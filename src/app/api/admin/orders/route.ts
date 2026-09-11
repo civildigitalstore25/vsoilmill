@@ -18,6 +18,8 @@ const patchSchema = z.object({
   status: statusEnum.optional(),
   paymentStatus: paymentEnum.optional(),
   notes: z.string().optional(),
+  trackingNumber: z.string().optional(),
+  courier: z.string().optional(),
 });
 
 const createSchema = z.object({
@@ -142,6 +144,18 @@ export async function PATCH(request: Request) {
     }
     const { id, ...updates } = parsed.data;
     await connectDb();
+
+    if (updates.paymentStatus === PaymentStatus.PAID) {
+      const { markOrderPaid } = await import("@/lib/orders/mark-paid");
+      await markOrderPaid({ orderId: id });
+      const { paymentStatus: _p, ...rest } = updates;
+      if (Object.keys(rest).length) {
+        await OrderModel.findByIdAndUpdate(id, rest);
+      }
+      const order = await OrderModel.findById(id).lean();
+      return NextResponse.json({ data: JSON.parse(JSON.stringify(order)) });
+    }
+
     const order = await OrderModel.findByIdAndUpdate(id, updates, {
       new: true,
     }).lean();

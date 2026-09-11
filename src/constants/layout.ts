@@ -2,9 +2,11 @@ export const LAYOUT = {
   container: "page-container",
   narrow: "mx-auto w-full max-w-3xl",
   sectionY: "py-12 md:py-16",
-  heroMin: "min-h-[72vh] md:min-h-[78vh]",
+  heroMin: "min-h-0 md:min-h-[78vh]",
   heroImage: "object-cover object-[70%_center]",
-  heroOverlay: "bg-gradient-to-r from-cream/90 via-cream/45 to-cream/10",
+  heroOverlay:
+    "bg-gradient-to-r from-cream/90 via-cream/45 to-cream/10",
+  heroContent: "relative z-10 w-full max-w-2xl",
   productGrid:
     "grid w-full grid-cols-2 items-stretch gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5",
   categoryGrid:

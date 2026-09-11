@@ -16,6 +16,7 @@ export type AddressItem = {
   state: string;
   pincode: string;
   country?: string;
+  isDefault?: boolean;
 };
 
 export function AddressManager() {
@@ -36,6 +37,7 @@ export function AddressManager() {
     state: "",
     pincode: "",
     country: "India",
+    isDefault: false,
   });
 
   const fetchAddresses = async () => {
@@ -69,6 +71,7 @@ export function AddressManager() {
       state: "",
       pincode: "",
       country: "India",
+      isDefault: false,
     });
     setShowModal(true);
   };
@@ -85,6 +88,7 @@ export function AddressManager() {
       state: addr.state,
       pincode: addr.pincode,
       country: addr.country || "India",
+      isDefault: Boolean(addr.isDefault),
     });
     setShowModal(true);
   };
@@ -200,7 +204,8 @@ export function AddressManager() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-cream px-2.5 py-1 text-xs font-semibold text-primary">
-                    <Home className="h-3.5 w-3.5" /> Address #{idx + 1}
+                    <Home className="h-3.5 w-3.5" />
+                    {addr.isDefault ? "Default" : `Address #${idx + 1}`}
                   </span>
                   <div className="flex items-center gap-1">
                     <button
@@ -335,6 +340,17 @@ export function AddressManager() {
                   />
                 </div>
               </div>
+
+              <label className="flex items-center gap-2 text-sm text-dark">
+                <input
+                  type="checkbox"
+                  checked={Boolean(form.isDefault)}
+                  onChange={(e) =>
+                    setForm({ ...form, isDefault: e.target.checked })
+                  }
+                />
+                Set as default checkout address
+              </label>
 
               <div className="flex justify-end gap-3 pt-4 border-t border-border">
                 <Button

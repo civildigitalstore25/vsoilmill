@@ -1,8 +1,10 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PageContainer } from "@/components/layout/PageContainer";
+import { USER_ROLES } from "@/constants/auth";
 import { ROUTES } from "@/constants/routes";
+import { auth } from "@/lib/auth/auth";
 import { connectDb } from "@/lib/db/mongoose";
 import { formatInr } from "@/lib/utils/format";
 import { OrderModel } from "@/models/Order";
@@ -10,20 +12,40 @@ import { OrderModel } from "@/models/Order";
 type Props = { params: Promise<{ id: string }> };
 
 export default async function OrderConfirmationPage({ params }: Props) {
+  const session = await auth();
+  if (!session?.user) {
+    const { id } = await params;
+    redirect(
+      `${ROUTES.LOGIN}?callbackUrl=${encodeURIComponent(ROUTES.ORDER_CONFIRMATION(id))}`,
+    );
+  }
+
   const { id } = await params;
   await connectDb();
   const order = await OrderModel.findById(id).lean();
   if (!order) notFound();
 
   const data = JSON.parse(JSON.stringify(order));
+  const isOwner =
+    data.userId === session.user.id || session.user.role === USER_ROLES.ADMIN;
+  if (!isOwner) notFound();
 
   return (
     <PageContainer className="py-16 text-center">
       <h1 className="font-display text-4xl text-dark">Thank you!</h1>
       <p className="mt-3 text-muted">
         Order <span className="font-medium text-dark">{data._id}</span> is{" "}
-        {data.paymentStatus === "PAID" ? "confirmed" : "pending payment confirmation"}.
+        {data.paymentStatus === "PAID"
+          ? "confirmed"
+          : "pending payment confirmation"}
+        .
       </p>
+      {data.trackingNumber ? (
+        <p className="mt-2 text-sm text-muted">
+          Tracking: {data.courier ? `${data.courier} · ` : ""}
+          {data.trackingNumber}
+        </p>
+      ) : null}
       <div className="mt-8 rounded-xl border border-border bg-card p-6 text-left text-sm">
         <p className="font-semibold">Ship to</p>
         <p className="mt-1 text-muted">
