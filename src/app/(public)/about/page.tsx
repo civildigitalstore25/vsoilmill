@@ -7,7 +7,7 @@ import { buildPageMetadata } from "@/lib/seo/metadata";
 export const metadata: Metadata = buildPageMetadata({
   title: "About Us",
   description:
-    "VS OilMill has been pressing pure oils with traditional Mara Chekku methods in Sivagangai, Tamil Nadu since 1985.",
+    "VS OilMill has been pressing pure oils with traditional Mara Chekku methods in Madurai, Tamil Nadu since 1985.",
   path: "/about",
 });
 
@@ -29,7 +29,7 @@ export default function AboutPage() {
         </p>
         <p>
           From seed selection to unfiltered bottling, we deliver pure oils and
-          Uthukuli A2 ghee directly from our mill in Sivagangai to families across
+          Uthukuli A2 ghee directly from our mill in Madurai to families across
           India.
         </p>
       </div>

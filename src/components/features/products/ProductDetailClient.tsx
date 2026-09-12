@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -65,20 +66,32 @@ export function ProductDetailClient({ product }: { product: Product }) {
   }
 
   return (
-    <div className="grid gap-10 lg:grid-cols-2">
-      <div className="relative aspect-square overflow-hidden rounded-xl bg-cream-dark">
-        <Image
-          src={imgSrc}
-          alt={product.name}
-          fill
-          unoptimized
-          onError={() => setImgSrc(ASSETS.PLACEHOLDER_PRODUCT)}
-          className="object-cover"
-          priority
-        />
-      </div>
+    <div>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="mb-6 -ml-2 gap-1.5 text-muted hover:text-dark"
+        onClick={() => router.back()}
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back
+      </Button>
 
-      <div>
+      <div className="grid gap-10 lg:grid-cols-2">
+        <div className="relative aspect-square overflow-hidden rounded-xl bg-cream-dark">
+          <Image
+            src={imgSrc}
+            alt={product.name}
+            fill
+            unoptimized
+            onError={() => setImgSrc(ASSETS.PLACEHOLDER_PRODUCT)}
+            className="object-cover"
+            priority
+          />
+        </div>
+
+        <div>
         {discount > 0 ? (
           <Badge className="mb-3 bg-primary text-primary-foreground">
             -{discount}% OFF
@@ -191,6 +204,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
           className="prose prose-sm mt-10 max-w-none text-dark/80"
           dangerouslySetInnerHTML={{ __html: product.description }}
         />
+        </div>
       </div>
     </div>
   );

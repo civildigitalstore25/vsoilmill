@@ -67,8 +67,8 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const page = ADMIN_NAV.find((item) => pathname.startsWith(item.href));
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,var(--color-cream)_0%,var(--color-cream-dark)_100%)]">
-      <div className="mx-auto flex min-h-screen max-w-[1600px]">
+    <div className="min-h-screen bg-[linear-gradient(180deg,var(--color-cream)_0%,var(--color-cream-dark)_100%)] lg:h-screen lg:overflow-hidden">
+      <div className="mx-auto flex min-h-screen max-w-[1600px] lg:h-full">
         <aside className="hidden w-72 shrink-0 flex-col border-r border-dark/10 bg-dark p-5 text-cream lg:flex">
           <Link href={ROUTES.ADMIN.DASHBOARD} className="block">
             <p className="font-display text-2xl text-accent">{ADMIN_COPY.brand}</p>
@@ -127,7 +127,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           </div>
         ) : null}
 
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col lg:min-h-0 lg:overflow-y-auto">
           <header className={cn("sticky top-0 z-30 border-b border-border/70 bg-cream/80 py-4 backdrop-blur-md", LAYOUT.container)}>
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">

@@ -10,7 +10,7 @@ import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 export const metadata: Metadata = buildPageMetadata({
   title: "Contact Us",
   description:
-    "Contact VS OilMill in Sivagangai, Tamil Nadu. Call or WhatsApp +91 84387 75451 for orders and support.",
+    "Contact VS OilMill in Madurai, Tamil Nadu. Call or WhatsApp +91 84387 75451 for orders and support.",
   path: "/contact",
 });
 

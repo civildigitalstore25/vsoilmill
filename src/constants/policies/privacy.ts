@@ -17,7 +17,7 @@ export const PRIVACY_POLICY = {
     },
     {
       title: "Contact",
-      body: "For privacy questions, contact us at +91 84387 75451 or visit our mill store in Sivagangai, Tamil Nadu.",
+      body: "For privacy questions, contact us at +91 84387 75451 or visit our mill store in Madurai, Tamil Nadu.",
     },
   ],
 };
