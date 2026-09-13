@@ -7,7 +7,7 @@ import { buildPageMetadata } from "@/lib/seo/metadata";
 export const metadata: Metadata = buildPageMetadata({
   title: "About Us",
   description:
-    "VS OilMill has been pressing pure oils with traditional Mara Chekku methods in Madurai, Tamil Nadu since 1985.",
+    "VS OilMill has been pressing pure oils with traditional Mara Chekku methods in Madurai, Tamil Nadu since 2020.",
   path: "/about",
 });
 
@@ -19,7 +19,7 @@ export default function AboutPage() {
       <p className="mt-4 text-lg text-muted">{UI.since}</p>
       <div className="mt-8 space-y-4 leading-relaxed text-dark/80">
         <p>
-          Our wooden Chekku mill has been pressing oils since 1985. Every drop
+          Our wooden Chekku mill has been pressing oils since 2020. Every drop
           carries the wisdom of generations and the purity of nature.
         </p>
         <p>

@@ -7,7 +7,7 @@ export const UI = {
     process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "918438775451",
   address: "#228, Vivekananda 1st Street, Thasildar Nagar, Madurai - 625020",
   announcement: `Free Express Shipping Across India on Orders Above ₹${FREE_SHIPPING_THRESHOLD}`,
-  since: "Since 1985 · Madurai, Tamil Nadu",
+  since: "Since 2020 · Madurai, Tamil Nadu",
   trustFamilies: "12,000+",
   trustYears: "38+",
   trustRating: "4.9",
