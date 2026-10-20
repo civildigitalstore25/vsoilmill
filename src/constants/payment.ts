@@ -16,3 +16,9 @@ export const PAYMENT_CALLBACK_AUTH = {
   HEADER: "authorization",
   SCHEME: "Basic",
 } as const;
+
+export const PHONEPE_V2 = {
+  TOKEN_TYPE: "O-Bearer",
+  PAY_FLOW: "PG_CHECKOUT",
+  EXPIRE_AFTER_SECONDS: 1200,
+} as const;

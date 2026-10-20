@@ -14,6 +14,10 @@ export interface CartItem {
 export interface CartState {
   items: CartItem[];
   addItem: (item: Omit<CartItem, "quantity"> & { quantity?: number }) => void;
+  /** Replace entire cart with a single item (Buy Now). */
+  buyNowItem: (
+    item: Omit<CartItem, "quantity"> & { quantity?: number },
+  ) => void;
   removeItem: (productId: string, variantId: string) => void;
   updateQuantity: (
     productId: string,

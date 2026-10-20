@@ -24,6 +24,7 @@ import type { Product } from "@/types/product";
 export function ProductDetailClient({ product }: { product: Product }) {
   const router = useRouter();
   const addItem = useCartStore((s) => s.addItem);
+  const buyNowItem = useCartStore((s) => s.buyNowItem);
   const { requireLogin } = useRequireLogin();
   const [variantIndex, setVariantIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -42,9 +43,9 @@ export function ProductDetailClient({ product }: { product: Product }) {
     );
   }, [variant]);
 
-  function addToCart() {
-    if (!variant) return;
-    addItem({
+  function buildCartPayload() {
+    if (!variant) return null;
+    return {
       productId: product._id,
       variantId: String(variant._id),
       slug: product.slug,
@@ -55,13 +56,23 @@ export function ProductDetailClient({ product }: { product: Product }) {
       originalPrice: variant.originalPrice,
       stock: variant.stock,
       quantity,
-    });
-    toast.success("Added to cart");
+    };
+  }
+
+  function addToCart() {
+    const payload = buildCartPayload();
+    if (!payload) return;
+    addItem(payload);
+    toast.success(CHECKOUT_COPY.ADDED_TO_CART);
   }
 
   function buyNow() {
     if (!requireLogin()) return;
-    addToCart();
+    const payload = buildCartPayload();
+    if (!payload) return;
+    // Buy Now = this item only, then checkout (does not append to existing cart)
+    buyNowItem(payload);
+    toast.success(CHECKOUT_COPY.BUY_NOW_SUCCESS);
     router.push(ROUTES.CHECKOUT);
   }
 

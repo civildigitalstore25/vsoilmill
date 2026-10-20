@@ -49,7 +49,7 @@ export function ProductCard({ product }: ProductCardProps) {
       originalPrice: variant.originalPrice,
       stock: variant.stock,
     });
-    toast.success("Added to cart");
+    toast.success(CHECKOUT_COPY.ADDED_TO_CART);
   }
 
   return (

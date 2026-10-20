@@ -10,6 +10,7 @@ export const ROUTES = {
   ORDER_DETAIL: (id: string) => `/orders/${id}`,
   ORDER_CONFIRMATION: (id: string) => `/orders/${id}/confirmation`,
   PROFILE: "/profile",
+  PROFILE_ORDERS: "/profile?tab=orders",
   LOGIN: "/login",
   REGISTER: "/register",
   FORGOT_PASSWORD: "/forgot-password",

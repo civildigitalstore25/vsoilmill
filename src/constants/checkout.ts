@@ -17,5 +17,8 @@ export const CHECKOUT_COPY = {
   PROCEED: "Proceed to checkout",
   BUY_NOW: "Buy Now",
   ADD_TO_CART: "Add to Cart",
+  ADDED_TO_CART: "Added to cart",
+  BUY_NOW_SUCCESS: "Ready for checkout",
   LOGIN_REQUIRED: "Sign in to complete your purchase",
+  ADDRESS_SAVED: "Address saved for next checkout",
 } as const;

@@ -4,6 +4,7 @@ import { PAYMENT_ERRORS } from "@/constants/payment";
 import { connectDb } from "@/lib/db/mongoose";
 import { auth } from "@/lib/auth/auth";
 import { createPhonePePayment } from "@/lib/payment/phonepe";
+import { resolveSiteUrl } from "@/lib/payment/site-url";
 import { OrderModel } from "@/models/Order";
 
 const schema = z.object({
@@ -39,8 +40,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-    const merchantOrderId = `VS${String(order._id).slice(-10)}${Date.now().toString().slice(-4)}`;
+    const siteUrl = resolveSiteUrl(request);
+    const merchantOrderId = `VS-${String(order._id).slice(-10)}-${Date.now().toString().slice(-6)}`;
     order.phonepeMerchantOrderId = merchantOrderId;
     await order.save();
 
@@ -48,7 +49,6 @@ export async function POST(request: Request) {
       merchantOrderId,
       amountInPaise: Math.round(order.pricing.total * 100),
       redirectUrl: `${siteUrl}/orders/${order._id}/confirmation`,
-      callbackUrl: `${siteUrl}/api/payment/phonepe/callback`,
     });
 
     if ("error" in result) {
@@ -56,6 +56,11 @@ export async function POST(request: Request) {
         { error: result.error || PAYMENT_ERRORS.INIT_FAILED },
         { status: 502 },
       );
+    }
+
+    if (result.phonepeOrderId) {
+      order.phonepeTransactionId = result.phonepeOrderId;
+      await order.save();
     }
 
     return NextResponse.json({

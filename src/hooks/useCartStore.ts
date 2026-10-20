@@ -33,6 +33,13 @@ export const useCartStore = create<CartState>()(
           };
         });
       },
+      buyNowItem: (item) => {
+        const quantity = Math.min(
+          Math.max(item.quantity ?? 1, 1),
+          item.stock,
+        );
+        set({ items: [{ ...item, quantity }] });
+      },
       removeItem: (productId, variantId) =>
         set((state) => ({
           items: state.items.filter(
