@@ -12,12 +12,14 @@ import { PageContainer } from "@/components/layout/PageContainer";
 import { API_ENDPOINTS } from "@/constants/api";
 import { CHECKOUT_COPY } from "@/constants/checkout";
 import { UI } from "@/constants/ui";
-import { GST_RATE } from "@/constants/seo";
-import { FREE_SHIPPING_THRESHOLD, SHIPPING_FEE } from "@/constants/shipping";
 import { ROUTES } from "@/constants/routes";
 import { useCartStore } from "@/hooks/useCartStore";
 import { useRequireLogin } from "@/hooks/useRequireLogin";
 import { previewCouponDiscount } from "@/lib/orders/coupons";
+import {
+  calculatePricing,
+  pricingFlagsFromLines,
+} from "@/lib/orders/pricing";
 import { formatInr } from "@/lib/utils/format";
 import {
   buildCartWhatsAppMessage,
@@ -41,12 +43,17 @@ export default function CheckoutPage() {
   const router = useRouter();
   const items = useCartStore((s) => s.items);
   const clearCart = useCartStore((s) => s.clearCart);
+  const syncProductFlags = useCartStore((s) => s.syncProductFlags);
   const subtotal = useCartStore((s) => s.getSubtotal());
   const [address, setAddress] = useState<ShippingAddress>(EMPTY_ADDRESS);
   const [savedAddresses, setSavedAddresses] = useState<ShippingAddress[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [couponCode, setCouponCode] = useState("");
   const [loading, setLoading] = useState(false);
+  /** Live admin flags (source of truth for checkout preview). */
+  const [gstExemptByProduct, setGstExemptByProduct] = useState<
+    Record<string, boolean>
+  >({});
   const { requireLogin } = useRequireLogin();
 
   useEffect(() => {
@@ -70,11 +77,63 @@ export default function CheckoutPage() {
     void loadAddresses();
   }, []);
 
+  const productIdsKey = [...new Set(items.map((i) => i.productId))]
+    .sort()
+    .join(",");
+
+  // Load gstExempt from DB so admin toggle applies even if cart was old
+  useEffect(() => {
+    if (!productIdsKey) return;
+    const ids = productIdsKey.split(",");
+    let cancelled = false;
+    async function syncFlags() {
+      try {
+        const results = await Promise.all(
+          ids.map(async (id) => {
+            const res = await fetch(API_ENDPOINTS.PRODUCT(id), {
+              cache: "no-store",
+            });
+            if (!res.ok) return null;
+            const json = await res.json();
+            return {
+              productId: id,
+              gstExempt: Boolean(json.data?.gstExempt),
+            };
+          }),
+        );
+        if (cancelled) return;
+        const map: Record<string, boolean> = {};
+        const flags: Array<{ productId: string; gstExempt: boolean }> = [];
+        for (const row of results) {
+          if (!row) continue;
+          map[row.productId] = row.gstExempt;
+          flags.push(row);
+        }
+        setGstExemptByProduct(map);
+        syncProductFlags(flags);
+      } catch {
+        // server order pricing still uses DB flags
+      }
+    }
+    void syncFlags();
+    return () => {
+      cancelled = true;
+    };
+  }, [productIdsKey, syncProductFlags]);
+
   const discount = previewCouponDiscount(couponCode, subtotal);
-  const shipping =
-    subtotal - discount >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
-  const tax = Math.round(Math.max(subtotal - discount, 0) * GST_RATE);
-  const total = Math.max(subtotal - discount, 0) + shipping + tax;
+  const pricedLines = items.map((item) => ({
+    price: item.price,
+    quantity: item.quantity,
+    gstExempt:
+      gstExemptByProduct[item.productId] ?? Boolean(item.gstExempt),
+  }));
+  const flags = pricingFlagsFromLines(pricedLines);
+  const { shipping, tax, total } = calculatePricing(
+    subtotal,
+    discount,
+    flags,
+  );
 
   function updateField<K extends keyof ShippingAddress>(
     key: K,

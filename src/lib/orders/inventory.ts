@@ -8,7 +8,10 @@ type CartLikeItem = {
   quantity: number;
 };
 
-export type ResolvedOrderItem = OrderItem & { sku?: string };
+export type ResolvedOrderItem = OrderItem & {
+  sku?: string;
+  gstExempt?: boolean;
+};
 
 export async function resolveOrderItemsFromCatalog(
   items: CartLikeItem[],
@@ -50,6 +53,9 @@ export async function resolveOrderItemsFromCatalog(
       price: variant.price,
       quantity: item.quantity,
       sku: variant.sku,
+      gstExempt: Boolean(
+        (product as { gstExempt?: boolean | null }).gstExempt,
+      ),
     });
   }
 

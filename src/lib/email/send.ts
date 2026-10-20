@@ -1,4 +1,5 @@
 import { UI } from "@/constants/ui";
+import { sendBrevoEmail } from "@/lib/email/brevo";
 
 export type OrderEmailLike = {
   _id: { toString(): string };
@@ -8,7 +9,7 @@ export type OrderEmailLike = {
 };
 
 /**
- * Sends order confirmation when EMAIL_FROM + SMTP/Resend is configured.
+ * Sends order confirmation when EMAIL_FROM + BREVO_API_KEY are set.
  * Falls back to console logging so local/dev never hard-fails.
  */
 export async function sendOrderConfirmationEmail(
@@ -26,24 +27,15 @@ export async function sendOrderConfirmationEmail(
     `— ${UI.brand}`,
   ].join("\n");
 
-  const from = process.env.EMAIL_FROM;
-  const resendKey = process.env.RESEND_API_KEY;
-
-  if (from && resendKey && to) {
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${resendKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ from, to, subject, text: body }),
-    });
-    if (!response.ok) {
-      throw new Error("Failed to send order email");
-    }
-    return { sent: true, mode: "email" };
+  if (!to) {
+    console.info("[email:console]", { to: "(no email)", subject, body });
+    return { sent: false, mode: "console" };
   }
 
-  console.info("[email:console]", { to: to ?? "(no email)", subject, body });
-  return { sent: false, mode: "console" };
+  return sendBrevoEmail({
+    to,
+    toName: order.shippingAddress?.fullName,
+    subject,
+    text: body,
+  });
 }

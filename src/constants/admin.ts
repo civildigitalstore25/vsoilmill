@@ -174,6 +174,9 @@ export const ADMIN_PRODUCTS_COPY = {
   title: "Products",
   description: "Manage oils, ghee, variants, pricing, and SEO.",
   addButton: "Add product",
+  gstExemptTitle: "No GST & free shipping",
+  gstExemptHint:
+    "Skips GST and shipping when the cart has only this kind of product (e.g. ₹1 payment test).",
 } as const;
 
 export const ADMIN_REVIEWS_COPY = {

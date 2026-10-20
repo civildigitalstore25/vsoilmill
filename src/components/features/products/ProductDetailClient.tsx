@@ -56,6 +56,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
       originalPrice: variant.originalPrice,
       stock: variant.stock,
       quantity,
+      gstExempt: Boolean(product.gstExempt),
     };
   }
 

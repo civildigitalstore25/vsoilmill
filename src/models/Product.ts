@@ -36,6 +36,7 @@ const ProductSchema = new Schema(
     isActive: { type: Boolean, default: true },
     isBestSeller: { type: Boolean, default: false },
     isNewArrival: { type: Boolean, default: false },
+    gstExempt: { type: Boolean, default: false },
     seo: { type: SeoSchema, default: {} },
     averageRating: { type: Number, default: 0 },
     reviewCount: { type: Number, default: 0 },
@@ -45,4 +46,12 @@ const ProductSchema = new Schema(
 
 ProductSchema.index({ name: "text", shortDescription: "text" });
 
-export const ProductModel = models.Product ?? model("Product", ProductSchema);
+// Hot reload can keep a cached model without new paths — ensure gstExempt exists.
+const ExistingProduct = models.Product;
+if (ExistingProduct && !ExistingProduct.schema.path("gstExempt")) {
+  ExistingProduct.schema.add({
+    gstExempt: { type: Boolean, default: false },
+  });
+}
+
+export const ProductModel = ExistingProduct ?? model("Product", ProductSchema);

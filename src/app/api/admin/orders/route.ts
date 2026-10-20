@@ -4,7 +4,10 @@ import { AUTH_ERRORS } from "@/constants/auth";
 import { ASSETS } from "@/constants/assets";
 import { DEFAULT_SHIPPING_COUNTRY } from "@/constants/checkout";
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { calculatePricing } from "@/lib/orders/pricing";
+import {
+  calculatePricing,
+  pricingFlagsFromLines,
+} from "@/lib/orders/pricing";
 import { connectDb } from "@/lib/db/mongoose";
 import { OrderModel } from "@/models/Order";
 import { ProductModel } from "@/models/Product";
@@ -52,6 +55,7 @@ type LeanProduct = {
   _id: { toString(): string };
   name: string;
   images?: string[];
+  gstExempt?: boolean;
   variants: {
     _id: { toString(): string };
     label: string;
@@ -102,6 +106,7 @@ export async function POST(request: Request) {
         image: product.images?.[0] ?? ASSETS.PLACEHOLDER_PRODUCT,
         price: variant.price,
         quantity: item.quantity,
+        gstExempt: Boolean(product.gstExempt),
       });
     }
 
@@ -109,13 +114,14 @@ export async function POST(request: Request) {
       (sum, item) => sum + item.price * item.quantity,
       0,
     );
+    const flags = pricingFlagsFromLines(lineItems);
     const order = await OrderModel.create({
-      items: lineItems,
+      items: lineItems.map(({ gstExempt: _g, ...item }) => item),
       shippingAddress: {
         ...parsed.data.shippingAddress,
         email: parsed.data.shippingAddress.email || undefined,
       },
-      pricing: calculatePricing(subtotal),
+      pricing: calculatePricing(subtotal, 0, flags),
       status: parsed.data.status ?? OrderStatus.PENDING,
       paymentStatus: parsed.data.paymentStatus ?? PaymentStatus.PENDING,
       notes: parsed.data.notes,

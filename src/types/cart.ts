@@ -9,6 +9,7 @@ export interface CartItem {
   originalPrice: number;
   quantity: number;
   stock: number;
+  gstExempt?: boolean;
 }
 
 export interface CartState {
@@ -25,6 +26,10 @@ export interface CartState {
     quantity: number,
   ) => void;
   clearCart: () => void;
+  /** Refresh gstExempt (and related) flags from live product data. */
+  syncProductFlags: (
+    flags: Array<{ productId: string; gstExempt: boolean }>,
+  ) => void;
   getSubtotal: () => number;
   getItemCount: () => number;
 }

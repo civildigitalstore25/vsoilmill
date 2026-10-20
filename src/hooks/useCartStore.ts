@@ -23,6 +23,9 @@ export const useCartStore = create<CartState>()(
                   ? {
                       ...i,
                       quantity: Math.min(i.quantity + quantity, i.stock),
+                      gstExempt: item.gstExempt ?? i.gstExempt,
+                      stock: item.stock ?? i.stock,
+                      price: item.price ?? i.price,
                     }
                   : i,
               ),
@@ -57,6 +60,20 @@ export const useCartStore = create<CartState>()(
             .filter((i) => i.quantity > 0),
         })),
       clearCart: () => set({ items: [] }),
+      syncProductFlags: (flags) => {
+        const byId = new Map(flags.map((f) => [f.productId, f.gstExempt]));
+        set((state) => {
+          let changed = false;
+          const nextItems = state.items.map((item) => {
+            if (!byId.has(item.productId)) return item;
+            const gstExempt = byId.get(item.productId);
+            if (item.gstExempt === gstExempt) return item;
+            changed = true;
+            return { ...item, gstExempt };
+          });
+          return changed ? { items: nextItems } : state;
+        });
+      },
       getSubtotal: () =>
         get().items.reduce((sum, i) => sum + i.price * i.quantity, 0),
       getItemCount: () =>

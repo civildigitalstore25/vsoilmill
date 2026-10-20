@@ -40,6 +40,8 @@ export interface Product {
   isActive: boolean;
   isBestSeller: boolean;
   isNewArrival: boolean;
+  /** Skip GST on this product (e.g. ₹1 payment test). */
+  gstExempt?: boolean;
   seo: ProductSeo;
   averageRating?: number;
   reviewCount?: number;

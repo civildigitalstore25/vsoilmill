@@ -31,4 +31,14 @@ describe("pricing", () => {
       pricing.subtotal + pricing.shipping + pricing.tax - pricing.discount,
     );
   });
+
+  it("skips GST and shipping for gst-exempt-only cart", () => {
+    const pricing = calculatePricing(1, 0, {
+      taxableSubtotal: 0,
+      waiveShipping: true,
+    });
+    expect(pricing.tax).toBe(0);
+    expect(pricing.shipping).toBe(0);
+    expect(pricing.total).toBe(1);
+  });
 });

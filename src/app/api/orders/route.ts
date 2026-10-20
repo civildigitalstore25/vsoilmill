@@ -1,7 +1,10 @@
 import { connectDb } from "@/lib/db/mongoose";
 import { getCouponDiscount } from "@/lib/orders/coupons";
 import { resolveOrderItemsFromCatalog } from "@/lib/orders/inventory";
-import { calculatePricing } from "@/lib/orders/pricing";
+import {
+  calculatePricing,
+  pricingFlagsFromLines,
+} from "@/lib/orders/pricing";
 import { saveCheckoutAddressForUser } from "@/lib/user/save-checkout-address";
 import { OrderModel } from "@/models/Order";
 import { auth } from "@/lib/auth/auth";
@@ -62,7 +65,8 @@ export async function POST(request: Request) {
     if (coupon.error) {
       return NextResponse.json({ error: coupon.error }, { status: 400 });
     }
-    const pricing = calculatePricing(subtotal, coupon.discount);
+    const flags = pricingFlagsFromLines(resolved.items);
+    const pricing = calculatePricing(subtotal, coupon.discount, flags);
 
     const shippingAddress = {
       ...parsed.data.shippingAddress,
@@ -72,7 +76,9 @@ export async function POST(request: Request) {
 
     const order = await OrderModel.create({
       userId: session.user.id,
-      items: resolved.items.map(({ sku: _sku, ...item }) => item),
+      items: resolved.items.map(
+        ({ sku: _sku, gstExempt: _gstExempt, ...item }) => item,
+      ),
       shippingAddress,
       pricing,
       couponCode: coupon.code,

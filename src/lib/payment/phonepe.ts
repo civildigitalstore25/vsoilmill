@@ -1,9 +1,14 @@
 import { PAYMENT_ERRORS } from "@/constants/payment";
 import {
+  assertPhonePeCredentialsConfigured,
   getPhonePeAccessToken,
-  getPhonePeCredentials,
   getPhonePeHosts,
+  isPhonePeProductionV1,
 } from "@/lib/payment/phonepe-auth";
+import {
+  createPhonePePaymentV1,
+  getPhonePeStatusV1,
+} from "@/lib/payment/phonepe-v1";
 
 type CreatePaymentResult =
   | { redirectUrl: string; phonepeOrderId?: string; raw: unknown }
@@ -19,12 +24,19 @@ export async function createPhonePePayment(input: {
   merchantOrderId: string;
   amountInPaise: number;
   redirectUrl: string;
+  callbackUrl?: string;
 }): Promise<CreatePaymentResult> {
-  const { clientId, clientSecret } = getPhonePeCredentials();
-  if (!clientId || !clientSecret) {
-    return { error: PAYMENT_ERRORS.CREDENTIALS_MISSING };
+  const configured = assertPhonePeCredentialsConfigured();
+  if (!configured.ok) {
+    return { error: configured.error };
   }
 
+  // Live dashboard API Key → classic V1 Pay API
+  if (isPhonePeProductionV1()) {
+    return createPhonePePaymentV1(input);
+  }
+
+  // Sandbox Client Id/Secret → PG V2 OAuth + checkout
   try {
     const token = await getPhonePeAccessToken();
     const { apiHost } = getPhonePeHosts();
@@ -81,6 +93,10 @@ export async function createPhonePePayment(input: {
 export async function getPhonePeStatus(
   merchantOrderId: string,
 ): Promise<StatusResult> {
+  if (isPhonePeProductionV1()) {
+    return getPhonePeStatusV1(merchantOrderId);
+  }
+
   try {
     const token = await getPhonePeAccessToken();
     const { apiHost } = getPhonePeHosts();

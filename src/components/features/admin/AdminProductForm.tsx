@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ADMIN_PRODUCTS_COPY } from "@/constants/admin";
 import { API_ENDPOINTS } from "@/constants/api";
 import { ASSETS } from "@/constants/assets";
 import { ROUTES } from "@/constants/routes";
@@ -41,6 +42,7 @@ export function AdminProductForm({
     isActive: product?.isActive ?? true,
     isBestSeller: product?.isBestSeller ?? false,
     isNewArrival: product?.isNewArrival ?? false,
+    gstExempt: product?.gstExempt ?? false,
     metaTitle: product?.seo?.metaTitle ?? "",
     metaDescription: product?.seo?.metaDescription ?? "",
     metaKeywords: product?.seo?.metaKeywords?.join(", ") ?? "",
@@ -140,6 +142,7 @@ export function AdminProductForm({
       isActive: form.isActive,
       isBestSeller: form.isBestSeller,
       isNewArrival: form.isNewArrival,
+      gstExempt: form.gstExempt,
       variants: formattedVariants,
       seo: {
         metaTitle: form.metaTitle || undefined,
@@ -444,6 +447,25 @@ export function AdminProductForm({
                 New Arrival Menu
               </span>
               <span className="text-[11px] text-muted">Show in New Arrivals tab</span>
+            </div>
+          </label>
+
+          <label className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-3 transition hover:bg-primary/10 cursor-pointer sm:col-span-3">
+            <input
+              type="checkbox"
+              className="h-4 w-4 accent-primary"
+              checked={form.gstExempt}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, gstExempt: e.target.checked }))
+              }
+            />
+            <div>
+              <span className="text-xs font-bold text-dark block">
+                {ADMIN_PRODUCTS_COPY.gstExemptTitle}
+              </span>
+              <span className="text-[11px] text-muted">
+                {ADMIN_PRODUCTS_COPY.gstExemptHint}
+              </span>
             </div>
           </label>
         </div>

@@ -30,6 +30,7 @@ const productSchema = z.object({
   isActive: z.boolean().default(true),
   isBestSeller: z.boolean().default(false),
   isNewArrival: z.boolean().default(false),
+  gstExempt: z.boolean().default(false),
   seo: z
     .object({
       metaTitle: z.string().optional(),

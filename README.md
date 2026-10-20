@@ -47,10 +47,11 @@ Set these in Vercel project env (Production + Preview as needed):
 | `AUTH_SECRET` | strong random secret |
 | `AUTH_URL` / `NEXT_PUBLIC_SITE_URL` | your production HTTPS origin |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | optional |
-| `PHONEPE_CLIENT_ID` / `PHONEPE_CLIENT_SECRET` / `PHONEPE_CLIENT_VERSION` | PhonePe **PG V2** Test/Prod credentials from Developer Settings |
-| `PHONEPE_ENV` | `SANDBOX` or `PRODUCTION` |
+| `PHONEPE_ENV` | `SANDBOX` (PG V2 Client Id/Secret) or `PRODUCTION` (PG V1 Merchant Id/API Key) |
+| `PHONEPE_CLIENT_ID` / `PHONEPE_CLIENT_SECRET` / `PHONEPE_CLIENT_VERSION` | Sandbox only — Test Mode Developer Settings |
+| `PHONEPE_MERCHANT_ID` / `PHONEPE_API_KEY` / `PHONEPE_KEY_INDEX` | Production only — live dashboard API credentials |
 | `PHONEPE_CALLBACK_USERNAME` / `PHONEPE_CALLBACK_PASSWORD` | Webhook SHA auth (same values as PhonePe webhook config) |
-| `EMAIL_FROM` / `RESEND_API_KEY` | optional order/reset emails |
+| `EMAIL_FROM` / `BREVO_API_KEY` | optional order/reset emails via [Brevo](https://app.brevo.com/settings/keys/api) |
 
 Seed against production only when intentional:
 

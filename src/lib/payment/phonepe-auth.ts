@@ -1,6 +1,6 @@
 import { PHONEPE_ENVS, PAYMENT_ERRORS } from "@/constants/payment";
 
-type PhonePeEnv = (typeof PHONEPE_ENVS)[keyof typeof PHONEPE_ENVS];
+export type PhonePeEnv = (typeof PHONEPE_ENVS)[keyof typeof PHONEPE_ENVS];
 
 type TokenCache = {
   accessToken: string;
@@ -9,30 +9,38 @@ type TokenCache = {
 
 let tokenCache: TokenCache | null = null;
 
-function getEnv(): PhonePeEnv {
+export function getPhonePeEnv(): PhonePeEnv {
   const env = (process.env.PHONEPE_ENV ?? PHONEPE_ENVS.SANDBOX).toUpperCase();
   return env === PHONEPE_ENVS.PRODUCTION
     ? PHONEPE_ENVS.PRODUCTION
     : PHONEPE_ENVS.SANDBOX;
 }
 
+/** Production dashboard shows API Key (V1). Sandbox uses Client Id/Secret (V2). */
+export function isPhonePeProductionV1(): boolean {
+  return getPhonePeEnv() === PHONEPE_ENVS.PRODUCTION;
+}
+
 export function getPhonePeHosts() {
-  const env = getEnv();
+  const env = getPhonePeEnv();
   if (env === PHONEPE_ENVS.PRODUCTION) {
     return {
       env,
       oauthHost: "https://api.phonepe.com/apis/identity-manager",
       apiHost: "https://api.phonepe.com/apis/pg",
+      v1Host: "https://api.phonepe.com/apis/hermes",
     };
   }
   return {
     env,
     oauthHost: "https://api-preprod.phonepe.com/apis/pg-sandbox",
     apiHost: "https://api-preprod.phonepe.com/apis/pg-sandbox",
+    v1Host: "https://api-preprod.phonepe.com/apis/pg-sandbox",
   };
 }
 
-export function getPhonePeCredentials() {
+/** Sandbox / PG V2 credentials */
+export function getPhonePeV2Credentials() {
   return {
     clientId: process.env.PHONEPE_CLIENT_ID ?? "",
     clientSecret: process.env.PHONEPE_CLIENT_SECRET ?? "",
@@ -40,9 +48,36 @@ export function getPhonePeCredentials() {
   };
 }
 
-/** OAuth access token for PhonePe PG V2 (cached until near expiry). */
+/** Production / PG V1 credentials (API Key + Key Index from live dashboard) */
+export function getPhonePeV1Credentials() {
+  return {
+    merchantId: process.env.PHONEPE_MERCHANT_ID ?? "",
+    apiKey: process.env.PHONEPE_API_KEY ?? "",
+    keyIndex: process.env.PHONEPE_KEY_INDEX ?? "1",
+  };
+}
+
+export function assertPhonePeCredentialsConfigured():
+  | { ok: true }
+  | { ok: false; error: string } {
+  if (isPhonePeProductionV1()) {
+    const { merchantId, apiKey } = getPhonePeV1Credentials();
+    if (!merchantId || !apiKey) {
+      return { ok: false, error: PAYMENT_ERRORS.PROD_CREDENTIALS_MISSING };
+    }
+    return { ok: true };
+  }
+
+  const { clientId, clientSecret } = getPhonePeV2Credentials();
+  if (!clientId || !clientSecret) {
+    return { ok: false, error: PAYMENT_ERRORS.CREDENTIALS_MISSING };
+  }
+  return { ok: true };
+}
+
+/** OAuth access token for PhonePe PG V2 (sandbox). */
 export async function getPhonePeAccessToken(): Promise<string> {
-  const { clientId, clientSecret, clientVersion } = getPhonePeCredentials();
+  const { clientId, clientSecret, clientVersion } = getPhonePeV2Credentials();
   if (!clientId || !clientSecret) {
     throw new Error(PAYMENT_ERRORS.CREDENTIALS_MISSING);
   }

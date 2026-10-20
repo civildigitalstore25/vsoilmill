@@ -48,6 +48,7 @@ export function ProductCard({ product }: ProductCardProps) {
       price: variant.price,
       originalPrice: variant.originalPrice,
       stock: variant.stock,
+      gstExempt: Boolean(product.gstExempt),
     });
     toast.success(CHECKOUT_COPY.ADDED_TO_CART);
   }

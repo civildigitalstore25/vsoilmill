@@ -3,6 +3,7 @@ import { z } from "zod";
 import { PAYMENT_ERRORS } from "@/constants/payment";
 import { connectDb } from "@/lib/db/mongoose";
 import { auth } from "@/lib/auth/auth";
+import { assertPhonePeCredentialsConfigured } from "@/lib/payment/phonepe-auth";
 import { createPhonePePayment } from "@/lib/payment/phonepe";
 import { resolveSiteUrl } from "@/lib/payment/site-url";
 import { OrderModel } from "@/models/Order";
@@ -24,11 +25,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (!process.env.PHONEPE_CLIENT_ID || !process.env.PHONEPE_CLIENT_SECRET) {
-      return NextResponse.json(
-        { error: PAYMENT_ERRORS.CREDENTIALS_MISSING },
-        { status: 503 },
-      );
+    const configured = assertPhonePeCredentialsConfigured();
+    if (!configured.ok) {
+      return NextResponse.json({ error: configured.error }, { status: 503 });
     }
 
     await connectDb();
@@ -49,6 +48,7 @@ export async function POST(request: Request) {
       merchantOrderId,
       amountInPaise: Math.round(order.pricing.total * 100),
       redirectUrl: `${siteUrl}/orders/${order._id}/confirmation`,
+      callbackUrl: `${siteUrl}/api/payment/phonepe/callback`,
     });
 
     if ("error" in result) {
