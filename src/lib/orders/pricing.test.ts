@@ -1,13 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { getCouponDiscount, previewCouponDiscount } from "@/lib/orders/coupons";
 import { calculatePricing } from "@/lib/orders/pricing";
-import { UI } from "@/constants/ui";
+import { COUPONS } from "@/constants/coupons";
 
 describe("coupons", () => {
+  const sample = COUPONS[0];
+
   it("applies configured promo percent", () => {
-    const result = getCouponDiscount(UI.promoCode, 1000);
-    expect(result.discount).toBe(Math.round(1000 * (UI.promoPercent / 100)));
-    expect(result.code).toBe(UI.promoCode);
+    const result = getCouponDiscount(sample.code, 1000);
+    expect(result.discount).toBe(
+      Math.round(1000 * (sample.percentOff / 100)),
+    );
+    expect(result.code).toBe(sample.code);
   });
 
   it("rejects unknown codes", () => {
@@ -17,8 +21,8 @@ describe("coupons", () => {
   });
 
   it("previews discount for checkout UI", () => {
-    expect(previewCouponDiscount(UI.promoCode.toLowerCase(), 500)).toBe(
-      Math.round(500 * (UI.promoPercent / 100)),
+    expect(previewCouponDiscount(sample.code.toLowerCase(), 500)).toBe(
+      Math.round(500 * (sample.percentOff / 100)),
     );
   });
 });

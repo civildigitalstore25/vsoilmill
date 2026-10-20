@@ -457,13 +457,12 @@ async function seed() {
     ReviewModel.deleteMany({}),
   ]);
 
-  const adminEmail = process.env.ADMIN_EMAIL ?? "admin@vsoilmill.com";
-  const adminPassword = process.env.ADMIN_PASSWORD ?? "Admin@12345";
-  const passwordHash = await bcrypt.hash(adminPassword, AUTH.bcryptRounds);
+  // Seed creates a starter admin; change email/password in DB or Admin → Users after.
+  const passwordHash = await bcrypt.hash("Admin@12345", AUTH.bcryptRounds);
 
   await UserModel.create({
     name: "VS OilMill Admin",
-    email: adminEmail,
+    email: "admin@vsoilmill.com",
     passwordHash,
     role: USER_ROLES.ADMIN,
     phone: "8438775451",

@@ -21,4 +21,6 @@ export const CHECKOUT_COPY = {
   BUY_NOW_SUCCESS: "Ready for checkout",
   LOGIN_REQUIRED: "Sign in to complete your purchase",
   ADDRESS_SAVED: "Address saved for next checkout",
+  COUPON_LABEL: "Coupon",
+  COUPON_PLACEHOLDER: "Enter coupon code",
 } as const;

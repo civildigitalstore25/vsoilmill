@@ -1,17 +1,18 @@
-import { UI } from "@/constants/ui";
-
 export type CouponDefinition = {
   code: string;
   percentOff: number;
   label: string;
 };
 
-/** Server-validated promo codes. Extend here or later move to admin/DB. */
+/**
+ * Server-validated promo codes only.
+ * Do not surface these as checkout defaults/placeholders.
+ */
 export const COUPONS: readonly CouponDefinition[] = [
   {
-    code: UI.promoCode,
-    percentOff: UI.promoPercent,
-    label: `${UI.promoPercent}% off`,
+    code: "PURE10",
+    percentOff: 10,
+    label: "10% off",
   },
 ] as const;
 

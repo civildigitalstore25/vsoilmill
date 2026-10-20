@@ -16,6 +16,7 @@ export const API_ENDPOINTS = {
   PAYMENT_STATUS: "/api/payment/phonepe/status",
   PAYMENT_CALLBACK: "/api/payment/phonepe/callback",
   AUTH_REGISTER: "/api/auth/register",
+  CONTACT: "/api/contact",
   ADMIN_STATS: "/api/admin/stats",
   ADMIN_USERS: "/api/admin/users",
   ADMIN_USER: (id: string) => `/api/admin/users/${id}`,

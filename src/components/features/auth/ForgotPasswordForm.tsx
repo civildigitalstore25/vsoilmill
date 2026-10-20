@@ -33,9 +33,6 @@ export function ForgotPasswordForm() {
       if (!res.ok) throw new Error(json.error ?? "Request failed");
       setSent(true);
       toast.success(AUTH_COPY.forgotSent);
-      if (json.data?.resetUrl) {
-        toast.message("Dev reset link", { description: json.data.resetUrl });
-      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Request failed");
     } finally {

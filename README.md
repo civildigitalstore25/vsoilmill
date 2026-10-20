@@ -51,7 +51,8 @@ Set these in Vercel project env (Production + Preview as needed):
 | `PHONEPE_CLIENT_ID` / `PHONEPE_CLIENT_SECRET` / `PHONEPE_CLIENT_VERSION` | Sandbox only — Test Mode Developer Settings |
 | `PHONEPE_MERCHANT_ID` / `PHONEPE_API_KEY` / `PHONEPE_KEY_INDEX` | Production only — live dashboard API credentials |
 | `PHONEPE_CALLBACK_USERNAME` / `PHONEPE_CALLBACK_PASSWORD` | Webhook SHA auth (same values as PhonePe webhook config) |
-| `EMAIL_FROM` / `BREVO_API_KEY` | optional order/reset emails via [Brevo](https://app.brevo.com/settings/keys/api) |
+| `EMAIL_FROM` / `BREVO_API_KEY` | Brevo transactional email ([API keys](https://app.brevo.com/settings/keys/api)) |
+| `ADMIN_NOTIFY_EMAIL` | contact form + new paid-order alerts inbox |
 
 Seed against production only when intentional:
 

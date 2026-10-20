@@ -11,8 +11,6 @@ export const UI = {
   trustFamilies: "12,000+",
   trustYears: "38+",
   trustRating: "4.9",
-  promoCode: "PURE10",
-  promoPercent: 10,
   close: "Close",
 } as const;
 

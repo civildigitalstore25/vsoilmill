@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ContactForm } from "@/components/features/contact/ContactForm";
 import { Button } from "@/components/ui/button";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { LAYOUT } from "@/constants/layout";
@@ -18,28 +19,30 @@ export default function ContactPage() {
   return (
     <PageContainer className="py-12">
       <div className={LAYOUT.narrow}>
-      <h1 className="font-display text-4xl text-dark">Contact Us</h1>
-      <p className="mt-4 text-muted">
-        We are happy to help with orders, bulk enquiries, and product questions.
-      </p>
-      <div className="mt-8 space-y-4 rounded-xl border border-border bg-card p-6">
-        <p>
-          <span className="font-semibold">Address:</span> {UI.address}
+        <h1 className="font-display text-4xl text-dark">Contact Us</h1>
+        <p className="mt-4 text-muted">
+          We are happy to help with orders, bulk enquiries, and product questions.
         </p>
-        <p>
-          <span className="font-semibold">Phone / WhatsApp:</span>{" "}
-          {UI.phoneDisplay}
-        </p>
-        <Button variant="whatsapp" asChild>
-          <Link
-            href={buildWhatsAppUrl("Hi VS OilMill! I have a question.")}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Chat on WhatsApp
-          </Link>
-        </Button>
-      </div>
+        <div className="mt-8 space-y-4 rounded-xl border border-border bg-card p-6">
+          <p>
+            <span className="font-semibold">Address:</span> {UI.address}
+          </p>
+          <p>
+            <span className="font-semibold">Phone / WhatsApp:</span>{" "}
+            {UI.phoneDisplay}
+          </p>
+          <Button variant="whatsapp" asChild>
+            <Link
+              href={buildWhatsAppUrl("Hi VS OilMill! I have a question.")}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Chat on WhatsApp
+            </Link>
+          </Button>
+        </div>
+
+        <ContactForm />
       </div>
     </PageContainer>
   );

@@ -11,7 +11,6 @@ import { Label } from "@/components/ui/label";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { API_ENDPOINTS } from "@/constants/api";
 import { CHECKOUT_COPY } from "@/constants/checkout";
-import { UI } from "@/constants/ui";
 import { ROUTES } from "@/constants/routes";
 import { useCartStore } from "@/hooks/useCartStore";
 import { useRequireLogin } from "@/hooks/useRequireLogin";
@@ -269,13 +268,14 @@ export default function CheckoutPage() {
         </ul>
 
         <div className="mt-4">
-          <Label htmlFor="coupon">Coupon</Label>
+          <Label htmlFor="coupon">{CHECKOUT_COPY.COUPON_LABEL}</Label>
           <Input
             id="coupon"
             className="mt-1.5"
-            placeholder={UI.promoCode}
+            placeholder={CHECKOUT_COPY.COUPON_PLACEHOLDER}
             value={couponCode}
             onChange={(e) => setCouponCode(e.target.value)}
+            autoComplete="off"
           />
         </div>
 

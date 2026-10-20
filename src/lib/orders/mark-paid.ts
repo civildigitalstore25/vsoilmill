@@ -1,7 +1,10 @@
 import { OrderModel } from "@/models/Order";
 import { PaymentStatus, OrderStatus } from "@/types/order";
 import { decrementStockForItems } from "@/lib/orders/inventory";
-import { sendOrderConfirmationEmail } from "@/lib/email/send";
+import {
+  sendAdminNewOrderEmail,
+  sendOrderConfirmationEmail,
+} from "@/lib/email/send";
 
 type MarkPaidInput = {
   orderId: string;
@@ -34,6 +37,7 @@ export async function markOrderPaid(input: MarkPaidInput) {
 
   if (!wasPaid) {
     void sendOrderConfirmationEmail(order).catch(() => undefined);
+    void sendAdminNewOrderEmail(order).catch(() => undefined);
   }
 
   return order;

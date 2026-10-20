@@ -31,9 +31,10 @@ export const AUTH_COPY = {
   orEmail: "or continue with email",
   forgotPassword: "Forgot password?",
   forgotTitle: "Reset your password",
-  forgotSubtitle: "Enter your email and we will send a reset link when email is configured.",
+  forgotSubtitle: "Enter your email and we’ll send you a link to reset your password.",
   forgotSubmit: "Send reset link",
-  forgotSent: "Check your email for a reset link (or server logs in development).",
+  forgotSent:
+    "If an account exists for that email, we’ve sent a password reset link. Check your inbox and spam folder.",
   resetTitle: "Choose a new password",
   resetSubtitle: "Enter your new password below.",
   resetSubmit: "Update password",

@@ -8,6 +8,8 @@ export type SendEmailInput = {
   subject: string;
   text: string;
   html?: string;
+  replyTo?: string;
+  replyToName?: string;
 };
 
 function parseSender(from: string): { email: string; name: string } {
@@ -57,6 +59,14 @@ export async function sendBrevoEmail(
       htmlContent:
         input.html ??
         `<pre style="font-family:sans-serif;white-space:pre-wrap">${input.text}</pre>`,
+      ...(input.replyTo
+        ? {
+            replyTo: {
+              email: input.replyTo,
+              name: input.replyToName,
+            },
+          }
+        : {}),
     }),
   });
 

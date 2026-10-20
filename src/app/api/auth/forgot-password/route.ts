@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { z } from "zod";
 import { AUTH } from "@/constants/auth";
-import { UI } from "@/constants/ui";
-import { isEmailConfigured, sendBrevoEmail } from "@/lib/email/brevo";
+import { isEmailConfigured } from "@/lib/email/brevo";
+import { sendPasswordResetEmail } from "@/lib/email/send";
 import { connectDb } from "@/lib/db/mongoose";
 import { UserModel } from "@/models/User";
 
@@ -46,24 +46,16 @@ export async function POST(request: Request) {
     const resetUrl = `${siteUrl}/reset-password?token=${token}`;
 
     if (isEmailConfigured()) {
-      await sendBrevoEmail({
-        to: email,
-        subject: `Reset your ${UI.brand} password`,
-        text: `Reset your password: ${resetUrl}\nThis link expires in 1 hour.`,
-      });
+      await sendPasswordResetEmail({ email, resetUrl });
     } else {
       console.info("[password-reset]", { email, resetUrl });
     }
 
-    const exposeToken =
-      process.env.NODE_ENV !== "production" ||
-      process.env.AUTH_EXPOSE_RESET_TOKEN === "true";
-
+    // Never return the reset link in the UI — only in the email (or server logs if Brevo unset)
     return NextResponse.json({
       data: {
         ok: true,
         message: "If an account exists, a reset token was created.",
-        ...(exposeToken ? { resetUrl, token } : {}),
         minPasswordLength: AUTH.passwordMinLength,
       },
     });

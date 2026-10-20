@@ -162,9 +162,35 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ data: JSON.parse(JSON.stringify(order)) });
     }
 
+    const previous = await OrderModel.findById(id).lean();
     const order = await OrderModel.findByIdAndUpdate(id, updates, {
       new: true,
     }).lean();
+
+    if (
+      order &&
+      !Array.isArray(order) &&
+      updates.status &&
+      previous &&
+      !Array.isArray(previous) &&
+      previous.status !== updates.status
+    ) {
+      const { sendOrderStatusEmail } = await import("@/lib/email/send");
+      void sendOrderStatusEmail(
+        order as {
+          _id: { toString(): string };
+          shippingAddress?: {
+            email?: string;
+            fullName?: string;
+          };
+          pricing?: { total?: number };
+          trackingNumber?: string;
+          courier?: string;
+        },
+        updates.status,
+      ).catch(() => undefined);
+    }
+
     return NextResponse.json({ data: JSON.parse(JSON.stringify(order)) });
   } catch (error) {
     return NextResponse.json(
