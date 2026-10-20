@@ -5,7 +5,7 @@ export const PHONEPE_ENVS = {
 
 export const PAYMENT_ERRORS = {
   CREDENTIALS_MISSING:
-    "PhonePe credentials are not configured. Set PHONEPE_CLIENT_ID and PHONEPE_CLIENT_SECRET.",
+    "PhonePe credentials are not configured. Please set the required PhonePe environment variables in your .env file.",
   CALLBACK_UNAUTHORIZED: "Invalid payment callback credentials",
   STATUS_UNAUTHORIZED: "Unauthorized",
   STATUS_FORBIDDEN: "Forbidden",

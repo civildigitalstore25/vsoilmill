@@ -100,6 +100,8 @@ export default function CheckoutPage() {
           items: items.map((i) => ({
             productId: i.productId,
             variantId: i.variantId,
+            slug: i.slug,
+            variantLabel: i.variantLabel,
             quantity: i.quantity,
           })),
           shippingAddress: address,
@@ -130,7 +132,17 @@ export default function CheckoutPage() {
 
       throw new Error(payJson.error ?? "Payment initiation failed");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Checkout failed");
+      const errMsg = error instanceof Error ? error.message : "Checkout failed";
+      if (errMsg.includes("unavailable")) {
+        toast.error(errMsg, {
+          action: {
+            label: "Clear Stale Cart",
+            onClick: () => clearCart(),
+          },
+        });
+      } else {
+        toast.error(errMsg);
+      }
     } finally {
       setLoading(false);
     }

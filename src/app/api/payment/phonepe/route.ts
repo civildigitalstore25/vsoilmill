@@ -3,7 +3,7 @@ import { z } from "zod";
 import { PAYMENT_ERRORS } from "@/constants/payment";
 import { connectDb } from "@/lib/db/mongoose";
 import { auth } from "@/lib/auth/auth";
-import { createPhonePePayment } from "@/lib/payment/phonepe";
+import { createPhonePePayment, isPhonePeConfigured } from "@/lib/payment/phonepe";
 import { OrderModel } from "@/models/Order";
 
 const schema = z.object({
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (!process.env.PHONEPE_CLIENT_ID || !process.env.PHONEPE_CLIENT_SECRET) {
+    if (!isPhonePeConfigured()) {
       return NextResponse.json(
         { error: PAYMENT_ERRORS.CREDENTIALS_MISSING },
         { status: 503 },

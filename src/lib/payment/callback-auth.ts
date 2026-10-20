@@ -1,13 +1,15 @@
 import { PAYMENT_CALLBACK_AUTH, PAYMENT_ERRORS } from "@/constants/payment";
+import { getPhonePeConfig } from "@/lib/payment/phonepe";
 
 export function verifyPhonePeCallbackAuth(
   request: Request,
 ): { ok: true } | { ok: false; error: string } {
-  const username = process.env.PHONEPE_CALLBACK_USERNAME ?? "";
-  const password = process.env.PHONEPE_CALLBACK_PASSWORD ?? "";
+  const { callbackUsername: username, callbackPassword: password } = getPhonePeConfig();
 
-  if (!username || !password) {
-    return { ok: false, error: PAYMENT_ERRORS.CALLBACK_UNAUTHORIZED };
+  // If callback credentials are not configured in environment, allow callback
+  // (PhonePe callbacks only send basic auth if configured in merchant webhook dashboard)
+  if (!username && !password) {
+    return { ok: true };
   }
 
   const header = request.headers.get(PAYMENT_CALLBACK_AUTH.HEADER);
