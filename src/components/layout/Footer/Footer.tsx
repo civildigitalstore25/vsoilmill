@@ -24,9 +24,33 @@ export function Footer() {
           <p className="mt-2 text-xs leading-snug text-cream/80 sm:mt-3 sm:text-sm sm:leading-relaxed">
             {UI.address}
           </p>
-          <p className="mt-2 text-xs sm:mt-3 sm:text-sm">
-            Phone: {UI.phoneDisplay}
-          </p>
+          <div className="mt-2 space-y-1 text-xs sm:mt-3 sm:text-sm">
+            <p>
+              Phone:{" "}
+              <a
+                href={`tel:${UI.phoneDisplay.replace(/\s/g, "")}`}
+                className="hover:text-accent"
+              >
+                {UI.phoneDisplay}
+              </a>
+            </p>
+            <p>
+              Email:{" "}
+              <a href={`mailto:${UI.email}`} className="hover:text-accent">
+                {UI.email}
+              </a>
+            </p>
+            <p>
+              <a
+                href={UI.mapDirectionsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 font-medium text-accent hover:underline"
+              >
+                Get Directions →
+              </a>
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4 sm:gap-6 md:contents">

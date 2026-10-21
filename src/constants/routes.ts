@@ -34,6 +34,7 @@ export const ROUTES = {
     ORDER_DETAIL: (id: string) => `/admin/orders/${id}`,
     USERS: "/admin/users",
     REVIEWS: "/admin/reviews",
+    CAROUSELS: "/admin/carousels",
   },
 } as const;
 

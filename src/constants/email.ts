@@ -73,5 +73,7 @@ export const EMAIL_COPY = {
 
 /** Inbox for admin alerts (contact form, new paid orders). */
 export function getAdminNotifyEmail(): string {
-  return process.env.ADMIN_NOTIFY_EMAIL?.trim() || "";
+  return (
+    process.env.ADMIN_NOTIFY_EMAIL?.trim() || "sarathkumar.agri001@gmail.com"
+  );
 }

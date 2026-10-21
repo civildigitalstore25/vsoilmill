@@ -23,4 +23,8 @@ export const API_ENDPOINTS = {
   ADMIN_ORDERS: "/api/admin/orders",
   ADMIN_ORDER: (id: string) => `/api/admin/orders/${id}`,
   ADMIN_REVIEWS: "/api/admin/reviews",
+  CAROUSELS: "/api/carousels",
+  CAROUSEL: (id: string) => `/api/carousels/${id}`,
+  CAROUSEL_STATUS: (id: string) => `/api/carousels/${id}/status`,
+  CAROUSELS_PUBLIC: "/api/carousels/public",
 } as const;
