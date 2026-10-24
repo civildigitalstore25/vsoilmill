@@ -11,8 +11,12 @@ export type OrderEmailLike = {
     email?: string;
     fullName?: string;
     phone?: string;
+    line1?: string;
+    line2?: string;
     city?: string;
     state?: string;
+    pincode?: string;
+    country?: string;
   };
   pricing?: { total?: number };
   paymentStatus?: string;
@@ -29,6 +33,18 @@ export type OrderEmailLike = {
 
 function orderIdShort(order: OrderEmailLike): string {
   return order._id.toString().slice(-8).toUpperCase();
+}
+
+function addressRows(order: OrderEmailLike): EmailDetailRow[] {
+  const addr = order.shippingAddress;
+  const street = [addr?.line1, addr?.line2].filter(Boolean).join(", ");
+  return [
+    { label: EMAIL_COPY.address, value: street || "—" },
+    { label: EMAIL_COPY.city, value: addr?.city ?? "—" },
+    { label: EMAIL_COPY.state, value: addr?.state ?? "—" },
+    { label: EMAIL_COPY.pincode, value: addr?.pincode ?? "—" },
+    { label: EMAIL_COPY.country, value: addr?.country ?? "—" },
+  ];
 }
 
 function itemRows(order: OrderEmailLike): EmailDetailRow[] {
@@ -86,14 +102,22 @@ export async function sendAdminNewOrderEmail(order: OrderEmailLike) {
     { label: "Customer", value: addr?.fullName ?? "—" },
     { label: "Phone", value: addr?.phone ?? "—" },
     { label: "Email", value: addr?.email ?? "—" },
-    {
-      label: "Location",
-      value: `${addr?.city ?? "—"}, ${addr?.state ?? ""}`.trim(),
-    },
+    ...addressRows(order),
     { label: "Total", value: `₹${order.pricing?.total ?? 0}` },
     ...itemRows(order),
   ];
-  const text = `New paid order #${id}\nCustomer: ${addr?.fullName ?? "—"}\nTotal: ₹${order.pricing?.total ?? 0}`;
+  const text = [
+    `New paid order #${id}`,
+    `Customer: ${addr?.fullName ?? "—"}`,
+    `Phone: ${addr?.phone ?? "—"}`,
+    `Email: ${addr?.email ?? "—"}`,
+    `Address: ${[addr?.line1, addr?.line2].filter(Boolean).join(", ") || "—"}`,
+    `City: ${addr?.city ?? "—"}`,
+    `State: ${addr?.state ?? "—"}`,
+    `Pincode: ${addr?.pincode ?? "—"}`,
+    `Country: ${addr?.country ?? "—"}`,
+    `Total: ₹${order.pricing?.total ?? 0}`,
+  ].join("\n");
   const html = renderEmailHtml({
     title: "New paid order",
     paragraphs: [

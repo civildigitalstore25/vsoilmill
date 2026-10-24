@@ -68,6 +68,11 @@ export const EMAIL_COPY = {
   contactMessage: "Message",
   footerTagline: UI.since,
   shopCta: "Visit our store",
+  address: "Address",
+  city: "City",
+  state: "State",
+  pincode: "Pincode",
+  country: "Country",
 } as const;
 
 /** Inbox for admin alerts (contact form, new paid orders). */
