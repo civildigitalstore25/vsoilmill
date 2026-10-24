@@ -51,18 +51,15 @@ export function ComboCard({ combo }: { combo: ComboOffer }) {
 
   return (
     <ScaleOnHover className="h-full w-full">
-      <article className="group flex h-full flex-col rounded-xl border border-border/70 bg-card p-2.5 shadow-sm">
-        <Link
-          href={ROUTES.COMBO(combo.slug)}
-          className="relative mb-2.5 aspect-square shrink-0 overflow-hidden rounded-lg bg-cream-dark"
-        >
+      <article className="group flex h-full flex-col rounded-xl border border-border/70 bg-card p-2 shadow-sm">
+        <Link href={ROUTES.COMBO(combo.slug)} className={LAYOUT.productMedia}>
           <Image
             src={imgSrc}
             alt={name}
             fill
             unoptimized
             onError={() => setImgSrc(ASSETS.PLACEHOLDER_PRODUCT)}
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+            className={LAYOUT.productImage}
           />
           {discount > 0 ? (
             <Badge className="absolute left-2 top-2 bg-primary px-1.5 py-0 text-[10px] text-primary-foreground">
@@ -97,7 +94,7 @@ export function ComboCard({ combo }: { combo: ComboOffer }) {
         {combo.endsAt && comboIsLive(combo) ? (
           <OfferCountdown endsAt={combo.endsAt} compact />
         ) : null}
-        <div className="mt-auto pt-3">
+        <div className="mt-auto pt-2">
           <Button size="sm" className="w-full" onClick={handleAdd}>
             {CHECKOUT_COPY.ADD_TO_CART}
           </Button>

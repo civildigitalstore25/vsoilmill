@@ -61,8 +61,13 @@ export const CATALOG_COPY = {
   reviewSubmit: "Submit review",
   reviewThanks: "Review submitted for approval",
   reviewFailed: "Could not submit review",
+  reviewTooShort: "Write at least 2 characters in your review.",
   reviewAverage: "Average rating",
   reviewRating: "Rating",
   reviewTitle: "Customer reviews",
   reviewFrom: "from",
+  reviewVerified: "Verified purchase",
+  reviewDeliveredHint: "This order is delivered. Share how each product worked for you.",
+  reviewAlready: "Review submitted for this product.",
+  reviewAnchor: "reviews",
 } as const;

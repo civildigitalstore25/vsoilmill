@@ -11,7 +11,6 @@ import {
   Lock,
   RotateCcw,
   Truck,
-  ShieldCheck,
   CreditCard,
   ShoppingBag,
   Edit2,

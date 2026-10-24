@@ -10,14 +10,16 @@ export type PricingOptions = {
 export function calculatePricing(
   subtotal: number,
   discount = 0,
-  _options: PricingOptions = {},
+  options: PricingOptions = {},
 ): OrderPricing {
+  void options;
   const net = Math.max(subtotal - discount, 0);
   return { subtotal, shipping: 0, tax: 0, discount, total: net };
 }
 
 export function pricingFlagsFromLines(
-  _lines: Array<{ price: number; quantity: number; gstExempt?: boolean }>,
+  lines: Array<{ price: number; quantity: number; gstExempt?: boolean }>,
 ): { taxableSubtotal: number; waiveShipping: boolean } {
+  void lines;
   return { taxableSubtotal: 0, waiveShipping: true };
 }

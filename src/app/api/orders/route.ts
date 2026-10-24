@@ -76,9 +76,12 @@ export async function POST(request: Request) {
 
     const order = await OrderModel.create({
       userId: session.user.id,
-      items: resolved.items.map(
-        ({ sku: _sku, gstExempt: _gstExempt, ...item }) => item,
-      ),
+      items: resolved.items.map((line) => {
+        const { sku, gstExempt, ...item } = line;
+        void sku;
+        void gstExempt;
+        return item;
+      }),
       shippingAddress,
       pricing,
       couponCode: coupon.code,

@@ -1,5 +1,5 @@
 import React from "react";
-import { ShieldAlert, CheckCircle, Scale, FileCheck } from "lucide-react";
+import { CheckCircle, Scale, FileCheck } from "lucide-react";
 
 export function CertificateTrustNotice() {
   return (

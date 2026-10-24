@@ -128,6 +128,10 @@ export const ADMIN_CATEGORY_COPY = {
   updated: "Category updated",
   deleted: "Category deleted",
   inactive: "inactive",
+  tableCategory: "Category",
+  tableSlug: "Slug",
+  tableStatus: "Status",
+  tableActions: "Actions",
   createFailed: "Failed to create category",
 } as const;
 
@@ -192,12 +196,14 @@ export const ADMIN_DASHBOARD_COPY = {
   outOfStockHint: "Products marked unavailable",
   outOfStockEmpty: "Every product is available.",
   editProduct: "Edit",
+  tableProduct: "Product",
 } as const;
 
 export const ADMIN_PRODUCTS_COPY = {
   title: "Products",
   description: "Manage oils, ghee, variants, pricing, and SEO.",
   addButton: "Add product",
+  empty: "No products yet.",
   gstExemptTitle: "No GST & free shipping",
   gstExemptHint:
     "Skips GST and shipping when the cart has only this kind of product (e.g. ₹1 payment test).",
@@ -212,6 +218,13 @@ export const ADMIN_REVIEWS_COPY = {
   empty: "No reviews yet.",
   approved: "Approved",
   pending: "Pending",
+  hidden: "Hidden",
+  tableReviewer: "Reviewer",
+  tableRating: "Rating",
+  tableReview: "Review",
+  tableStatus: "Status",
+  tableActions: "Actions",
+  ratingMax: 5,
 } as const;
 
 export const ADMIN_CAROUSEL_COPY = {

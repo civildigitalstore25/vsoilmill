@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { AdminOrderFieldSelect } from "@/components/features/admin/AdminOrderFieldSelect";
 import { AdminCard } from "@/components/features/admin/AdminUi";
+import { UserAvatar } from "@/components/shared/UserAvatar";
 import { Button } from "@/components/ui/button";
 import { ADMIN_ACTIONS, ADMIN_ORDERS_COPY } from "@/constants/admin";
 import { API_ENDPOINTS } from "@/constants/api";
@@ -84,12 +85,17 @@ export function AdminOrdersTable({ orders }: { orders: Order[] }) {
                 className="border-b border-border/70 align-middle transition hover:bg-cream/40"
               >
                 <td className="px-5 py-4">
-                  <p className="font-medium text-dark">
-                    {order.shippingAddress.fullName}
-                  </p>
-                  <p className="mt-1 text-xs text-muted">
-                    {order.shippingAddress.phone} · {order.shippingAddress.city}
-                  </p>
+                  <div className="flex items-center gap-3">
+                    <UserAvatar name={order.shippingAddress.fullName} />
+                    <div>
+                      <p className="font-medium text-dark">
+                        {order.shippingAddress.fullName}
+                      </p>
+                      <p className="mt-1 text-xs text-muted">
+                        {order.shippingAddress.phone} · {order.shippingAddress.city}
+                      </p>
+                    </div>
+                  </div>
                 </td>
                 <td className="px-5 py-4 whitespace-nowrap text-muted">
                   {formatOrderDate(order.createdAt)}

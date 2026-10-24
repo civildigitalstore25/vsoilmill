@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Package, Calendar, ChevronRight, CheckCircle2, Clock, Truck, AlertCircle, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CATALOG_COPY } from "@/constants/catalog";
 import { ROUTES } from "@/constants/routes";
 import { formatInr } from "@/lib/utils/format";
 import type { Order } from "@/types/order";
@@ -168,6 +169,13 @@ export function OrderCard({ order }: { order: Order }) {
               View Details <ChevronRight className="h-3.5 w-3.5" />
             </Link>
           </Button>
+          {order.status.toUpperCase() === "DELIVERED" ? (
+            <Button size="sm" variant="outline" asChild className="rounded-xl text-xs">
+              <Link href={`${ROUTES.ORDER_DETAIL(order._id)}#${CATALOG_COPY.reviewAnchor}`}>
+                {CATALOG_COPY.reviewWrite}
+              </Link>
+            </Button>
+          ) : null}
           <Button size="sm" asChild className="gap-1.5 rounded-xl text-xs">
             <Link href={ROUTES.SHOP}>
               <ShoppingBag className="h-3.5 w-3.5" /> Reorder

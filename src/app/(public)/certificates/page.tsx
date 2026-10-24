@@ -5,7 +5,6 @@ import { PageContainer } from "@/components/layout/PageContainer";
 import { CertificatesPageClient } from "@/components/features/certificates/CertificatesPageClient";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { ROUTES } from "@/constants/routes";
-import { SITE_NAME } from "@/constants/seo";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Certificates & Quality Standards",

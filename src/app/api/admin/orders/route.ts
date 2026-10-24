@@ -116,7 +116,11 @@ export async function POST(request: Request) {
     );
     const flags = pricingFlagsFromLines(lineItems);
     const order = await OrderModel.create({
-      items: lineItems.map(({ gstExempt: _g, ...item }) => item),
+      items: lineItems.map((line) => {
+        const { gstExempt, ...item } = line;
+        void gstExempt;
+        return item;
+      }),
       shippingAddress: {
         ...parsed.data.shippingAddress,
         email: parsed.data.shippingAddress.email || undefined,
@@ -154,7 +158,8 @@ export async function PATCH(request: Request) {
     if (updates.paymentStatus === PaymentStatus.PAID) {
       const { markOrderPaid } = await import("@/lib/orders/mark-paid");
       await markOrderPaid({ orderId: id });
-      const { paymentStatus: _p, ...rest } = updates;
+      const { paymentStatus, ...rest } = updates;
+      void paymentStatus;
       if (Object.keys(rest).length) {
         await OrderModel.findByIdAndUpdate(id, rest);
       }

@@ -23,6 +23,11 @@ export interface TestParameter {
   unit?: string;
 }
 
+export interface CertificatePdfPagesProps {
+  url: string;
+  title: string;
+}
+
 export interface CertificateDocument {
   id: string;
   title: string;

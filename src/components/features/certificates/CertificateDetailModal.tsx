@@ -10,7 +10,6 @@ import {
   Building,
   Calendar,
   Layers,
-  CheckCircle2,
   Lock,
   Eye,
   FileSearch,

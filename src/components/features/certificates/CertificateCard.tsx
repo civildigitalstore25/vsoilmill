@@ -14,8 +14,6 @@ interface CertificateCardProps {
 
 export function CertificateCard({ document, onSelect }: CertificateCardProps) {
   const Icon = getDocumentIcon(document.id, document.category);
-  const isVerified = document.status === "verified";
-  const hasRealDoc = Boolean(document.documentUrl);
 
   return (
     <article className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">

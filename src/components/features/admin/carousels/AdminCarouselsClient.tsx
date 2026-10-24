@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Images } from "lucide-react";
 import { toast } from "sonner";
+import { AdminListControls, AdminListPagination } from "@/components/features/admin/AdminListControls";
 import { AdminFormDialog } from "@/components/features/admin/AdminFormDialog";
 import {
   AdminAddButton,
@@ -14,7 +15,9 @@ import { CarouselSlideForm } from "@/components/features/admin/carousels/Carouse
 import { CarouselSlidesTable } from "@/components/features/admin/carousels/CarouselSlidesTable";
 import { DeleteCarouselDialog } from "@/components/features/admin/carousels/DeleteCarouselDialog";
 import { ADMIN_CAROUSEL_COPY } from "@/constants/admin";
+import { ADMIN_ACTIVE_OPTIONS, ADMIN_LIST } from "@/constants/admin-list";
 import { API_ENDPOINTS } from "@/constants/api";
+import { useAdminList } from "@/hooks/useAdminList";
 import type { CarouselSlide } from "@/types/carousel";
 
 interface AdminCarouselsClientProps {
@@ -74,6 +77,19 @@ export function AdminCarouselsClient({
     }
   }
 
+  const list = useAdminList(
+    slides,
+    (slide) => `${slide.headline ?? ""} ${slide.subheadline ?? ""}`,
+    [
+      {
+        id: "status",
+        label: ADMIN_LIST.status,
+        allLabel: ADMIN_LIST.all,
+        options: ADMIN_ACTIVE_OPTIONS,
+        match: (slide, value) => (value === "inactive" ? !slide.isActive : slide.isActive),
+      },
+    ],
+  );
   const activeCount = slides.filter((s) => s.isActive).length;
   const inactiveCount = slides.length - activeCount;
 
@@ -116,12 +132,18 @@ export function AdminCarouselsClient({
       </div>
 
       {/* Main Listing Table */}
-      <CarouselSlidesTable
-        slides={slides}
-        onEdit={openEdit}
-        onRequestDelete={(slide) => setDeletingSlide(slide)}
-        onRefresh={() => router.refresh()}
-      />
+      <AdminListControls list={list} />
+      {list.noMatches ? (
+        <p className="text-sm text-muted">{ADMIN_LIST.empty}</p>
+      ) : (
+        <CarouselSlidesTable
+          slides={list.pageItems}
+          onEdit={openEdit}
+          onRequestDelete={(slide) => setDeletingSlide(slide)}
+          onRefresh={() => router.refresh()}
+        />
+      )}
+      <AdminListPagination list={list} />
 
       {/* Add / Edit Slide Dialog */}
       <AdminFormDialog

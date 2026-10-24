@@ -6,7 +6,7 @@ import {
   buildProductJsonLd,
   buildProductMetadata,
 } from "@/lib/seo/metadata";
-import { getProductBySlug, getProducts } from "@/lib/products/queries";
+import { getProductBySlug } from "@/lib/products/queries";
 import type { Category } from "@/types/product";
 
 export const dynamic = "force-dynamic";

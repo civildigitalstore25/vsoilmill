@@ -4,6 +4,7 @@ import type { UserAvatarProps } from "@/types/user";
 export function UserAvatar({ image, name, className }: UserAvatarProps) {
   if (image) {
     return (
+      // eslint-disable-next-line @next/next/no-img-element
       <img
         src={image}
         alt={name}

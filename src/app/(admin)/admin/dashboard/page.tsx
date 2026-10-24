@@ -11,8 +11,9 @@ import {
   AdminPageHeader,
   AdminStatCard,
 } from "@/components/features/admin/AdminUi";
+import { UserAvatar } from "@/components/shared/UserAvatar";
 import { Button } from "@/components/ui/button";
-import { ADMIN_DASHBOARD_COPY } from "@/constants/admin";
+import { ADMIN_DASHBOARD_COPY, ADMIN_ORDERS_COPY } from "@/constants/admin";
 import { ROUTES } from "@/constants/routes";
 import { connectDb } from "@/lib/db/mongoose";
 import { getOutOfStockProducts } from "@/lib/products/out-of-stock";
@@ -99,36 +100,44 @@ export default async function AdminDashboardPage() {
               <Link href={ROUTES.ADMIN.ORDERS}>View all</Link>
             </Button>
           </div>
-          <div className="space-y-3">
-            {recentOrders.length === 0 ? (
-              <p className="rounded-xl bg-cream px-4 py-8 text-center text-sm text-muted">
-                No orders yet.
-              </p>
-            ) : (
-              recentOrders.map((order) => {
-                const data = JSON.parse(JSON.stringify(order));
-                return (
-                  <Link
-                    key={data._id}
-                    href={ROUTES.ADMIN.ORDER_DETAIL(data._id)}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-cream/40 px-4 py-3 transition hover:border-primary/40 hover:bg-card"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-dark">
-                        {data.shippingAddress.fullName}
-                      </p>
-                      <p className="text-xs text-muted">
-                        {data.status} · {data.paymentStatus}
-                      </p>
-                    </div>
-                    <p className="text-sm font-semibold text-dark">
-                      {formatInr(data.pricing.total)}
-                    </p>
-                  </Link>
-                );
-              })
-            )}
-          </div>
+          {recentOrders.length === 0 ? (
+            <p className="rounded-xl bg-cream px-4 py-8 text-center text-sm text-muted">
+              No orders yet.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="border-b border-border text-xs uppercase tracking-[0.12em] text-muted">
+                  <tr>
+                    <th className="py-3 font-semibold">{ADMIN_ORDERS_COPY.tableCustomer}</th>
+                    <th className="py-3 font-semibold">{ADMIN_ORDERS_COPY.tableStatus}</th>
+                    <th className="py-3 text-right font-semibold">{ADMIN_ORDERS_COPY.tableTotal}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentOrders.map((order) => {
+                    const data = JSON.parse(JSON.stringify(order));
+                    return (
+                      <tr key={data._id} className="border-b border-border/70 last:border-0">
+                        <td className="py-3">
+                          <Link href={ROUTES.ADMIN.ORDER_DETAIL(data._id)} className="flex items-center gap-3">
+                            <UserAvatar name={data.shippingAddress.fullName} />
+                            <span className="font-medium text-dark">{data.shippingAddress.fullName}</span>
+                          </Link>
+                        </td>
+                        <td className="py-3 text-muted">
+                          {data.status} · {data.paymentStatus}
+                        </td>
+                        <td className="py-3 text-right font-semibold text-dark">
+                          {formatInr(data.pricing.total)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </AdminCard>
 
         <AdminCard className="p-6">
@@ -143,31 +152,40 @@ export default async function AdminDashboardPage() {
               <p className="text-sm text-muted">{ADMIN_DASHBOARD_COPY.outOfStockHint}</p>
             </div>
           </div>
-          <ul className="space-y-3">
-            {outOfStock.length === 0 ? (
-              <li className="rounded-xl bg-primary/5 px-4 py-8 text-center text-sm text-primary">
-                {ADMIN_DASHBOARD_COPY.outOfStockEmpty}
-              </li>
-            ) : (
-              outOfStock.map((product) => (
-                <li
-                  key={product.id}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-cream/40 px-4 py-3"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-dark">{product.name}</p>
-                    <p className="text-xs text-muted">{product.labels.join(", ")}</p>
-                  </div>
-                  <Link
-                    href={ROUTES.ADMIN.PRODUCT_EDIT(product.id)}
-                    className="shrink-0 text-xs font-semibold text-primary hover:underline"
-                  >
-                    {ADMIN_DASHBOARD_COPY.editProduct}
-                  </Link>
-                </li>
-              ))
-            )}
-          </ul>
+          {outOfStock.length === 0 ? (
+            <p className="rounded-xl bg-primary/5 px-4 py-8 text-center text-sm text-primary">
+              {ADMIN_DASHBOARD_COPY.outOfStockEmpty}
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="border-b border-border text-xs uppercase tracking-[0.12em] text-muted">
+                  <tr>
+                    <th className="py-3 font-semibold">{ADMIN_DASHBOARD_COPY.tableProduct}</th>
+                    <th className="py-3 text-right font-semibold">{ADMIN_DASHBOARD_COPY.editProduct}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {outOfStock.map((product) => (
+                    <tr key={product.id} className="border-b border-border/70 last:border-0">
+                      <td className="py-3">
+                        <p className="font-medium text-dark">{product.name}</p>
+                        <p className="text-xs text-muted">{product.labels.join(", ")}</p>
+                      </td>
+                      <td className="py-3 text-right">
+                        <Link
+                          href={ROUTES.ADMIN.PRODUCT_EDIT(product.id)}
+                          className="text-xs font-semibold text-primary hover:underline"
+                        >
+                          {ADMIN_DASHBOARD_COPY.editProduct}
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </AdminCard>
       </div>
     </div>

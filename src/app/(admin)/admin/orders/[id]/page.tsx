@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { AdminOrderDeleteButton } from "@/components/features/admin/AdminOrderDeleteButton";
 import { AdminOrderStatusForm } from "@/components/features/admin/AdminOrderStatusForm";
 import { AdminCard, AdminPageHeader } from "@/components/features/admin/AdminUi";
+import { UserAvatar } from "@/components/shared/UserAvatar";
 import { Button } from "@/components/ui/button";
 import { ADMIN_ORDERS_COPY } from "@/constants/admin";
 import { ROUTES } from "@/constants/routes";
@@ -43,8 +44,10 @@ export default async function AdminOrderDetailPage({ params }: Props) {
           <h2 className="font-display text-xl text-dark">
             {ADMIN_ORDERS_COPY.customerTitle}
           </h2>
-          <p className="mt-4 text-sm leading-relaxed text-muted">
-            {data.shippingAddress.fullName}
+          <div className="mt-4 flex items-start gap-3">
+            <UserAvatar name={data.shippingAddress.fullName} />
+            <p className="text-sm leading-relaxed text-muted">
+              {data.shippingAddress.fullName}
             <br />
             {data.shippingAddress.phone}
             {data.shippingAddress.email ? (
@@ -59,7 +62,8 @@ export default async function AdminOrderDetailPage({ params }: Props) {
             <br />
             {data.shippingAddress.city}, {data.shippingAddress.state}{" "}
             {data.shippingAddress.pincode}
-          </p>
+            </p>
+          </div>
         </AdminCard>
 
         <AdminCard className="p-6">

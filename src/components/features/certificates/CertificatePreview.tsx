@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import {
   FileText,
   AlertTriangle,
@@ -58,7 +57,6 @@ export function CertificatePreview({
 }: CertificatePreviewProps) {
   const [imageError, setImageError] = useState(false);
   const Icon = getDocumentIcon(document.id, document.category);
-  const isPlaceholder = document.status === "placeholder";
   const hasRealImage = Boolean(document.previewImage) && !imageError;
 
   const handleContextMenu = (e: React.MouseEvent) => {

@@ -2,14 +2,17 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Package, MapPin, CreditCard, Calendar } from "lucide-react";
+import { OrderDeliveredReviews } from "@/components/features/orders/OrderDeliveredReviews";
 import { Button } from "@/components/ui/button";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { ROUTES } from "@/constants/routes";
 import { USER_ROLES } from "@/constants/auth";
 import { auth } from "@/lib/auth/auth";
 import { connectDb } from "@/lib/db/mongoose";
+import { getDeliveredReviewTargets } from "@/lib/reviews/order-reviews";
 import { formatInr } from "@/lib/utils/format";
 import { OrderModel } from "@/models/Order";
+import { OrderStatus } from "@/types/order";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -39,10 +42,13 @@ export default async function OrderDetailPage({ params }: Props) {
     : "";
 
   const isPaid = data.paymentStatus?.toUpperCase() === "PAID";
+  const isDelivered = String(data.status).toUpperCase() === OrderStatus.DELIVERED;
+  const reviewState = isDelivered
+    ? await getDeliveredReviewTargets(session.user.id, data.items)
+    : null;
 
   return (
     <PageContainer className="py-10">
-      {/* Header Navigation */}
       <div className="flex items-center justify-between border-b border-border pb-6">
         <div>
           <div className="flex items-center gap-3">
@@ -70,7 +76,6 @@ export default async function OrderDetailPage({ params }: Props) {
       </div>
 
       <div className="mt-8 grid gap-8 md:grid-cols-3">
-        {/* Main Content: Products List Card */}
         <div className="space-y-6 md:col-span-2">
           <div className="rounded-2xl border border-border bg-card p-6 shadow-xs">
             <div className="flex items-center justify-between border-b border-border pb-4">
@@ -132,7 +137,14 @@ export default async function OrderDetailPage({ params }: Props) {
             </div>
           </div>
 
-          {/* Shipping Address Card */}
+          {reviewState ? (
+            <OrderDeliveredReviews
+              customerName={data.shippingAddress.fullName}
+              items={reviewState.items}
+              reviewedIds={reviewState.reviewedIds}
+            />
+          ) : null}
+
           <div className="rounded-2xl border border-border bg-card p-6 shadow-xs">
             <h2 className="font-display text-xl text-dark flex items-center gap-2 border-b border-border pb-4">
               <MapPin className="h-5 w-5 text-primary" /> Delivery Address
@@ -146,7 +158,6 @@ export default async function OrderDetailPage({ params }: Props) {
           </div>
         </div>
 
-        {/* Sidebar: Order Summary Card */}
         <div className="h-fit space-y-6">
           <div className="rounded-2xl border border-border bg-card p-6 shadow-xs space-y-4">
             <h2 className="font-display text-xl text-dark flex items-center gap-2 border-b border-border pb-3">

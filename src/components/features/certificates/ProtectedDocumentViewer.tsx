@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import Image from "next/image";
 import {
   ZoomIn,
   ZoomOut,
@@ -9,9 +8,10 @@ import {
   ShieldCheck,
   ShieldAlert,
   Lock,
-  Eye,
   AlertTriangle,
 } from "lucide-react";
+import { CertificatePdfPages } from "@/components/features/certificates/CertificatePdfPages";
+import { CERTIFICATE_VIEWER } from "@/constants/certificates";
 import type { CertificateDocument } from "@/types/certificate";
 import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/button";
@@ -130,11 +130,11 @@ export function ProtectedDocumentViewer({
   };
 
   const handleZoomIn = () => {
-    setZoom((prev) => Math.min(2.5, +(prev + 0.25).toFixed(2)));
+    setZoom((prev) => Math.min(CERTIFICATE_VIEWER.maxZoom, +(prev + CERTIFICATE_VIEWER.zoomStep).toFixed(2)));
   };
 
   const handleZoomOut = () => {
-    setZoom((prev) => Math.max(0.75, +(prev - 0.25).toFixed(2)));
+    setZoom((prev) => Math.max(CERTIFICATE_VIEWER.minZoom, +(prev - CERTIFICATE_VIEWER.zoomStep).toFixed(2)));
   };
 
   const handleResetZoom = () => {
@@ -172,7 +172,7 @@ export function ProtectedDocumentViewer({
             variant="ghost"
             size="sm"
             onClick={handleZoomOut}
-            disabled={zoom <= 0.75}
+            disabled={zoom <= CERTIFICATE_VIEWER.minZoom}
             className="h-7 w-7 rounded-lg p-0 text-stone-300 hover:bg-stone-800 hover:text-white disabled:opacity-30"
             title="Zoom Out"
           >
@@ -189,7 +189,7 @@ export function ProtectedDocumentViewer({
             variant="ghost"
             size="sm"
             onClick={handleZoomIn}
-            disabled={zoom >= 2.5}
+            disabled={zoom >= CERTIFICATE_VIEWER.maxZoom}
             className="h-7 w-7 rounded-lg p-0 text-stone-300 hover:bg-stone-800 hover:text-white disabled:opacity-30"
             title="Zoom In"
           >
@@ -248,16 +248,17 @@ export function ProtectedDocumentViewer({
         )}
 
         {/* Certificate Rendering Container with Zoom Transformation */}
-        <div className="flex min-h-full items-center justify-center">
+        <div className="flex min-h-full w-full justify-center">
           <div
-            className="relative transition-transform duration-150 ease-out"
+            className="relative w-full max-w-3xl transition-transform duration-150 ease-out"
             style={{
               transform: `scale(${zoom})`,
-              transformOrigin: "center center",
+              transformOrigin: "top center",
             }}
           >
-            {/* The Document Preview Graphic */}
-            {doc.previewImage ? (
+            {doc.fileType === "pdf" && doc.documentUrl ? (
+              <CertificatePdfPages url={doc.documentUrl} title={doc.title} />
+            ) : doc.previewImage ? (
               <div
                 className="relative overflow-hidden rounded-lg bg-white shadow-2xl"
                 onContextMenu={handleContextMenu}

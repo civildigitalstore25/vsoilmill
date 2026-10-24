@@ -4,7 +4,6 @@ import React, { useState, useMemo } from "react";
 import {
   Shield,
   FlaskConical,
-  Sparkles,
   Search,
   Filter,
 } from "lucide-react";

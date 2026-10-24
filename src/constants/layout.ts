@@ -9,9 +9,13 @@ export const LAYOUT = {
   heroContent: "relative z-10 w-full max-w-2xl",
   productGrid:
     "grid w-full grid-cols-2 items-stretch gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5",
+  productMedia:
+    "relative mb-2 aspect-square shrink-0 overflow-hidden rounded-lg bg-cream-dark",
+  productImage:
+    "object-cover transition-transform duration-700 ease-out group-hover:scale-110",
   categoryGrid:
     "grid w-full grid-cols-2 items-stretch gap-4 sm:gap-5 md:grid-cols-3 xl:grid-cols-5",
-  productTitle: "line-clamp-2 min-h-10 leading-snug sm:min-h-12",
+  productTitle: "line-clamp-2 min-h-8 leading-tight sm:min-h-10",
   productDesc: "line-clamp-1 min-h-4",
   productVariants: "min-h-7",
   productPrice: "min-h-6",
