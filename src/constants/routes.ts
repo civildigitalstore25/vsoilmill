@@ -17,6 +17,7 @@ export const ROUTES = {
   RESET_PASSWORD: "/reset-password",
   AUTH_COMPLETE: "/login/complete",
   ABOUT: "/about",
+  CERTIFICATES: "/certificates",
   CONTACT: "/contact",
   FAQS: "/faqs",
   PRIVACY: "/privacy",

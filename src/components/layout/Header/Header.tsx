@@ -16,6 +16,7 @@ import { LAYOUT } from "@/constants/layout";
 import { NAV_LINKS } from "@/constants/ui";
 import { ROUTES } from "@/constants/routes";
 import { useCartStore } from "@/hooks/useCartStore";
+import { SocialLinks } from "@/components/common/SocialLinks";
 import { cn } from "@/lib/utils/cn";
 
 export function Header() {
@@ -55,7 +56,7 @@ export function Header() {
         </Link>
 
         {/* Main Desktop Navigation */}
-        <nav className="hidden items-center gap-6 md:flex">
+        <nav className="hidden items-center gap-3.5 lg:gap-6 md:flex">
           <HeaderCategoriesDropdown />
           {NAV_LINKS.map((link) => (
             <Link
@@ -195,6 +196,14 @@ export function Header() {
               </Link>
             </div>
           )}
+
+          {/* Mobile Social Links Strip */}
+          <div className="mt-3 pt-3 border-t border-border">
+            <p className="text-xs font-bold uppercase tracking-wider text-muted mb-2">
+              Connect on Social Media
+            </p>
+            <SocialLinks variant="pill" className="gap-2" />
+          </div>
         </nav>
       </div>
 

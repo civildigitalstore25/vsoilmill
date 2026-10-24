@@ -19,12 +19,48 @@ export const UI = {
   trustYears: "38+",
   trustRating: "4.9",
   close: "Close",
+  social: {
+    instagram: "https://www.instagram.com/vsoilmillstore/",
+    facebook: "https://www.facebook.com/VSOilMillStore/",
+    youtube: "https://www.youtube.com/@Sarathkumar-pd",
+  },
 } as const;
+
+export const SOCIAL_LINKS = [
+  {
+    id: "instagram",
+    name: "Instagram",
+    label: "@vsoilmillstore",
+    href: "https://www.instagram.com/vsoilmillstore/",
+    handle: "vsoilmillstore",
+    description: "Watch our daily Mara Chekku oil extraction reels & customer stories.",
+    color: "#E1306C",
+  },
+  {
+    id: "facebook",
+    name: "Facebook",
+    label: "VSOilMillStore",
+    href: "https://www.facebook.com/VSOilMillStore/",
+    handle: "VSOilMillStore",
+    description: "Follow our official community for fresh batches, updates & healthy tips.",
+    color: "#1877F2",
+  },
+  {
+    id: "youtube",
+    name: "YouTube",
+    label: "@Sarathkumar-pd",
+    href: "https://www.youtube.com/@Sarathkumar-pd",
+    handle: "@Sarathkumar-pd",
+    description: "Subscribe for traditional wooden-press videos & mill tours by founder Sarathkumar.",
+    color: "#FF0000",
+  },
+] as const;
 
 export const NAV_LINKS = [
   { label: "Shop", href: "/shop" },
   { label: "Bestsellers", href: "/bestsellers" },
   { label: "About", href: "/about" },
+  { label: "Certificates", href: "/certificates" },
   { label: "Contact", href: "/contact" },
   { label: "FAQs", href: "/faqs" },
 ] as const;

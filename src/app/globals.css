@@ -67,3 +67,14 @@
     padding-inline: 5rem;
   }
 }
+
+@media print {
+  /* Strict Anti-Print & Anti-PDF Export Protection for Official Certificates */
+  [data-radix-dialog-content],
+  img[alt*="Official View Only"],
+  img[alt*="Preview"] {
+    display: none !important;
+    visibility: hidden !important;
+  }
+}
+
