@@ -1,7 +1,9 @@
 import {
   FolderTree,
+  Images,
   LayoutDashboard,
   Package,
+  Gift,
   ShoppingBag,
   Star,
   Users,
@@ -22,10 +24,22 @@ export const ADMIN_NAV = [
     icon: Package,
   },
   {
+    href: ROUTES.ADMIN.COMBOS,
+    label: "Combo offers",
+    description: "Bundles & combo price",
+    icon: Gift,
+  },
+  {
     href: ROUTES.ADMIN.CATEGORIES,
     label: "Categories",
     description: "Collections",
     icon: FolderTree,
+  },
+  {
+    href: ROUTES.ADMIN.CAROUSELS,
+    label: "Carousels",
+    description: "Hero banners & slides",
+    icon: Images,
   },
   {
     href: ROUTES.ADMIN.ORDERS,
@@ -69,6 +83,7 @@ export const ADMIN_ACTIONS = {
   updateFailed: "Update failed",
   createFailed: "Create failed",
   confirmDelete: "Delete this item? This cannot be undone.",
+  openPage: "Open page",
 } as const;
 
 export const ADMIN_USERS_COPY = {
@@ -99,6 +114,8 @@ export const ADMIN_CATEGORY_COPY = {
   title: "Categories",
   description: "Create, edit, and delete shop collections.",
   addButton: "Add category",
+  addInline: "Add",
+  namePlaceholder: "New category name",
   createTitle: "Create category",
   editTitle: "Edit category",
   empty: "No categories yet.",
@@ -111,6 +128,10 @@ export const ADMIN_CATEGORY_COPY = {
   updated: "Category updated",
   deleted: "Category deleted",
   inactive: "inactive",
+  tableCategory: "Category",
+  tableSlug: "Slug",
+  tableStatus: "Status",
+  tableActions: "Actions",
   createFailed: "Failed to create category",
 } as const;
 
@@ -170,10 +191,22 @@ export const ADMIN_ORDERS_COPY = {
   refundFailed: "Refund failed",
 } as const;
 
+export const ADMIN_DASHBOARD_COPY = {
+  outOfStockTitle: "Out of stock",
+  outOfStockHint: "Products marked unavailable",
+  outOfStockEmpty: "Every product is available.",
+  editProduct: "Edit",
+  tableProduct: "Product",
+} as const;
+
 export const ADMIN_PRODUCTS_COPY = {
   title: "Products",
   description: "Manage oils, ghee, variants, pricing, and SEO.",
   addButton: "Add product",
+  empty: "No products yet.",
+  gstExemptTitle: "No GST & free shipping",
+  gstExemptHint:
+    "Skips GST and shipping when the cart has only this kind of product (e.g. ₹1 payment test).",
 } as const;
 
 export const ADMIN_REVIEWS_COPY = {
@@ -185,4 +218,55 @@ export const ADMIN_REVIEWS_COPY = {
   empty: "No reviews yet.",
   approved: "Approved",
   pending: "Pending",
+  hidden: "Hidden",
+  tableReviewer: "Reviewer",
+  tableRating: "Rating",
+  tableReview: "Review",
+  tableStatus: "Status",
+  tableActions: "Actions",
+  ratingMax: 5,
 } as const;
+
+export const ADMIN_CAROUSEL_COPY = {
+  title: "Carousel Management",
+  description: "Create, reorder, and manage homepage hero carousel slides.",
+  addButton: "Add Carousel Slide",
+  createTitle: "Add Carousel Slide",
+  editTitle: "Edit Carousel Slide",
+  empty: "No carousel slides found. Click \"Add Carousel Slide\" to create your first slide.",
+  imageUrl: "Image URL",
+  imageUrlPlaceholder: "https://ik.imagekit.io/... (Paste high-res banner URL)",
+  navigationLink: "Navigation Link",
+  navigationLinkPlaceholder: "/shop, /bestsellers, or https://...",
+  headline: "Headline",
+  headlinePlaceholder: "e.g. Inspired by Nature",
+  subheadline: "Subheadline",
+  subheadlinePlaceholder: "e.g. A beautiful blend of design, quality, and everyday functionality.",
+  buttonText: "Button Text",
+  buttonTextPlaceholder: "e.g. Shop Now",
+  altText: "Alt Text",
+  altTextPlaceholder: "Accessible description for screen readers",
+  sortOrder: "Sort Order",
+  activeStatus: "Active Status",
+  active: "Active",
+  inactive: "Inactive",
+  saveSlide: "Save Slide",
+  saving: "Saving slide…",
+  cancel: "Cancel",
+  created: "Carousel slide created successfully",
+  updated: "Carousel slide updated successfully",
+  deleted: "Carousel slide deleted successfully",
+  statusUpdated: "Slide status updated",
+  createFailed: "Failed to create slide",
+  updateFailed: "Failed to update slide",
+  deleteFailed: "Failed to delete slide",
+  confirmDeleteTitle: "Delete Carousel Slide",
+  confirmDeleteMessage: "Are you sure you want to remove this slide? This action cannot be undone and will permanently remove it from the homepage hero carousel.",
+  tableSlide: "Slide",
+  tableHeadline: "Headline",
+  tableLink: "Navigation Link",
+  tableOrder: "Sort Order",
+  tableStatus: "Status",
+  tableActions: "Actions",
+} as const;
+

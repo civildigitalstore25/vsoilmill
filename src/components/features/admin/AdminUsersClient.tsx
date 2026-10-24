@@ -6,17 +6,18 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { AdminAddUserForm } from "@/components/features/admin/AdminAddUserForm";
 import { AdminFormDialog } from "@/components/features/admin/AdminFormDialog";
+import { AdminListControls, AdminListPagination } from "@/components/features/admin/AdminListControls";
+import { AdminUsersTable } from "@/components/features/admin/AdminUsersTable";
 import {
   AdminAddButton,
   AdminCard,
   AdminPageHeader,
-  AdminStatusPill,
 } from "@/components/features/admin/AdminUi";
-import { Button } from "@/components/ui/button";
-import { UserAvatar } from "@/components/shared/UserAvatar";
 import { ADMIN_ACTIONS, ADMIN_USERS_COPY } from "@/constants/admin";
+import { ADMIN_LIST } from "@/constants/admin-list";
 import { API_ENDPOINTS } from "@/constants/api";
-import { USER_ROLE_OPTIONS, USER_ROLES } from "@/constants/auth";
+import { USER_ROLE_OPTIONS } from "@/constants/auth";
+import { useAdminList } from "@/hooks/useAdminList";
 import type { AdminUser, UserRole } from "@/types/user";
 
 export function AdminUsersClient({ users }: { users: AdminUser[] }) {
@@ -24,6 +25,19 @@ export function AdminUsersClient({ users }: { users: AdminUser[] }) {
   const { data: session } = useSession();
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<AdminUser | null>(null);
+  const list = useAdminList(
+    users,
+    (user) => `${user.name} ${user.email} ${user.role}`,
+    [
+      {
+        id: "role",
+        label: ADMIN_LIST.role,
+        allLabel: ADMIN_LIST.all,
+        options: USER_ROLE_OPTIONS,
+        match: (user, value) => user.role === value,
+      },
+    ],
+  );
 
   function closeForm() {
     setFormOpen(false);
@@ -87,94 +101,24 @@ export function AdminUsersClient({ users }: { users: AdminUser[] }) {
           {ADMIN_USERS_COPY.empty}
         </AdminCard>
       ) : (
-        <AdminCard className="overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-left text-sm">
-              <thead className="border-b border-border bg-cream/70">
-                <tr className="text-xs uppercase tracking-[0.12em] text-muted">
-                  <th className="px-5 py-4 font-semibold">
-                    {ADMIN_USERS_COPY.tableUser}
-                  </th>
-                  <th className="px-5 py-4 font-semibold">
-                    {ADMIN_USERS_COPY.tableEmail}
-                  </th>
-                  <th className="px-5 py-4 font-semibold">
-                    {ADMIN_USERS_COPY.tableRole}
-                  </th>
-                  <th className="px-5 py-4 font-semibold">
-                    {ADMIN_USERS_COPY.tableActions}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user) => {
-                  const isSelf = session?.user?.id === user._id;
-                  return (
-                    <tr
-                      key={user._id}
-                      className="border-b border-border/70 transition hover:bg-cream/40"
-                    >
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-3">
-                          <UserAvatar image={user.image} name={user.name} />
-                          <span className="font-medium text-dark">
-                            {user.name}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-5 py-4 text-muted">{user.email}</td>
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-3">
-                          <AdminStatusPill
-                            active={user.role === USER_ROLES.ADMIN}
-                            label={user.role}
-                          />
-                          <select
-                            aria-label={ADMIN_USERS_COPY.roleLabel}
-                            className="h-9 rounded-md border border-border bg-card px-2 text-sm text-dark disabled:opacity-50"
-                            value={user.role}
-                            disabled={isSelf}
-                            onChange={(e) =>
-                              updateRole(user._id, e.target.value as UserRole)
-                            }
-                          >
-                            {USER_ROLE_OPTIONS.map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </td>
-                      <td className="px-5 py-4">
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setEditing(user);
-                              setFormOpen(true);
-                            }}
-                          >
-                            {ADMIN_ACTIONS.edit}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            disabled={isSelf}
-                            onClick={() => removeUser(user._id)}
-                          >
-                            {ADMIN_ACTIONS.delete}
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </AdminCard>
+        <>
+        <AdminListControls list={list} />
+        {list.noMatches ? (
+          <AdminCard className="px-6 py-16 text-center text-sm text-muted">{ADMIN_LIST.empty}</AdminCard>
+        ) : (
+          <AdminUsersTable
+            users={list.pageItems}
+            currentUserId={session?.user?.id}
+            onEdit={(user) => {
+              setEditing(user);
+              setFormOpen(true);
+            }}
+            onDelete={removeUser}
+            onRole={updateRole}
+          />
+        )}
+        <AdminListPagination list={list} />
+        </>
       )}
 
       <AdminFormDialog

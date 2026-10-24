@@ -3,25 +3,30 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth/auth";
 import { connectDb } from "@/lib/db/mongoose";
 import { ProductModel } from "@/models/Product";
-import { slugify } from "@/lib/utils/format";
+import { slugify, stripHtml } from "@/lib/utils/format";
 import { z } from "zod";
 import { USER_ROLES } from "@/constants/auth";
 
 const productSchema = z.object({
   name: z.string().min(2),
   slug: z.string().optional(),
-  description: z.string().min(2),
+  description: z.string().refine((value) => stripHtml(value).length >= 2),
   shortDescription: z.string().optional(),
   images: z.array(z.string()).default([]),
+  videos: z.array(z.string()).default([]),
   categoryId: z.string(),
   variants: z
     .array(
       z.object({
+        _id: z.string().optional(),
         label: z.string(),
         sku: z.string(),
         originalPrice: z.number(),
         price: z.number(),
+        offerPrice: z.number().optional(),
+        available: z.boolean().optional(),
         stock: z.number(),
+        image: z.string().optional(),
         weightGrams: z.number().optional(),
       }),
     )
@@ -30,6 +35,10 @@ const productSchema = z.object({
   isActive: z.boolean().default(true),
   isBestSeller: z.boolean().default(false),
   isNewArrival: z.boolean().default(false),
+  gstExempt: z.boolean().default(false),
+  offerEnabled: z.boolean().default(false),
+  offerStartsAt: z.string().optional().nullable(),
+  offerEndsAt: z.string().optional().nullable(),
   seo: z
     .object({
       metaTitle: z.string().optional(),

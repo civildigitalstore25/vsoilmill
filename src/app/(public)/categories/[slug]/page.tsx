@@ -4,6 +4,7 @@ import { ProductGrid } from "@/components/features/products/ProductGrid";
 import { CategoryHero } from "@/components/features/categories/CategoryHero";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { buildPageMetadata } from "@/lib/seo/metadata";
+import { stripHtml } from "@/lib/utils/format";
 import {
   getCategories,
   getCategoryBySlug,
@@ -24,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return buildPageMetadata({
       title: category.name,
       description:
-        category.description ??
+        stripHtml(category.description ?? "") ||
         `Shop ${category.name} from VS OilMill — pure wooden-pressed oils and ghee.`,
       path: `/categories/${slug}`,
     });

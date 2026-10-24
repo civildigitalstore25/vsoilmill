@@ -9,9 +9,9 @@ import { PaymentStatus } from "@/types/order";
 
 const schema = z.object({
   productId: z.string(),
-  authorName: z.string().min(2),
+  authorName: z.string().trim().min(2),
   rating: z.number().min(1).max(5),
-  body: z.string().min(5),
+  body: z.string().trim().min(2),
 });
 
 export async function GET(request: Request) {

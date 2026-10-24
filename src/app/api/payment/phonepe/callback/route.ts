@@ -6,6 +6,60 @@ import { verifyPhonePeCallbackAuth } from "@/lib/payment/callback-auth";
 import { OrderModel } from "@/models/Order";
 import { PaymentStatus } from "@/types/order";
 
+type WebhookBody = {
+  event?: string;
+  payload?: {
+    merchantOrderId?: string;
+    originalMerchantOrderId?: string;
+    orderId?: string;
+    state?: string;
+    paymentDetails?: Array<{ transactionId?: string }>;
+  };
+  // legacy / flexible shapes
+  data?: {
+    merchantTransactionId?: string;
+    merchantOrderId?: string;
+    state?: string;
+    transactionId?: string;
+  };
+  merchantOrderId?: string;
+  merchantTransactionId?: string;
+  code?: string;
+  success?: boolean;
+};
+
+function extractMerchantOrderId(body: WebhookBody): string | undefined {
+  return (
+    body.payload?.originalMerchantOrderId ??
+    body.payload?.merchantOrderId ??
+    body.data?.merchantOrderId ??
+    body.data?.merchantTransactionId ??
+    body.merchantOrderId ??
+    body.merchantTransactionId
+  );
+}
+
+function isSuccess(body: WebhookBody): boolean {
+  const state = body.payload?.state ?? body.data?.state ?? body.code;
+  return (
+    body.event === "checkout.order.completed" ||
+    body.event === "pg.order.completed" ||
+    state === "COMPLETED" ||
+    state === "PAYMENT_SUCCESS" ||
+    state === "SUCCESS" ||
+    body.success === true
+  );
+}
+
+function isFailed(body: WebhookBody): boolean {
+  const state = body.payload?.state ?? body.data?.state;
+  return (
+    body.event === "checkout.order.failed" ||
+    body.event === "pg.order.failed" ||
+    state === "FAILED"
+  );
+}
+
 export async function POST(request: Request) {
   try {
     const authResult = verifyPhonePeCallbackAuth(request);
@@ -16,11 +70,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const body = await request.json().catch(() => ({}));
-    const merchantOrderId =
-      body?.data?.merchantTransactionId ??
-      body?.merchantTransactionId ??
-      body?.merchantOrderId;
+    const body = (await request.json().catch(() => ({}))) as WebhookBody;
+    const merchantOrderId = extractMerchantOrderId(body);
 
     if (!merchantOrderId) {
       return NextResponse.json({ error: "Invalid callback" }, { status: 400 });
@@ -34,20 +85,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    const code = body?.code ?? body?.data?.state;
-    const success =
-      body?.success === true ||
-      code === "PAYMENT_SUCCESS" ||
-      code === "COMPLETED" ||
-      code === "SUCCESS";
-
-    if (success) {
+    if (isSuccess(body)) {
+      const transactionId =
+        body.payload?.paymentDetails?.[0]?.transactionId ??
+        body.payload?.orderId ??
+        body.data?.transactionId;
       await markOrderPaid({
         orderId: String(order._id),
-        transactionId:
-          body?.data?.transactionId ?? body?.transactionId ?? undefined,
+        transactionId: transactionId ?? undefined,
       });
-    } else {
+    } else if (isFailed(body)) {
       order.paymentStatus = PaymentStatus.FAILED;
       await order.save();
     }

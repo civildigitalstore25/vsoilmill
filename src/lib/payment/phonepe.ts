@@ -1,104 +1,132 @@
-import crypto from "crypto";
+import { PAYMENT_ERRORS } from "@/constants/payment";
+import {
+  assertPhonePeCredentialsConfigured,
+  getPhonePeAccessToken,
+  getPhonePeHosts,
+  isPhonePeProductionV1,
+} from "@/lib/payment/phonepe-auth";
+import {
+  createPhonePePaymentV1,
+  getPhonePeStatusV1,
+} from "@/lib/payment/phonepe-v1";
 
-const PHONEPE_HOST = {
-  SANDBOX: "https://api-preprod.phonepe.com/apis/pg-sandbox",
-  PRODUCTION: "https://api.phonepe.com/apis/pg",
-} as const;
+type CreatePaymentResult =
+  | { redirectUrl: string; phonepeOrderId?: string; raw: unknown }
+  | { error: string; raw?: unknown };
 
-function getConfig() {
-  const clientId = process.env.PHONEPE_CLIENT_ID ?? "";
-  const clientSecret = process.env.PHONEPE_CLIENT_SECRET ?? "";
-  const saltIndex = process.env.PHONEPE_CLIENT_VERSION ?? "1";
-  const env = (process.env.PHONEPE_ENV ?? "SANDBOX") as keyof typeof PHONEPE_HOST;
-  return { clientId, clientSecret, saltIndex, host: PHONEPE_HOST[env] ?? PHONEPE_HOST.SANDBOX };
-}
-
-function checksum(base64Payload: string, path: string, salt: string, index: string): string {
-  const hash = crypto
-    .createHash("sha256")
-    .update(`${base64Payload}${path}${salt}`)
-    .digest("hex");
-  return `${hash}###${index}`;
-}
+type StatusResult = {
+  success: boolean;
+  state?: string;
+  raw: unknown;
+};
 
 export async function createPhonePePayment(input: {
   merchantOrderId: string;
   amountInPaise: number;
   redirectUrl: string;
-  callbackUrl: string;
-}): Promise<{ redirectUrl: string; raw: unknown } | { error: string }> {
-  const { clientId, clientSecret, saltIndex, host } = getConfig();
+  callbackUrl?: string;
+}): Promise<CreatePaymentResult> {
+  const configured = assertPhonePeCredentialsConfigured();
+  if (!configured.ok) {
+    return { error: configured.error };
+  }
 
-  if (!clientId || !clientSecret) {
+  // Live dashboard API Key → classic V1 Pay API
+  if (isPhonePeProductionV1()) {
+    return createPhonePePaymentV1(input);
+  }
+
+  // Sandbox Client Id/Secret → PG V2 OAuth + checkout
+  try {
+    const token = await getPhonePeAccessToken();
+    const { apiHost } = getPhonePeHosts();
+
+    const payload = {
+      merchantOrderId: input.merchantOrderId,
+      amount: input.amountInPaise,
+      expireAfter: 1200,
+      paymentFlow: {
+        type: "PG_CHECKOUT",
+        merchantUrls: {
+          redirectUrl: input.redirectUrl,
+        },
+      },
+    };
+
+    const response = await fetch(`${apiHost}/checkout/v2/pay`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `O-Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const raw = (await response.json()) as {
+      redirectUrl?: string;
+      orderId?: string;
+      state?: string;
+      message?: string;
+      code?: string;
+    };
+
+    if (!response.ok || !raw.redirectUrl) {
+      return {
+        error: raw.message ?? raw.code ?? PAYMENT_ERRORS.INIT_FAILED,
+        raw,
+      };
+    }
+
     return {
-      error:
-        "PhonePe credentials are not configured. Set PHONEPE_CLIENT_ID and PHONEPE_CLIENT_SECRET.",
+      redirectUrl: raw.redirectUrl,
+      phonepeOrderId: raw.orderId,
+      raw,
+    };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : PAYMENT_ERRORS.INIT_FAILED,
     };
   }
-
-  const payload = {
-    merchantId: clientId,
-    merchantTransactionId: input.merchantOrderId,
-    merchantUserId: `MUID-${input.merchantOrderId.slice(0, 8)}`,
-    amount: input.amountInPaise,
-    redirectUrl: input.redirectUrl,
-    redirectMode: "REDIRECT",
-    callbackUrl: input.callbackUrl,
-    paymentInstrument: { type: "PAY_PAGE" },
-  };
-
-  const path = "/pg/v1/pay";
-  const base64 = Buffer.from(JSON.stringify(payload)).toString("base64");
-  const xVerify = checksum(base64, path, clientSecret, saltIndex);
-
-  const response = await fetch(`${host}${path}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      "X-VERIFY": xVerify,
-    },
-    body: JSON.stringify({ request: base64 }),
-  });
-
-  const raw = await response.json();
-  const redirectUrl =
-    raw?.data?.instrumentResponse?.redirectInfo?.url ??
-    raw?.data?.redirectUrl;
-
-  if (!redirectUrl) {
-    return { error: raw?.message ?? "Failed to create PhonePe payment", raw } as {
-      error: string;
-    };
-  }
-
-  return { redirectUrl, raw };
 }
 
 export async function getPhonePeStatus(
   merchantOrderId: string,
-): Promise<{ success: boolean; state?: string; raw: unknown }> {
-  const { clientId, clientSecret, saltIndex, host } = getConfig();
-  const path = `/pg/v1/status/${clientId}/${merchantOrderId}`;
-  const xVerify = checksum("", path, clientSecret, saltIndex);
+): Promise<StatusResult> {
+  if (isPhonePeProductionV1()) {
+    return getPhonePeStatusV1(merchantOrderId);
+  }
 
-  const response = await fetch(`${host}${path}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      "X-VERIFY": xVerify,
-      "X-MERCHANT-ID": clientId,
-    },
-  });
+  try {
+    const token = await getPhonePeAccessToken();
+    const { apiHost } = getPhonePeHosts();
+    const path = `/checkout/v2/order/${encodeURIComponent(merchantOrderId)}/status`;
 
-  const raw = await response.json();
-  const state = raw?.data?.state ?? raw?.data?.paymentState;
-  const success =
-    raw?.success === true ||
-    state === "COMPLETED" ||
-    state === "SUCCESS" ||
-    raw?.code === "PAYMENT_SUCCESS";
+    const response = await fetch(`${apiHost}${path}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `O-Bearer ${token}`,
+      },
+    });
 
-  return { success, state, raw };
+    const raw = (await response.json()) as {
+      state?: string;
+      orderId?: string;
+      message?: string;
+    };
+
+    const state = raw.state;
+    const success = state === "COMPLETED";
+    return { success, state, raw };
+  } catch (error) {
+    return {
+      success: false,
+      state: "ERROR",
+      raw: {
+        message: error instanceof Error ? error.message : "Status check failed",
+      },
+    };
+  }
 }

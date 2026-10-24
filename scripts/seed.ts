@@ -6,6 +6,7 @@ import { UserModel } from "../src/models/User";
 import { CategoryModel } from "../src/models/Category";
 import { ProductModel } from "../src/models/Product";
 import { ReviewModel } from "../src/models/Review";
+import { CarouselModel } from "../src/models/Carousel";
 import { slugify } from "../src/lib/utils/format";
 import { AUTH, USER_ROLES } from "../src/constants/auth";
 
@@ -457,13 +458,12 @@ async function seed() {
     ReviewModel.deleteMany({}),
   ]);
 
-  const adminEmail = process.env.ADMIN_EMAIL ?? "admin@vsoilmill.com";
-  const adminPassword = process.env.ADMIN_PASSWORD ?? "Admin@12345";
-  const passwordHash = await bcrypt.hash(adminPassword, AUTH.bcryptRounds);
+  // Seed creates a starter admin; change email/password in DB or Admin → Users after.
+  const passwordHash = await bcrypt.hash("Admin@12345", AUTH.bcryptRounds);
 
   await UserModel.create({
     name: "VS OilMill Admin",
-    email: adminEmail,
+    email: "admin@vsoilmill.com",
     passwordHash,
     role: USER_ROLES.ADMIN,
     phone: "8438775451",
@@ -513,8 +513,45 @@ async function seed() {
     });
   }
 
+  const carouselCount = await CarouselModel.countDocuments();
+  if (carouselCount === 0) {
+    await CarouselModel.insertMany([
+      {
+        imageUrl: "https://ik.imagekit.io/mnm0iz0ng2/banner/1.png",
+        navigationLink: "/shop",
+        headline: "Pure, Traditional Wood-Pressed Oils",
+        subheadline: "Cold-pressed with Vaagai wood to retain natural nutrients, aroma, and rich taste.",
+        buttonText: "Shop All Oils",
+        altText: "VS OilMill Wood-Pressed Cold Pressed Oils",
+        sortOrder: 1,
+        isActive: true,
+      },
+      {
+        imageUrl: "https://ik.imagekit.io/mnm0iz0ng2/banner/2.png",
+        navigationLink: "/categories/pure-cow-ghee",
+        headline: "Authentic Uthukuli A2 Cow Ghee",
+        subheadline: "Slow-cooked traditionally with rich golden grains, heavenly aroma, and supreme purity.",
+        buttonText: "Explore Pure Ghee",
+        altText: "Authentic Uthukuli A2 Cow Ghee",
+        sortOrder: 2,
+        isActive: true,
+      },
+      {
+        imageUrl: "https://ik.imagekit.io/mnm0iz0ng2/category/Wooden-Pressed.jpg",
+        navigationLink: "/bestsellers",
+        headline: "Farm-Fresh Groundnut & Sesame Oils",
+        subheadline: "Direct from local farmers to our traditional expeller mill, unrefined and 100% natural.",
+        buttonText: "View Best Sellers",
+        altText: "Wooden pressed groundnut oil bottles",
+        sortOrder: 3,
+        isActive: true,
+      },
+    ]);
+    console.log("Seeded 3 initial carousel slides.");
+  }
+
   console.log(`Seed complete: ${products.length} products created.`);
-  console.log(`Admin: ${adminEmail} / ${adminPassword}`);
+  console.log("Admin: admin@vsoilmill.com / Admin@12345");
   await mongoose.disconnect();
 }
 

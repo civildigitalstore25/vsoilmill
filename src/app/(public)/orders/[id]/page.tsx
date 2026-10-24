@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Package, MapPin, CreditCard, Calendar } from "lucide-react";
+import { OrderDeliveredReviews } from "@/components/features/orders/OrderDeliveredReviews";
 import { Button } from "@/components/ui/button";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { ASSETS } from "@/constants/assets";
@@ -9,8 +10,10 @@ import { ROUTES } from "@/constants/routes";
 import { USER_ROLES } from "@/constants/auth";
 import { auth } from "@/lib/auth/auth";
 import { connectDb } from "@/lib/db/mongoose";
+import { getDeliveredReviewTargets } from "@/lib/reviews/order-reviews";
 import { formatInr } from "@/lib/utils/format";
 import { OrderModel } from "@/models/Order";
+import { OrderStatus } from "@/types/order";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -33,46 +36,36 @@ export default async function OrderDetailPage({ params }: Props) {
   const shortId = `VSO-${data._id.slice(-6).toUpperCase()}`;
   const formattedDate = data.createdAt
     ? new Date(data.createdAt).toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      })
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    })
     : "";
 
   const isPaid = data.paymentStatus?.toUpperCase() === "PAID";
+  const isDelivered = String(data.status).toUpperCase() === OrderStatus.DELIVERED;
+  const reviewState = isDelivered
+    ? await getDeliveredReviewTargets(session.user.id, data.items)
+    : null;
 
   return (
     <PageContainer className="py-10">
-      {/* Header Navigation */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
-        <div className="flex items-center gap-4">
-          <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-white p-1 border border-border shadow-xs">
-            <Image
-              src={ASSETS.LOGO}
-              alt="VS OilMill"
-              width={48}
-              height={48}
-              unoptimized
-              className="h-full w-full object-contain"
-            />
-          </div>
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="font-display text-2xl sm:text-3xl text-dark">Order #{shortId}</h1>
-              <span
-                className={`inline-flex items-center gap-1 rounded-full border px-3 py-0.5 text-xs font-bold ${
-                  isPaid
-                    ? "bg-emerald-100 text-emerald-800 border-emerald-300"
-                    : "bg-amber-100 text-amber-800 border-amber-300"
+      <div className="flex items-center justify-between border-b border-border pb-6">
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="font-display text-3xl text-dark">Order #{shortId}</h1>
+            <span
+              className={`inline-flex items-center gap-1 rounded-full border px-3 py-0.5 text-xs font-bold ${isPaid
+                  ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                  : "bg-amber-100 text-amber-800 border-amber-300"
                 }`}
-              >
-                {isPaid ? "PAID" : "PAYMENT PENDING"}
-              </span>
-            </div>
-            <p className="mt-1 text-xs sm:text-sm text-muted flex items-center gap-2">
-              <Calendar className="h-4 w-4" /> Placed on {formattedDate} · ID: <span className="font-mono text-xs">{data._id}</span>
-            </p>
+            >
+              {isPaid ? "PAID" : "PAYMENT PENDING"}
+            </span>
           </div>
+          <p className="mt-1 text-sm text-muted flex items-center gap-2">
+            <Calendar className="h-4 w-4" /> Placed on {formattedDate} · ID: <span className="font-mono text-xs">{data._id}</span>
+          </p>
         </div>
 
         <Button variant="outline" size="sm" asChild className="gap-2">
@@ -83,7 +76,6 @@ export default async function OrderDetailPage({ params }: Props) {
       </div>
 
       <div className="mt-8 grid gap-8 md:grid-cols-3">
-        {/* Main Content: Products List Card */}
         <div className="space-y-6 md:col-span-2">
           <div className="rounded-2xl border border-border bg-card p-6 shadow-xs">
             <div className="flex items-center justify-between border-b border-border pb-4">
@@ -145,7 +137,14 @@ export default async function OrderDetailPage({ params }: Props) {
             </div>
           </div>
 
-          {/* Shipping Address Card */}
+          {reviewState ? (
+            <OrderDeliveredReviews
+              customerName={data.shippingAddress.fullName}
+              items={reviewState.items}
+              reviewedIds={reviewState.reviewedIds}
+            />
+          ) : null}
+
           <div className="rounded-2xl border border-border bg-card p-6 shadow-xs">
             <h2 className="font-display text-xl text-dark flex items-center gap-2 border-b border-border pb-4">
               <MapPin className="h-5 w-5 text-primary" /> Delivery Address
@@ -159,7 +158,6 @@ export default async function OrderDetailPage({ params }: Props) {
           </div>
         </div>
 
-        {/* Sidebar: Order Summary Card */}
         <div className="h-fit space-y-6">
           <div className="rounded-2xl border border-border bg-card p-6 shadow-xs space-y-4">
             <h2 className="font-display text-xl text-dark flex items-center gap-2 border-b border-border pb-3">
@@ -178,8 +176,8 @@ export default async function OrderDetailPage({ params }: Props) {
                 </span>
               </div>
               <div className="flex justify-between text-muted">
-                <span>Tax</span>
-                <span className="font-medium text-dark">{formatInr(data.pricing.tax)}</span>
+                <span>GST (5%)</span>
+                <span className="font-medium text-dark">Included</span>
               </div>
               {data.pricing.discount > 0 && (
                 <div className="flex justify-between text-green-700 font-medium">

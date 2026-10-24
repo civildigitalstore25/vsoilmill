@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AdminCreateOrderForm } from "@/components/features/admin/AdminCreateOrderForm";
 import { AdminFormDialog } from "@/components/features/admin/AdminFormDialog";
+import { AdminListControls, AdminListPagination } from "@/components/features/admin/AdminListControls";
 import { AdminOrdersTable } from "@/components/features/admin/AdminOrdersTable";
 import {
   AdminAddButton,
@@ -11,7 +12,9 @@ import {
   AdminPageHeader,
 } from "@/components/features/admin/AdminUi";
 import { ADMIN_ORDERS_COPY } from "@/constants/admin";
-import type { AdminProductOption, Order } from "@/types/order";
+import { ADMIN_LIST } from "@/constants/admin-list";
+import { useAdminList } from "@/hooks/useAdminList";
+import { OrderStatus, PaymentStatus, type AdminProductOption, type Order } from "@/types/order";
 
 export function AdminOrdersClient({
   orders,
@@ -22,6 +25,27 @@ export function AdminOrdersClient({
 }) {
   const router = useRouter();
   const [formOpen, setFormOpen] = useState(false);
+  const list = useAdminList(
+    orders,
+    (order) =>
+      `${order.shippingAddress.fullName} ${order.shippingAddress.phone} ${order.shippingAddress.city} ${order._id}`,
+    [
+      {
+        id: "status",
+        label: ADMIN_LIST.orderStatus,
+        allLabel: ADMIN_LIST.all,
+        options: Object.values(OrderStatus).map((value) => ({ value, label: value })),
+        match: (order, value) => order.status === value,
+      },
+      {
+        id: "payment",
+        label: ADMIN_LIST.payment,
+        allLabel: ADMIN_LIST.all,
+        options: Object.values(PaymentStatus).map((value) => ({ value, label: value })),
+        match: (order, value) => order.paymentStatus === value,
+      },
+    ],
+  );
 
   return (
     <div>
@@ -41,7 +65,15 @@ export function AdminOrdersClient({
           {ADMIN_ORDERS_COPY.empty}
         </AdminCard>
       ) : (
-        <AdminOrdersTable orders={orders} />
+        <>
+          <AdminListControls list={list} />
+          {list.noMatches ? (
+            <AdminCard className="px-6 py-16 text-center text-sm text-muted">{ADMIN_LIST.empty}</AdminCard>
+          ) : (
+            <AdminOrdersTable orders={list.pageItems} />
+          )}
+          <AdminListPagination list={list} />
+        </>
       )}
 
       <AdminFormDialog

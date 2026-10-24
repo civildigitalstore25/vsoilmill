@@ -3,6 +3,7 @@ import { PAYMENT_ERRORS } from "@/constants/payment";
 import { connectDb } from "@/lib/db/mongoose";
 import { auth } from "@/lib/auth/auth";
 import { markOrderPaid } from "@/lib/orders/mark-paid";
+import { assertPhonePeCredentialsConfigured } from "@/lib/payment/phonepe-auth";
 import { getPhonePeStatus } from "@/lib/payment/phonepe";
 import { OrderModel } from "@/models/Order";
 import { PaymentStatus } from "@/types/order";
@@ -18,11 +19,9 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!process.env.PHONEPE_CLIENT_ID || !process.env.PHONEPE_CLIENT_SECRET) {
-      return NextResponse.json(
-        { error: PAYMENT_ERRORS.CREDENTIALS_MISSING },
-        { status: 503 },
-      );
+    const configured = assertPhonePeCredentialsConfigured();
+    if (!configured.ok) {
+      return NextResponse.json({ error: configured.error }, { status: 503 });
     }
 
     const body = await request.json();

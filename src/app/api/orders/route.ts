@@ -1,7 +1,11 @@
 import { connectDb } from "@/lib/db/mongoose";
 import { getCouponDiscount } from "@/lib/orders/coupons";
 import { resolveOrderItemsFromCatalog } from "@/lib/orders/inventory";
-import { calculatePricing } from "@/lib/orders/pricing";
+import {
+  calculatePricing,
+  pricingFlagsFromLines,
+} from "@/lib/orders/pricing";
+import { saveCheckoutAddressForUser } from "@/lib/user/save-checkout-address";
 import { OrderModel } from "@/models/Order";
 import { auth } from "@/lib/auth/auth";
 import { NextResponse } from "next/server";
@@ -61,21 +65,34 @@ export async function POST(request: Request) {
     if (coupon.error) {
       return NextResponse.json({ error: coupon.error }, { status: 400 });
     }
-    const pricing = calculatePricing(subtotal, coupon.discount);
+    const flags = pricingFlagsFromLines(resolved.items);
+    const pricing = calculatePricing(subtotal, coupon.discount, flags);
+
+    const shippingAddress = {
+      ...parsed.data.shippingAddress,
+      email: parsed.data.shippingAddress.email || undefined,
+      country: parsed.data.shippingAddress.country || "India",
+    };
 
     const order = await OrderModel.create({
       userId: session.user.id,
-      items: resolved.items.map(({ sku: _sku, ...item }) => item),
-      shippingAddress: {
-        ...parsed.data.shippingAddress,
-        email: parsed.data.shippingAddress.email || undefined,
-      },
+      items: resolved.items.map((line) => {
+        const { sku, gstExempt, ...item } = line;
+        void sku;
+        void gstExempt;
+        return item;
+      }),
+      shippingAddress,
       pricing,
       couponCode: coupon.code,
       status: "PENDING",
       paymentStatus: "PENDING",
       stockDecremented: false,
     });
+
+    await saveCheckoutAddressForUser(session.user.id, shippingAddress).catch(
+      () => undefined,
+    );
 
     return NextResponse.json({ data: JSON.parse(JSON.stringify(order)) });
   } catch (error) {

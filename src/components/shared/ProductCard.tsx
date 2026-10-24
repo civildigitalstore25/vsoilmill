@@ -6,7 +6,9 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { OfferCountdown } from "@/components/features/catalog/OfferCountdown";
 import { ScaleOnHover } from "@/components/shared/motion";
+import { CATALOG_COPY } from "@/constants/catalog";
 import { CHECKOUT_COPY } from "@/constants/checkout";
 import { PRODUCT_COPY } from "@/constants/home";
 import { ROUTES } from "@/constants/routes";
@@ -15,6 +17,13 @@ import { LAYOUT } from "@/constants/layout";
 import { useCartStore } from "@/hooks/useCartStore";
 import { cn } from "@/lib/utils/cn";
 import { formatInr } from "@/lib/utils/format";
+import {
+  compareAtPrice,
+  sellingPrice,
+  variantDisplayImage,
+  offerIsLive,
+  variantIsAvailable,
+} from "@/lib/products/commerce";
 import { getProductImageUrl } from "@/lib/utils/image";
 import type { ProductCardProps } from "@/types/product";
 
@@ -22,22 +31,28 @@ export function ProductCard({ product }: ProductCardProps) {
   const addItem = useCartStore((s) => s.addItem);
   const [variantIndex, setVariantIndex] = useState(0);
   const variant = product.variants[variantIndex] ?? product.variants[0];
-  const initialImage = getProductImageUrl(product);
-  const [imgSrc, setImgSrc] = useState(initialImage);
+  const unitPrice = variant ? sellingPrice(product, variant) : 0;
+  const strikePrice = variant ? compareAtPrice(product, variant) : 0;
+  const available = variant ? variantIsAvailable(variant) : false;
+  const displayImage = variant
+    ? variantDisplayImage(product.images, variant, getProductImageUrl(product))
+    : getProductImageUrl(product);
+  const [imgSrc, setImgSrc] = useState(displayImage);
 
   useEffect(() => {
-    setImgSrc(getProductImageUrl(product));
-  }, [product]);
+    setImgSrc(displayImage);
+  }, [displayImage]);
 
   const discount =
-    variant && variant.originalPrice > variant.price
-      ? Math.round(
-          ((variant.originalPrice - variant.price) / variant.originalPrice) * 100,
-        )
+    strikePrice > unitPrice
+      ? Math.round(((strikePrice - unitPrice) / strikePrice) * 100)
       : 0;
 
   function handleAdd() {
-    if (!variant) return;
+    if (!variant || !available) {
+      toast.error(CATALOG_COPY.outOfStock);
+      return;
+    }
     addItem({
       productId: product._id,
       variantId: String(variant._id),
@@ -45,27 +60,25 @@ export function ProductCard({ product }: ProductCardProps) {
       name: product.name,
       variantLabel: variant.label,
       image: imgSrc,
-      price: variant.price,
-      originalPrice: variant.originalPrice,
+      price: unitPrice,
+      originalPrice: strikePrice,
       stock: variant.stock,
+      gstExempt: Boolean(product.gstExempt),
     });
-    toast.success("Added to cart");
+    toast.success(CHECKOUT_COPY.ADDED_TO_CART);
   }
 
   return (
     <ScaleOnHover className="h-full w-full">
-      <article className="group flex h-full flex-col rounded-xl border border-border/70 bg-card p-2.5 shadow-sm">
-        <Link
-          href={ROUTES.PRODUCT(product.slug)}
-          className="relative mb-2.5 aspect-square shrink-0 overflow-hidden rounded-lg bg-cream-dark"
-        >
+      <article className="group flex h-full flex-col rounded-xl border border-border/70 bg-card p-2 shadow-sm">
+        <Link href={ROUTES.PRODUCT(product.slug)} className={LAYOUT.productMedia}>
           <Image
             src={imgSrc}
             alt={product.name}
             fill
             unoptimized
             onError={() => setImgSrc(ASSETS.PLACEHOLDER_PRODUCT)}
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+            className={LAYOUT.productImage}
           />
           {discount > 0 ? (
             <Badge className="absolute left-2 top-2 bg-primary px-1.5 py-0 text-[10px] text-primary-foreground">
@@ -116,23 +129,26 @@ export function ProductCard({ product }: ProductCardProps) {
           {variant ? (
             <>
               <span className="text-sm font-semibold text-dark sm:text-base">
-                {formatInr(variant.price)}
+                {formatInr(unitPrice)}
               </span>
-              {variant.originalPrice > variant.price ? (
+              {strikePrice > unitPrice ? (
                 <span className="text-xs text-muted line-through">
-                  {formatInr(variant.originalPrice)}
+                  {formatInr(strikePrice)}
                 </span>
               ) : null}
             </>
           ) : null}
         </div>
+        {offerIsLive(product) && product.offerEndsAt ? (
+          <OfferCountdown endsAt={product.offerEndsAt} compact />
+        ) : null}
 
-        <div className="mt-auto pt-3">
+        <div className="mt-auto pt-2">
           <Button
             size="sm"
             className="w-full"
             onClick={handleAdd}
-            disabled={!variant}
+            disabled={!variant || !available}
           >
             {CHECKOUT_COPY.ADD_TO_CART}
           </Button>

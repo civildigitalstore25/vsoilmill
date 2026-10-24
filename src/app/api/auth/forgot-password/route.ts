@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { z } from "zod";
 import { AUTH } from "@/constants/auth";
+import { isEmailConfigured } from "@/lib/email/brevo";
+import { sendPasswordResetEmail } from "@/lib/email/send";
 import { connectDb } from "@/lib/db/mongoose";
 import { UserModel } from "@/models/User";
 
@@ -43,34 +45,17 @@ export async function POST(request: Request) {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
     const resetUrl = `${siteUrl}/reset-password?token=${token}`;
 
-    // Email optional — log when EMAIL_FROM / RESEND not configured
-    if (process.env.RESEND_API_KEY && process.env.EMAIL_FROM) {
-      await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: process.env.EMAIL_FROM,
-          to: email,
-          subject: "Reset your VS OilMill password",
-          text: `Reset your password: ${resetUrl}\nThis link expires in 1 hour.`,
-        }),
-      });
+    if (isEmailConfigured()) {
+      await sendPasswordResetEmail({ email, resetUrl });
     } else {
       console.info("[password-reset]", { email, resetUrl });
     }
 
-    const exposeToken =
-      process.env.NODE_ENV !== "production" ||
-      process.env.AUTH_EXPOSE_RESET_TOKEN === "true";
-
+    // Never return the reset link in the UI — only in the email (or server logs if Brevo unset)
     return NextResponse.json({
       data: {
         ok: true,
         message: "If an account exists, a reset token was created.",
-        ...(exposeToken ? { resetUrl, token } : {}),
         minPasswordLength: AUTH.passwordMinLength,
       },
     });

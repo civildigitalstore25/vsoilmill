@@ -40,10 +40,14 @@ export async function PUT(request: Request, { params }: Params) {
       body.slug = slugify(body.name);
     }
 
-    const product = await ProductModel.findByIdAndUpdate(id, body, {
-      new: true,
-      runValidators: true,
-    }).lean();
+    const product = await ProductModel.findByIdAndUpdate(
+      id,
+      { $set: body },
+      {
+        new: true,
+        runValidators: true,
+      },
+    ).lean();
 
     if (!product) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });

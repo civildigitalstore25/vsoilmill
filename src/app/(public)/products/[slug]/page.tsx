@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductDetailClient } from "@/components/features/products/ProductDetailClient";
-import { ProductReviews } from "@/components/features/reviews/ProductReviews";
 import { PageContainer } from "@/components/layout/PageContainer";
 import {
   buildProductJsonLd,
   buildProductMetadata,
 } from "@/lib/seo/metadata";
-import { getProductBySlug, getProducts } from "@/lib/products/queries";
+import { getProductBySlug } from "@/lib/products/queries";
 import type { Category } from "@/types/product";
 
 export const dynamic = "force-dynamic";
@@ -45,13 +44,12 @@ export default async function ProductPage({ params }: Props) {
   const jsonLd = buildProductJsonLd(product, category?.name);
 
   return (
-    <PageContainer className="py-12">
+    <PageContainer className="py-5 lg:py-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <ProductDetailClient product={product} />
-      <ProductReviews productId={product._id} />
     </PageContainer>
   );
 }

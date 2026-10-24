@@ -41,6 +41,14 @@ export interface ShippingAddress {
   isDefault?: boolean;
 }
 
+export interface AdminUsersTableProps {
+  users: AdminUser[];
+  currentUserId?: string;
+  onEdit: (user: AdminUser) => void;
+  onDelete: (id: string) => void;
+  onRole: (id: string, role: UserRole) => void;
+}
+
 export interface UserAvatarProps {
   image?: string | null;
   name: string;

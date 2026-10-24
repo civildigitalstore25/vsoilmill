@@ -10,6 +10,12 @@ export interface Review {
   createdAt: string;
 }
 
+export interface OrderReviewTarget {
+  productId: string;
+  name: string;
+  variantLabel: string;
+}
+
 export interface ReviewFormInput {
   productId: string;
   authorName: string;
