@@ -38,10 +38,9 @@ function whatsappHref(): string {
 export function getEmailSocialLinks(): EmailSocialLink[] {
   const links: EmailSocialLink[] = [
     { label: "WhatsApp", href: whatsappHref() },
-    // Add when you have public pages:
-    // { label: "Instagram", href: "https://instagram.com/..." },
-    // { label: "Facebook", href: "https://facebook.com/..." },
-    // { label: "YouTube", href: "https://youtube.com/..." },
+    { label: "Instagram", href: "https://www.instagram.com/vsoilmillstore/" },
+    { label: "Facebook", href: "https://www.facebook.com/VSOilMillStore/" },
+    { label: "YouTube", href: "https://www.youtube.com/@Sarathkumar-pd" },
   ];
   return links.filter((l) => Boolean(l.href));
 }

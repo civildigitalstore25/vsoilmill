@@ -11,8 +11,10 @@ import {
   Sparkles,
   Store,
   Compass,
+  Share2,
 } from "lucide-react";
 import { ContactForm } from "@/components/features/contact/ContactForm";
+import { SocialLinks } from "@/components/common/SocialLinks";
 import { Button } from "@/components/ui/button";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { UI } from "@/constants/ui";
@@ -285,6 +287,27 @@ export default function ContactPage() {
           {/* Form Column (5 cols) */}
           <div className="lg:col-span-5">
             <ContactForm />
+          </div>
+        </div>
+
+        {/* Official Social Media Community Section */}
+        <div className="mt-16 border-t border-border pt-12">
+          <div className="mx-auto max-w-2xl text-center">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
+              <Share2 className="h-3.5 w-3.5" />
+              <span>Watch Our Mill in Action</span>
+            </div>
+            <h2 className="mt-3 font-display text-2xl font-bold text-dark sm:text-3xl">
+              Connect with VS OilMill on Social Media
+            </h2>
+            <p className="mt-2 text-xs leading-relaxed text-muted sm:text-sm">
+              Follow our daily wooden Chekku oil extractions, farm seed inspections, customer reviews,
+              and healthy cooking tips across our official channels.
+            </p>
+          </div>
+
+          <div className="mt-8">
+            <SocialLinks variant="cards" />
           </div>
         </div>
       </PageContainer>
