@@ -13,7 +13,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 import { Button } from "@/components/ui/button";
 import { ASSETS } from "@/constants/assets";
 import { LAYOUT } from "@/constants/layout";
-import { NAV_LINKS } from "@/constants/ui";
+import { NAV_LINKS, UI } from "@/constants/ui";
 import { ROUTES } from "@/constants/routes";
 import { useCartStore } from "@/hooks/useCartStore";
 import { cn } from "@/lib/utils/cn";
@@ -41,16 +41,17 @@ export function Header() {
 
         <Link
           href={ROUTES.HOME}
-          className="flex items-center gap-2 shrink-0"
+          className="flex items-center shrink-0 transition-transform hover:scale-105 py-0.5"
+          aria-label="VS OilMill Home"
         >
           <Image
             src={ASSETS.LOGO}
             alt="VS OilMill Logo"
-            width={180}
-            height={52}
+            width={140}
+            height={128}
             priority
             unoptimized
-            className="h-10 sm:h-12 w-auto object-contain rounded-md transition-opacity hover:opacity-90"
+            className="h-14 sm:h-16 md:h-18 lg:h-20 w-auto object-contain mix-blend-multiply"
           />
         </Link>
 

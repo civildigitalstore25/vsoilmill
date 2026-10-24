@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ASSETS } from "@/constants/assets";
 import { SEO_DEFAULTS, SITE_NAME } from "@/constants/seo";
 import { stripHtml, truncate } from "@/lib/utils/format";
 import type { Product } from "@/types/product";
@@ -14,7 +15,7 @@ export function buildPageMetadata(input: {
 }): Metadata {
   const description = input.description ?? SEO_DEFAULTS.description;
   const url = input.path ? `${siteUrl}${input.path}` : siteUrl;
-  const image = input.image ?? `${siteUrl}/images/og-default.jpg`;
+  const image = input.image ?? `${siteUrl}${ASSETS.LOGO}`;
 
   return {
     title: input.title,
@@ -49,7 +50,7 @@ export function buildProductMetadata(product: Product): Metadata {
       160,
     );
   const image =
-    product.seo?.ogImage ?? product.images[0] ?? `${siteUrl}/images/og-default.jpg`;
+    product.seo?.ogImage ?? product.images[0] ?? `${siteUrl}${ASSETS.LOGO}`;
   const canonical =
     product.seo?.canonicalUrl ?? `${siteUrl}/products/${product.slug}`;
 

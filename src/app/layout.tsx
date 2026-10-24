@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, Fraunces } from "next/font/google";
 import { Providers } from "@/components/providers/Providers";
+import { ASSETS } from "@/constants/assets";
 import { SEO_DEFAULTS, SITE_NAME } from "@/constants/seo";
 import "./globals.css";
 
@@ -23,10 +24,23 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   ),
+  icons: {
+    icon: ASSETS.LOGO,
+    shortcut: ASSETS.LOGO,
+    apple: ASSETS.LOGO,
+  },
   openGraph: {
     siteName: SITE_NAME,
     locale: SEO_DEFAULTS.locale,
     type: SEO_DEFAULTS.type,
+    images: [
+      {
+        url: ASSETS.LOGO,
+        width: 640,
+        height: 640,
+        alt: `${SITE_NAME} Logo`,
+      },
+    ],
   },
 };
 

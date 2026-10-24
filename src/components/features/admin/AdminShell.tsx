@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ExternalLink, LogOut, Menu, X } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { useState } from "react";
 import { ADMIN_COPY, ADMIN_NAV } from "@/constants/admin";
+import { ASSETS } from "@/constants/assets";
 import { LAYOUT } from "@/constants/layout";
 import { ROUTES } from "@/constants/routes";
 import { getPostLogoutRoute } from "@/lib/auth/post-login";
@@ -70,9 +72,18 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-[linear-gradient(180deg,var(--color-cream)_0%,var(--color-cream-dark)_100%)] lg:h-screen lg:overflow-hidden">
       <div className="mx-auto flex min-h-screen max-w-[1600px] lg:h-full">
         <aside className="hidden w-72 shrink-0 flex-col border-r border-dark/10 bg-dark p-5 text-cream lg:flex">
-          <Link href={ROUTES.ADMIN.DASHBOARD} className="block">
-            <p className="font-display text-2xl text-accent">{ADMIN_COPY.brand}</p>
-            <p className="mt-1 text-xs uppercase tracking-[0.18em] text-cream/50">
+          <Link href={ROUTES.ADMIN.DASHBOARD} className="flex flex-col items-center text-center group" aria-label="Admin Dashboard">
+            <div className="overflow-hidden rounded-2xl bg-white p-2.5 shadow-md border border-white/20 transition-transform group-hover:scale-105">
+              <Image
+                src={ASSETS.LOGO}
+                alt="VS OilMill"
+                width={120}
+                height={110}
+                unoptimized
+                className="h-16 w-auto object-contain"
+              />
+            </div>
+            <p className="mt-2.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
               {ADMIN_COPY.panelLabel}
             </p>
           </Link>
@@ -106,14 +117,25 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             />
             <aside className="absolute left-0 top-0 flex h-full w-72 flex-col bg-dark p-5 text-cream shadow-2xl">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-display text-xl text-accent">
-                    {ADMIN_COPY.brand}
-                  </p>
-                  <p className="text-xs uppercase tracking-[0.18em] text-cream/50">
+                <Link
+                  href={ROUTES.ADMIN.DASHBOARD}
+                  className="flex items-center gap-3"
+                  onClick={() => setOpen(false)}
+                >
+                  <div className="overflow-hidden rounded-xl bg-white p-1.5 shadow-xs border border-white/20">
+                    <Image
+                      src={ASSETS.LOGO}
+                      alt="VS OilMill"
+                      width={60}
+                      height={55}
+                      unoptimized
+                      className="h-12 w-auto object-contain"
+                    />
+                  </div>
+                  <p className="text-xs uppercase tracking-[0.18em] text-accent font-semibold">
                     {ADMIN_COPY.panelLabel}
                   </p>
-                </div>
+                </Link>
                 <button
                   type="button"
                   aria-label="Close"

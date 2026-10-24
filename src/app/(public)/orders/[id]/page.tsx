@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Package, MapPin, CreditCard, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageContainer } from "@/components/layout/PageContainer";
+import { ASSETS } from "@/constants/assets";
 import { ROUTES } from "@/constants/routes";
 import { USER_ROLES } from "@/constants/auth";
 import { auth } from "@/lib/auth/auth";
@@ -43,23 +44,35 @@ export default async function OrderDetailPage({ params }: Props) {
   return (
     <PageContainer className="py-10">
       {/* Header Navigation */}
-      <div className="flex items-center justify-between border-b border-border pb-6">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="font-display text-3xl text-dark">Order #{shortId}</h1>
-            <span
-              className={`inline-flex items-center gap-1 rounded-full border px-3 py-0.5 text-xs font-bold ${
-                isPaid
-                  ? "bg-emerald-100 text-emerald-800 border-emerald-300"
-                  : "bg-amber-100 text-amber-800 border-amber-300"
-              }`}
-            >
-              {isPaid ? "PAID" : "PAYMENT PENDING"}
-            </span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
+        <div className="flex items-center gap-4">
+          <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-white p-1 border border-border shadow-xs">
+            <Image
+              src={ASSETS.LOGO}
+              alt="VS OilMill"
+              width={48}
+              height={48}
+              unoptimized
+              className="h-full w-full object-contain"
+            />
           </div>
-          <p className="mt-1 text-sm text-muted flex items-center gap-2">
-            <Calendar className="h-4 w-4" /> Placed on {formattedDate} · ID: <span className="font-mono text-xs">{data._id}</span>
-          </p>
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="font-display text-2xl sm:text-3xl text-dark">Order #{shortId}</h1>
+              <span
+                className={`inline-flex items-center gap-1 rounded-full border px-3 py-0.5 text-xs font-bold ${
+                  isPaid
+                    ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                    : "bg-amber-100 text-amber-800 border-amber-300"
+                }`}
+              >
+                {isPaid ? "PAID" : "PAYMENT PENDING"}
+              </span>
+            </div>
+            <p className="mt-1 text-xs sm:text-sm text-muted flex items-center gap-2">
+              <Calendar className="h-4 w-4" /> Placed on {formattedDate} · ID: <span className="font-mono text-xs">{data._id}</span>
+            </p>
+          </div>
         </div>
 
         <Button variant="outline" size="sm" asChild className="gap-2">

@@ -10,15 +10,17 @@ export function Footer() {
     <footer className="mt-12 border-t border-border bg-dark text-cream md:mt-20">
       <PageContainer className="grid gap-6 py-8 sm:gap-8 sm:py-10 md:grid-cols-3 md:gap-10 md:py-14">
         <div className="md:pr-4">
-          <Link href={ROUTES.HOME} className="mb-2 inline-block">
-            <Image
-              src={ASSETS.LOGO}
-              alt="VS OilMill Logo"
-              width={140}
-              height={42}
-              unoptimized
-              className="h-8 w-auto rounded-md object-contain sm:h-10"
-            />
+          <Link href={ROUTES.HOME} className="mb-4 inline-block group" aria-label="VS OilMill Home">
+            <div className="overflow-hidden rounded-2xl bg-white p-2.5 shadow-md border border-white/20 transition-transform group-hover:scale-105">
+              <Image
+                src={ASSETS.LOGO}
+                alt="VS OilMill Logo"
+                width={150}
+                height={138}
+                unoptimized
+                className="h-20 sm:h-24 w-auto object-contain"
+              />
+            </div>
           </Link>
           <p className="mt-2 text-xs text-cream/70 sm:text-sm">{UI.since}</p>
           <p className="mt-2 text-xs leading-snug text-cream/80 sm:mt-3 sm:text-sm sm:leading-relaxed">

@@ -1,5 +1,7 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
+import { ASSETS } from "@/constants/assets";
 import { AUTH_COPY, AUTH_HIGHLIGHTS } from "@/constants/auth";
 import { LAYOUT } from "@/constants/layout";
 import { ROUTES } from "@/constants/routes";
@@ -8,12 +10,20 @@ import { cn } from "@/lib/utils/cn";
 
 export function AuthMobileBar() {
   return (
-    <div className={cn(LAYOUT.container, "flex items-center justify-between border-b border-border py-3 lg:hidden")}>
+    <div className={cn(LAYOUT.container, "flex items-center justify-between border-b border-border py-2.5 lg:hidden")}>
       <Link
         href={ROUTES.HOME}
-        className="font-display text-xl font-semibold text-primary"
+        className="flex items-center transition-transform hover:scale-105"
+        aria-label="Home"
       >
-        {UI.brand}
+        <Image
+          src={ASSETS.LOGO}
+          alt="VS OilMill"
+          width={80}
+          height={73}
+          unoptimized
+          className="h-12 w-auto object-contain mix-blend-multiply"
+        />
       </Link>
       <Link
         href={ROUTES.HOME}
@@ -48,9 +58,19 @@ export function AuthBrandPanel() {
         </Link>
         <Link
           href={ROUTES.HOME}
-          className="mt-5 block font-display text-3xl font-semibold text-accent"
+          className="mt-6 inline-block group"
+          aria-label="Home"
         >
-          {UI.brand}
+          <div className="overflow-hidden rounded-2xl bg-white p-2.5 shadow-lg border border-white/15 transition-transform group-hover:scale-105">
+            <Image
+              src={ASSETS.LOGO}
+              alt="VS OilMill"
+              width={140}
+              height={128}
+              unoptimized
+              className="h-20 w-auto object-contain"
+            />
+          </div>
         </Link>
         <p className="mt-6 text-xs font-medium uppercase tracking-[0.2em] text-accent">
           {AUTH_COPY.panelEyebrow}
