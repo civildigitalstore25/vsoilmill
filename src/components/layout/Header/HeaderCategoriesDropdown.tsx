@@ -3,28 +3,44 @@
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import {
+  Candy,
   ChevronDown,
+  Citrus,
   Droplet,
-  Sparkles,
   Flame,
-  Sprout,
-  Gift,
-  ShieldCheck,
-  Tag,
+  Leaf,
+  Nut,
+  Sparkles,
+  Wheat,
   type LucideIcon,
 } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
-import { stripHtml } from "@/lib/utils/format";
 import type { Category } from "@/types/product";
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
-  "wood-pressed-oils": Droplet,
+  "sesame-oil": Droplet,
+  "groundnut-oil": Nut,
+  "coconut-oil": Citrus,
   "pure-cow-ghee": Sparkles,
-  "traditional-oils": Flame,
-  "oil-cakes": Sprout,
-  "combo-offers": Gift,
-  "home-cleaning": ShieldCheck,
+  "castor-oil": Droplet,
+  "neem-oil": Leaf,
+  "mahua-oil": Flame,
+  "pongam-oil": Flame,
+  "jaggery-powder": Candy,
+  "honey-dry-nuts": Wheat,
 };
+
+function categoryMenuLabel(name: string) {
+  const open = name.lastIndexOf("(");
+  const close = name.lastIndexOf(")");
+  if (open > 0 && close > open) {
+    return {
+      title: name.slice(0, open).trim(),
+      subtitle: name.slice(open + 1, close).trim(),
+    };
+  }
+  return { title: name, subtitle: "" };
+}
 
 export function HeaderCategoriesDropdown({
   categories,
@@ -72,30 +88,31 @@ export function HeaderCategoriesDropdown({
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-1 w-80 rounded-2xl border border-border/80 bg-card p-3 shadow-xl backdrop-blur-md">
-          <div className="mb-2 px-3 pt-1 text-[11px] font-bold uppercase tracking-wider text-muted">
+        <div className="absolute left-0 top-full z-50 mt-1 max-h-[min(70vh,32rem)] w-[36rem] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-2xl border border-border/80 bg-card p-3 shadow-xl">
+          <div className="mb-2 px-3 pt-1 text-xs font-bold uppercase tracking-wider text-muted">
             Shop By Category
           </div>
 
-          <div className="grid gap-1">
+          <div className="grid grid-cols-2 gap-1">
             {categories.map((cat) => {
-              const Icon = CATEGORY_ICONS[cat.slug] ?? Tag;
+              const Icon = CATEGORY_ICONS[cat.slug] ?? Droplet;
+              const label = categoryMenuLabel(cat.name);
               return (
                 <Link
                   key={cat._id}
                   href={ROUTES.CATEGORY(cat.slug)}
                   onClick={() => setOpen(false)}
-                  className="group flex items-start gap-3 rounded-xl p-2.5 transition-colors hover:bg-cream-dark/60"
+                  className="group flex items-center gap-2.5 rounded-xl p-2.5 transition-colors hover:bg-cream-dark/60"
                 >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-transform group-hover:scale-110">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <Icon className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="text-sm font-semibold text-dark transition-colors group-hover:text-primary">
-                      {cat.name}
+                    <div className="line-clamp-2 text-sm font-semibold leading-snug text-dark group-hover:text-primary">
+                      {label.title}
                     </div>
-                    <div className="truncate text-[11px] text-muted">
-                      {stripHtml(cat.description || "") || cat.badge || "Shop this collection"}
+                    <div className="truncate text-xs text-muted">
+                      {label.subtitle || cat.badge}
                     </div>
                   </div>
                 </Link>
