@@ -9,7 +9,7 @@ export const FAQS = [
   },
   {
     q: "What payment methods do you accept?",
-    a: "We accept UPI, cards, and wallets through PhonePe Payment Gateway. You can also place an order enquiry via WhatsApp.",
+    a: "We accept UPI, cards, and net banking. You can also place an order enquiry via WhatsApp.",
   },
   {
     q: "Is your ghee A2 / bilona?",

@@ -1,5 +1,8 @@
 export const API_ENDPOINTS = {
   PRODUCTS: "/api/products",
+  COMBOS: "/api/combos",
+  COMBO: (id: string) => `/api/combos/${id}`,
+  CATALOG_HIGHLIGHTS: "/api/catalog/highlights",
   PRODUCT: (id: string) => `/api/products/${id}`,
   CATEGORIES: "/api/categories",
   CATEGORY: (id: string) => `/api/categories/${id}`,

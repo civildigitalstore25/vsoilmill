@@ -165,8 +165,8 @@ export default async function OrderDetailPage({ params }: Props) {
                 </span>
               </div>
               <div className="flex justify-between text-muted">
-                <span>Tax</span>
-                <span className="font-medium text-dark">{formatInr(data.pricing.tax)}</span>
+                <span>GST (5%)</span>
+                <span className="font-medium text-dark">Included</span>
               </div>
               {data.pricing.discount > 0 && (
                 <div className="flex justify-between text-green-700 font-medium">

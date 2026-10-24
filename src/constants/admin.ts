@@ -3,6 +3,7 @@ import {
   Images,
   LayoutDashboard,
   Package,
+  Gift,
   ShoppingBag,
   Star,
   Users,
@@ -21,6 +22,12 @@ export const ADMIN_NAV = [
     label: "Products",
     description: "Catalog & variants",
     icon: Package,
+  },
+  {
+    href: ROUTES.ADMIN.COMBOS,
+    label: "Combo offers",
+    description: "Bundles & combo price",
+    icon: Gift,
   },
   {
     href: ROUTES.ADMIN.CATEGORIES,
@@ -76,6 +83,7 @@ export const ADMIN_ACTIONS = {
   updateFailed: "Update failed",
   createFailed: "Create failed",
   confirmDelete: "Delete this item? This cannot be undone.",
+  openPage: "Open page",
 } as const;
 
 export const ADMIN_USERS_COPY = {
@@ -106,6 +114,8 @@ export const ADMIN_CATEGORY_COPY = {
   title: "Categories",
   description: "Create, edit, and delete shop collections.",
   addButton: "Add category",
+  addInline: "Add",
+  namePlaceholder: "New category name",
   createTitle: "Create category",
   editTitle: "Edit category",
   empty: "No categories yet.",
@@ -175,6 +185,13 @@ export const ADMIN_ORDERS_COPY = {
   refundConfirm: "Refund this order and restore stock?",
   refunded: "Order refunded",
   refundFailed: "Refund failed",
+} as const;
+
+export const ADMIN_DASHBOARD_COPY = {
+  outOfStockTitle: "Out of stock",
+  outOfStockHint: "Products marked unavailable",
+  outOfStockEmpty: "Every product is available.",
+  editProduct: "Edit",
 } as const;
 
 export const ADMIN_PRODUCTS_COPY = {

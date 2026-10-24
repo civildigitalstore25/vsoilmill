@@ -28,15 +28,14 @@ describe("coupons", () => {
 });
 
 describe("pricing", () => {
-  it("adds shipping under free threshold", () => {
+  it("keeps GST inside the product price and shipping free", () => {
     const pricing = calculatePricing(100, 0);
-    expect(pricing.shipping).toBeGreaterThan(0);
-    expect(pricing.total).toBe(
-      pricing.subtotal + pricing.shipping + pricing.tax - pricing.discount,
-    );
+    expect(pricing.shipping).toBe(0);
+    expect(pricing.tax).toBe(0);
+    expect(pricing.total).toBe(100);
   });
 
-  it("skips GST and shipping for gst-exempt-only cart", () => {
+  it("does not add GST or shipping on a one-rupee order", () => {
     const pricing = calculatePricing(1, 0, {
       taxableSubtotal: 0,
       waiveShipping: true,

@@ -5,13 +5,13 @@ import { buildWhatsAppUrl } from "@/lib/utils/whatsapp";
 
 export function AnnouncementBar() {
   return (
-    <div className="bg-primary py-2 text-center text-sm text-primary-foreground">
+    <div className="bg-primary py-2 text-center text-[11px] leading-snug text-primary-foreground sm:text-sm">
       <p className={LAYOUT.container}>
-        {UI.announcement}
-        <span className="mx-2 opacity-50">|</span>
+        <span className="block sm:inline">{UI.announcement}</span>
+        <span className="mx-2 hidden opacity-50 sm:inline">|</span>
         <Link
           href={buildWhatsAppUrl("Hi VS OilMill!")}
-          className="underline underline-offset-2"
+          className="mt-0.5 block underline underline-offset-2 sm:mt-0 sm:inline"
           target="_blank"
           rel="noopener noreferrer"
         >

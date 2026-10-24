@@ -5,7 +5,7 @@ export const PRIVACY_POLICY = {
   sections: [
     {
       title: "Information We Collect",
-      body: "We collect name, phone, email, shipping address, and order details needed to fulfill purchases. Payment details are processed by PhonePe and are not stored on our servers.",
+      body: "We collect name, phone, email, shipping address, and order details needed to fulfill purchases. Payment details are processed by our payment partner and are not stored on our servers.",
     },
     {
       title: "How We Use Information",

@@ -9,7 +9,7 @@ export const TERMS_POLICY = {
     },
     {
       title: "Orders and Payment",
-      body: "Prices are in Indian Rupees (INR) and include applicable GST where indicated. Orders are confirmed after successful PhonePe payment or accepted WhatsApp confirmation.",
+      body: "Prices are in Indian Rupees (INR) and include applicable GST where indicated. Orders are confirmed after successful online payment or accepted WhatsApp confirmation.",
     },
     {
       title: "Account Responsibility",

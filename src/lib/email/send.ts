@@ -19,7 +19,12 @@ export type OrderEmailLike = {
   status?: string;
   trackingNumber?: string;
   courier?: string;
-  items?: Array<{ name?: string; quantity?: number; price?: number }>;
+  items?: Array<{
+    name?: string;
+    variantLabel?: string;
+    quantity?: number;
+    price?: number;
+  }>;
 };
 
 function orderIdShort(order: OrderEmailLike): string {
@@ -29,7 +34,7 @@ function orderIdShort(order: OrderEmailLike): string {
 function itemRows(order: OrderEmailLike): EmailDetailRow[] {
   if (!order.items?.length) return [];
   return order.items.map((i) => ({
-    label: i.name ?? "Item",
+    label: i.variantLabel ? `${i.name ?? "Item"} — ${i.variantLabel}` : (i.name ?? "Item"),
     value: `× ${i.quantity ?? 1} · ₹${i.price ?? 0}`,
   }));
 }

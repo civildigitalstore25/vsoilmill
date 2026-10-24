@@ -4,13 +4,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { Menu, ShoppingBag, LogOut, Shield } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnnouncementBar } from "@/components/layout/Header/AnnouncementBar";
-import { HeaderCategoriesDropdown, CATEGORIES_NAV } from "@/components/layout/Header/HeaderCategoriesDropdown";
+import { HeaderCategoriesDropdown } from "@/components/layout/Header/HeaderCategoriesDropdown";
 import { CartDrawer } from "@/components/features/cart/CartDrawer";
 import { ProfileDropdown } from "@/components/features/profile/ProfileDropdown";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Button } from "@/components/ui/button";
+import { API_ENDPOINTS } from "@/constants/api";
+import { CATALOG_COPY } from "@/constants/catalog";
 import { ASSETS } from "@/constants/assets";
 import { LAYOUT } from "@/constants/layout";
 import { NAV_LINKS } from "@/constants/ui";
@@ -18,11 +20,31 @@ import { ROUTES } from "@/constants/routes";
 import { useCartStore } from "@/hooks/useCartStore";
 import { cn } from "@/lib/utils/cn";
 
-export function Header() {
+import type { Category } from "@/types/product";
+
+export function Header({ categories }: { categories: Category[] }) {
   const { data: session } = useSession();
   const itemCount = useCartStore((s) => s.getItemCount());
   const [cartOpen, setCartOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [menus, setMenus] = useState({ hasOffers: false, hasCombos: false });
+
+  useEffect(() => {
+    void fetch(API_ENDPOINTS.CATALOG_HIGHLIGHTS)
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.data) setMenus(json.data);
+      })
+      .catch(() => undefined);
+  }, []);
+
+  const extraLinks: { label: string; href: string }[] = [];
+  if (menus.hasOffers) {
+    extraLinks.push({ label: CATALOG_COPY.offersNav, href: ROUTES.OFFERS });
+  }
+  if (menus.hasCombos) {
+    extraLinks.push({ label: CATALOG_COPY.combosNav, href: ROUTES.COMBOS });
+  }
 
   const isAdmin = session?.user?.role === "admin";
 
@@ -56,8 +78,8 @@ export function Header() {
 
         {/* Main Desktop Navigation */}
         <nav className="hidden items-center gap-6 md:flex">
-          <HeaderCategoriesDropdown />
-          {NAV_LINKS.map((link) => (
+          <HeaderCategoriesDropdown categories={categories} />
+          {[...extraLinks, ...NAV_LINKS].map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -103,10 +125,10 @@ export function Header() {
               Categories
             </p>
             <div className="grid grid-cols-2 gap-2">
-              {CATEGORIES_NAV.map((cat) => (
+              {categories.map((cat) => (
                 <Link
-                  key={cat.slug}
-                  href={`/categories/${cat.slug}`}
+                  key={cat._id}
+                  href={ROUTES.CATEGORY(cat.slug)}
                   className="rounded-lg bg-cream-dark/40 px-3 py-2 text-xs font-medium text-dark hover:bg-cream-dark"
                   onClick={() => setMobileOpen(false)}
                 >
@@ -117,7 +139,7 @@ export function Header() {
           </div>
 
           <div className="pt-2 border-t border-border">
-            {NAV_LINKS.map((link) => (
+            {[...extraLinks, ...NAV_LINKS].map((link) => (
               <Link
                 key={link.href}
                 href={link.href}

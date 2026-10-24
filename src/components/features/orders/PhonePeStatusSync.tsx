@@ -17,7 +17,7 @@ export function PhonePeStatusSync({
   const router = useRouter();
   const ran = useRef(false);
   const [message, setMessage] = useState(
-    paymentStatus === "PAID" ? "" : "Confirming payment with PhonePe…",
+    paymentStatus === "PAID" ? "" : "Confirming your payment…",
   );
 
   useEffect(() => {

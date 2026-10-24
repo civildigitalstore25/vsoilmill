@@ -12,7 +12,13 @@ export interface ProductVariant {
   sku: string;
   originalPrice: number;
   price: number;
+  /** Timed offer price. Used only while the product offer window is active. */
+  offerPrice?: number;
+  /** Admin availability toggle. False means out of stock. */
+  available?: boolean;
   stock: number;
+  /** Variant-specific image (ImageKit, Cloudinary, or any https URL). */
+  image?: string;
   weightGrams?: number;
 }
 
@@ -34,6 +40,8 @@ export interface Product {
   description: string;
   shortDescription?: string;
   images: string[];
+  /** Product videos (YouTube, Instagram, Drive, ImageKit, Cloudinary, etc.). */
+  videos?: string[];
   categoryId: string | Category;
   variants: ProductVariant[];
   tags: string[];
@@ -42,6 +50,9 @@ export interface Product {
   isNewArrival: boolean;
   /** Skip GST on this product (e.g. ₹1 payment test). */
   gstExempt?: boolean;
+  offerEnabled?: boolean;
+  offerStartsAt?: string | null;
+  offerEndsAt?: string | null;
   seo: ProductSeo;
   averageRating?: number;
   reviewCount?: number;
@@ -57,4 +68,21 @@ export interface ProductCardProps {
 export interface ProductGridProps {
   products: Product[];
   resetKey?: string;
+}
+
+export interface ProductShareProps {
+  name: string;
+  text: string;
+}
+
+export interface ProductShareLink {
+  key: "whatsapp" | "facebook" | "x" | "email";
+  label: string;
+  href: string;
+}
+
+export interface ProductDetailHeadingProps {
+  name: string;
+  shortDescription?: string;
+  discount: number;
 }

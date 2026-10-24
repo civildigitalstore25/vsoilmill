@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { RichTextEditor } from "@/components/features/admin/RichTextEditor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -117,14 +118,12 @@ export function AdminCategoryForm({
         <Label htmlFor="description">
           {ADMIN_CATEGORY_COPY.descriptionLabel}
         </Label>
-        <Input
-          id="description"
-          className="mt-1.5"
-          value={form.description}
-          onChange={(e) =>
-            setForm((f) => ({ ...f, description: e.target.value }))
-          }
-        />
+        <div className="mt-1.5">
+          <RichTextEditor
+            value={form.description}
+            onChange={(html) => setForm((f) => ({ ...f, description: html }))}
+          />
+        </div>
       </div>
       <label className="flex items-center gap-2 text-sm">
         <input

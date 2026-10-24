@@ -12,8 +12,10 @@ import {
   AdminStatCard,
 } from "@/components/features/admin/AdminUi";
 import { Button } from "@/components/ui/button";
+import { ADMIN_DASHBOARD_COPY } from "@/constants/admin";
 import { ROUTES } from "@/constants/routes";
 import { connectDb } from "@/lib/db/mongoose";
+import { getOutOfStockProducts } from "@/lib/products/out-of-stock";
 import { formatInr } from "@/lib/utils/format";
 import { OrderModel } from "@/models/Order";
 import { ProductModel } from "@/models/Product";
@@ -36,15 +38,13 @@ export default async function AdminDashboardPage() {
     (sum, order) => sum + (order.pricing?.total ?? 0),
     0,
   );
-  const lowStock = await ProductModel.find({ "variants.stock": { $lte: 10 } })
-    .limit(5)
-    .lean();
+  const outOfStock = await getOutOfStockProducts();
 
   return (
     <div>
       <AdminPageHeader
         title="Dashboard"
-        description="Track sales, stock health, and fulfillment at a glance."
+        description="Track sales and fulfillment at a glance."
         actions={
           <>
             <Button variant="outline" asChild>
@@ -137,29 +137,32 @@ export default async function AdminDashboardPage() {
               <AlertTriangle className="h-5 w-5" />
             </span>
             <div>
-              <h2 className="font-display text-xl text-dark">Low stock</h2>
-              <p className="text-sm text-muted">Variants at 10 units or below</p>
+              <h2 className="font-display text-xl text-dark">
+                {ADMIN_DASHBOARD_COPY.outOfStockTitle}
+              </h2>
+              <p className="text-sm text-muted">{ADMIN_DASHBOARD_COPY.outOfStockHint}</p>
             </div>
           </div>
           <ul className="space-y-3">
-            {lowStock.length === 0 ? (
+            {outOfStock.length === 0 ? (
               <li className="rounded-xl bg-primary/5 px-4 py-8 text-center text-sm text-primary">
-                Inventory looks healthy.
+                {ADMIN_DASHBOARD_COPY.outOfStockEmpty}
               </li>
             ) : (
-              lowStock.map((product) => (
+              outOfStock.map((product) => (
                 <li
-                  key={String(product._id)}
-                  className="flex items-center justify-between rounded-xl border border-border/70 bg-cream/40 px-4 py-3"
+                  key={product.id}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-cream/40 px-4 py-3"
                 >
-                  <span className="text-sm font-medium text-dark">
-                    {product.name}
-                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-dark">{product.name}</p>
+                    <p className="text-xs text-muted">{product.labels.join(", ")}</p>
+                  </div>
                   <Link
-                    href={ROUTES.ADMIN.PRODUCT_EDIT(String(product._id))}
-                    className="text-xs font-semibold text-primary hover:underline"
+                    href={ROUTES.ADMIN.PRODUCT_EDIT(product.id)}
+                    className="shrink-0 text-xs font-semibold text-primary hover:underline"
                   >
-                    Restock
+                    {ADMIN_DASHBOARD_COPY.editProduct}
                   </Link>
                 </li>
               ))

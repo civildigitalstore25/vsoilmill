@@ -6,6 +6,7 @@ import {
   AdminStatusPill,
 } from "@/components/features/admin/AdminUi";
 import { AdminProductDeleteButton } from "@/components/features/admin/AdminProductDeleteButton";
+import { AdminViewPageLink } from "@/components/features/admin/AdminViewPageLink";
 import { Button } from "@/components/ui/button";
 import { ADMIN_ACTIONS, ADMIN_PRODUCTS_COPY } from "@/constants/admin";
 import { ROUTES } from "@/constants/routes";
@@ -48,6 +49,7 @@ export default async function AdminProductsPage() {
                 <th className="px-5 py-4 font-semibold">Product</th>
                 <th className="px-5 py-4 font-semibold">Price from</th>
                 <th className="px-5 py-4 font-semibold">Status</th>
+                <th className="px-5 py-4 font-semibold">{ADMIN_ACTIONS.openPage}</th>
                 <th className="px-5 py-4 font-semibold">Actions</th>
               </tr>
             </thead>
@@ -57,6 +59,7 @@ export default async function AdminProductsPage() {
                   _id: string;
                   name: string;
                   shortDescription?: string;
+                  slug: string;
                   images?: string[];
                   categoryId?: { slug?: string; image?: string };
                   variants: { price: number; label: string }[];
@@ -94,6 +97,9 @@ export default async function AdminProductsPage() {
                     </td>
                     <td className="px-5 py-4">
                       <AdminStatusPill active={product.isActive} />
+                    </td>
+                    <td className="px-5 py-4">
+                      <AdminViewPageLink href={ROUTES.PRODUCT(product.slug)} />
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex gap-2">

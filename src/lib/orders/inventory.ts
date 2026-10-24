@@ -1,5 +1,13 @@
 import { Types } from "mongoose";
+import { ComboModel } from "@/models/Combo";
 import { ProductModel } from "@/models/Product";
+import {
+  comboIsLive,
+  sellingPrice,
+  variantDisplayImage,
+  variantIsAvailable,
+} from "@/lib/products/commerce";
+import { stripHtml } from "@/lib/utils/format";
 import type { OrderItem } from "@/types/order";
 
 type CartLikeItem = {
@@ -28,29 +36,79 @@ export async function resolveOrderItemsFromCatalog(
   for (const item of items) {
     const product = byId.get(item.productId);
     if (!product) {
-      return { error: "One or more products are unavailable" };
+      const combo = (await ComboModel.findById(item.productId).lean()) as {
+        name: string;
+        price: number;
+        images?: string[];
+        isActive?: boolean;
+        startsAt?: Date;
+        endsAt?: Date;
+        items?: Array<{
+          productName?: string;
+          variantLabel?: string;
+          quantity?: number;
+        }>;
+      } | null;
+      if (!combo || !comboIsLive(combo)) {
+        return { error: "One or more products are unavailable" };
+      }
+      const summary = (combo.items ?? [])
+        .map(
+          (line: { productName?: string; variantLabel?: string; quantity?: number }) =>
+            `${line.productName ?? "Item"} ${line.variantLabel ?? ""} × ${line.quantity ?? 1}`.trim(),
+        )
+        .join(", ");
+      resolved.push({
+        productId: item.productId,
+        variantId: item.variantId,
+        name: stripHtml(combo.name),
+        variantLabel: summary || "Combo",
+        image: combo.images?.[0] ?? "",
+        price: combo.price,
+        quantity: item.quantity,
+        gstExempt: false,
+      });
+      continue;
     }
 
     const variant = product.variants.find(
-      (v: { _id?: { toString(): string }; label: string; price: number; stock: number; sku?: string }) =>
-        String(v._id) === item.variantId,
+      (v: {
+        _id?: { toString(): string };
+        label: string;
+        price: number;
+        stock: number;
+        sku?: string;
+        available?: boolean;
+        image?: string;
+        offerPrice?: number;
+        originalPrice?: number;
+      }) => String(v._id) === item.variantId,
     );
     if (!variant) {
       return { error: `Variant not found for ${product.name}` };
     }
-    if (variant.stock < item.quantity) {
+    if (!variantIsAvailable(variant) || variant.stock < item.quantity) {
       return {
-        error: `Insufficient stock for ${product.name} (${variant.label})`,
+        error: `${product.name} (${variant.label}) is out of stock`,
       };
     }
+
+    const price = sellingPrice(product as {
+      offerEnabled?: boolean;
+      offerStartsAt?: Date | null;
+      offerEndsAt?: Date | null;
+    }, {
+      ...variant,
+      originalPrice: variant.originalPrice ?? variant.price,
+    });
 
     resolved.push({
       productId: item.productId,
       variantId: item.variantId,
       name: product.name,
       variantLabel: variant.label,
-      image: product.images?.[0] ?? "",
-      price: variant.price,
+      image: variantDisplayImage(product.images, variant),
+      price,
       quantity: item.quantity,
       sku: variant.sku,
       gstExempt: Boolean(
@@ -79,7 +137,22 @@ export async function decrementStockForItems(
       { $inc: { "variants.$.stock": -item.quantity } },
     );
     if (result.modifiedCount === 0) {
-      throw new Error("Failed to reserve stock for one or more items");
+      const combo = (await ComboModel.findById(item.productId).lean()) as {
+        items?: Array<{ productId: unknown; variantId: string; quantity?: number }>;
+      } | null;
+      if (!combo) {
+        throw new Error("Failed to reserve stock for one or more items");
+      }
+      for (const line of combo.items ?? []) {
+        if (!line.productId || !line.variantId) continue;
+        await decrementStockForItems([
+          {
+            productId: String(line.productId),
+            variantId: String(line.variantId),
+            quantity: (line.quantity ?? 1) * item.quantity,
+          },
+        ]);
+      }
     }
   }
 }

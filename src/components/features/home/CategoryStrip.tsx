@@ -11,6 +11,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 import { LAYOUT } from "@/constants/layout";
 import { ROUTES } from "@/constants/routes";
 import { cn } from "@/lib/utils/cn";
+import { stripHtml } from "@/lib/utils/format";
 import type { Category } from "@/types/product";
 
 const DEFAULT_CATEGORY_IMAGES: Record<string, string> = {
@@ -89,7 +90,7 @@ export function CategoryStrip({ categories }: { categories: Category[] }) {
                           "mt-1 text-xs leading-relaxed text-muted",
                         )}
                       >
-                        {category.description || "\u00a0"}
+                        {stripHtml(category.description || "") || "\u00a0"}
                       </p>
                       <div className="mt-auto flex items-center pt-4 text-xs font-bold text-primary transition-all group-hover:translate-x-1">
                         <span>Explore Collection</span>

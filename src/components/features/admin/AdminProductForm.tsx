@@ -9,7 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ADMIN_PRODUCTS_COPY } from "@/constants/admin";
+import { RichTextEditor } from "@/components/features/admin/RichTextEditor";
+import { ADMIN_CATEGORY_COPY, ADMIN_PRODUCTS_COPY } from "@/constants/admin";
+import { CATALOG_COPY } from "@/constants/catalog";
+import {
+  toDatetimeLocalValue,
+  VARIANT_AVAILABLE_STOCK,
+  variantIsAvailable,
+} from "@/lib/products/commerce";
 import { API_ENDPOINTS } from "@/constants/api";
 import { ASSETS } from "@/constants/assets";
 import { ROUTES } from "@/constants/routes";
@@ -43,12 +50,20 @@ export function AdminProductForm({
     isBestSeller: product?.isBestSeller ?? false,
     isNewArrival: product?.isNewArrival ?? false,
     gstExempt: product?.gstExempt ?? false,
+    offerEnabled: product?.offerEnabled ?? false,
+    offerStartsAt: toDatetimeLocalValue(product?.offerStartsAt),
+    offerEndsAt: toDatetimeLocalValue(product?.offerEndsAt),
     metaTitle: product?.seo?.metaTitle ?? "",
     metaDescription: product?.seo?.metaDescription ?? "",
     metaKeywords: product?.seo?.metaKeywords?.join(", ") ?? "",
     ogImage: product?.seo?.ogImage ?? "",
   });
 
+  const [categoryList, setCategoryList] = useState<Category[]>(categories);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [addingCategory, setAddingCategory] = useState(false);
+  const [videos, setVideos] = useState<string[]>(product?.videos ?? []);
+  const [videoUrl, setVideoUrl] = useState("");
   const [variants, setVariants] = useState<
     {
       _id?: string;
@@ -56,6 +71,9 @@ export function AdminProductForm({
       sku: string;
       originalPrice: number;
       price: number;
+      offerPrice: number;
+      available: boolean;
+      image: string;
       stock: number;
     }[]
   >(
@@ -66,6 +84,9 @@ export function AdminProductForm({
           sku: v.sku,
           originalPrice: v.originalPrice,
           price: v.price,
+          offerPrice: v.offerPrice ?? 0,
+          available: variantIsAvailable(v),
+          image: v.image ?? "",
           stock: v.stock,
         }))
       : [
@@ -74,7 +95,10 @@ export function AdminProductForm({
             sku: "",
             originalPrice: 400,
             price: 350,
-            stock: 100,
+            offerPrice: 0,
+            available: true,
+            image: "",
+            stock: VARIANT_AVAILABLE_STOCK,
           },
         ],
   );
@@ -87,7 +111,10 @@ export function AdminProductForm({
         sku: `${form.name.slice(0, 3).toUpperCase() || "OIL"}-${prev.length + 1}`,
         originalPrice: 400,
         price: 350,
-        stock: 50,
+        offerPrice: 0,
+        available: true,
+        image: "",
+        stock: VARIANT_AVAILABLE_STOCK,
       },
     ]);
   }
@@ -100,7 +127,38 @@ export function AdminProductForm({
     setVariants((prev) => prev.filter((_, i) => i !== index));
   }
 
-  function updateVariant(index: number, key: string, value: string | number) {
+  async function addCategory() {
+    const name = newCategoryName.trim();
+    if (name.length < 2) {
+      toast.error(ADMIN_CATEGORY_COPY.createFailed);
+      return;
+    }
+    setAddingCategory(true);
+    try {
+      const res = await fetch(API_ENDPOINTS.CATEGORIES, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, isActive: true }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? ADMIN_CATEGORY_COPY.createFailed);
+      const created = json.data as Category;
+      setCategoryList((prev) => [...prev, created]);
+      setForm((current) => ({ ...current, categoryId: created._id }));
+      setNewCategoryName("");
+      toast.success(ADMIN_CATEGORY_COPY.created);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : ADMIN_CATEGORY_COPY.createFailed);
+    } finally {
+      setAddingCategory(false);
+    }
+  }
+
+  function updateVariant(
+    index: number,
+    key: string,
+    value: string | number | boolean,
+  ) {
     setVariants((prev) => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [key]: value };
@@ -130,7 +188,10 @@ export function AdminProductForm({
       sku: v.sku || `${form.name.slice(0, 3).toUpperCase() || "PRD"}-${i + 1}`,
       originalPrice: Number(v.originalPrice),
       price: Number(v.price),
-      stock: Number(v.stock),
+      offerPrice: Number(v.offerPrice) > 0 ? Number(v.offerPrice) : undefined,
+      available: v.available,
+      image: v.image.trim() || undefined,
+      stock: v.available ? VARIANT_AVAILABLE_STOCK : 0,
     }));
 
     const payload = {
@@ -143,6 +204,10 @@ export function AdminProductForm({
       isBestSeller: form.isBestSeller,
       isNewArrival: form.isNewArrival,
       gstExempt: form.gstExempt,
+      videos: videos.map((url) => url.trim()).filter(Boolean),
+      offerEnabled: form.offerEnabled,
+      offerStartsAt: form.offerEnabled ? form.offerStartsAt || null : null,
+      offerEndsAt: form.offerEnabled ? form.offerEndsAt || null : null,
       variants: formattedVariants,
       seo: {
         metaTitle: form.metaTitle || undefined,
@@ -215,12 +280,34 @@ export function AdminProductForm({
             }
             required
           >
-            {categories.map((c) => (
+            {categoryList.map((c) => (
               <option key={c._id} value={c._id}>
                 {c.name}
               </option>
             ))}
           </select>
+          <div className="mt-2 flex gap-2">
+            <Input
+              value={newCategoryName}
+              placeholder={ADMIN_CATEGORY_COPY.namePlaceholder}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  void addCategory();
+                }
+              }}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              disabled={addingCategory}
+              onClick={() => void addCategory()}
+            >
+              <Plus className="mr-1 h-3.5 w-3.5" />
+              {ADMIN_CATEGORY_COPY.addInline}
+            </Button>
+          </div>
         </div>
 
         <div>
@@ -240,19 +327,15 @@ export function AdminProductForm({
 
         <div>
           <Label htmlFor="description" className="text-sm font-semibold">
-            Full Description (HTML Allowed) *
+            Full Description *
           </Label>
-          <Textarea
-            id="description"
-            rows={4}
-            className="mt-1.5 text-xs sm:text-sm"
-            placeholder="<p>Cold-pressed sesame oil extracted using traditional Mara Chekku mill...</p>"
-            value={form.description}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, description: e.target.value }))
-            }
-            required
-          />
+          <div className="mt-1.5">
+            <RichTextEditor
+              value={form.description}
+              onChange={(html) => setForm((f) => ({ ...f, description: html }))}
+              placeholder="Describe the oil, how it is pressed, and how to use it."
+            />
+          </div>
         </div>
       </div>
 
@@ -362,15 +445,44 @@ export function AdminProductForm({
               </div>
 
               <div className="sm:col-span-2">
-                <Label className="text-xs font-semibold">Stock Qty *</Label>
+                <Label className="text-xs font-semibold">
+                  {CATALOG_COPY.available}
+                </Label>
+                <label className="mt-1 flex h-9 items-center gap-2 rounded-md border border-border bg-card px-2 text-xs">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 accent-primary"
+                    checked={v.available}
+                    onChange={(e) =>
+                      updateVariant(index, "available", e.target.checked)
+                    }
+                  />
+                  {v.available ? CATALOG_COPY.available : CATALOG_COPY.outOfStock}
+                </label>
+              </div>
+              <div className="sm:col-span-6">
+                <Label className="text-xs font-semibold">
+                  {CATALOG_COPY.variantImage}
+                </Label>
+                <Input
+                  className="mt-1 h-9 text-xs"
+                  placeholder="https://ik.imagekit.io/… or cloudinary"
+                  value={v.image}
+                  onChange={(e) => updateVariant(index, "image", e.target.value)}
+                />
+              </div>
+              <div className="sm:col-span-3">
+                <Label className="text-xs font-semibold">
+                  {CATALOG_COPY.offerPrice}
+                </Label>
                 <Input
                   type="number"
                   className="mt-1 h-9 text-xs"
-                  value={v.stock}
+                  value={v.offerPrice || ""}
+                  placeholder="Optional"
                   onChange={(e) =>
-                    updateVariant(index, "stock", Number(e.target.value))
+                    updateVariant(index, "offerPrice", Number(e.target.value))
                   }
-                  required
                 />
               </div>
 
@@ -387,6 +499,95 @@ export function AdminProductForm({
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="space-y-4 rounded-xl border border-border bg-card p-5 shadow-2xs">
+        <div className="border-b border-border pb-3">
+          <h2 className="font-display text-lg font-bold text-dark">
+            {CATALOG_COPY.videosTitle}
+          </h2>
+          <p className="text-xs text-muted">{CATALOG_COPY.videosHint}</p>
+        </div>
+        <div className="flex gap-2">
+          <Input
+            value={videoUrl}
+            placeholder="https://youtube.com/watch?v=… or drive / imagekit / cloudinary"
+            onChange={(e) => setVideoUrl(e.target.value)}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              const url = videoUrl.trim();
+              if (!url || videos.includes(url)) return;
+              setVideos((prev) => [...prev, url]);
+              setVideoUrl("");
+            }}
+          >
+            {CATALOG_COPY.addVideo}
+          </Button>
+        </div>
+        <ul className="space-y-2">
+          {videos.map((url) => (
+            <li key={url} className="flex items-center gap-2 text-xs">
+              <span className="min-w-0 flex-1 truncate">{url}</span>
+              <button
+                type="button"
+                className="text-destructive"
+                onClick={() => setVideos((prev) => prev.filter((item) => item !== url))}
+              >
+                Remove
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="space-y-4 rounded-xl border border-border bg-card p-5 shadow-2xs">
+        <label className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            className="h-4 w-4 accent-primary"
+            checked={form.offerEnabled}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, offerEnabled: e.target.checked }))
+            }
+          />
+          <span>
+            <span className="block text-sm font-bold text-dark">
+              {CATALOG_COPY.offerTitle}
+            </span>
+            <span className="text-xs text-muted">{CATALOG_COPY.offerHint}</span>
+          </span>
+        </label>
+        {form.offerEnabled ? (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <Label>{CATALOG_COPY.offerStart}</Label>
+              <Input
+                type="datetime-local"
+                className="mt-1.5"
+                value={form.offerStartsAt}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, offerStartsAt: e.target.value }))
+                }
+                required
+              />
+            </div>
+            <div>
+              <Label>{CATALOG_COPY.offerEnd}</Label>
+              <Input
+                type="datetime-local"
+                className="mt-1.5"
+                value={form.offerEndsAt}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, offerEndsAt: e.target.value }))
+                }
+                required
+              />
+            </div>
+          </div>
+        ) : null}
       </div>
 
       {/* Storefront Display Badges & Visibility */}

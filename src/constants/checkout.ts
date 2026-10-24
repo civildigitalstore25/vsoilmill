@@ -9,9 +9,9 @@ export const CHECKOUT_STEPS = [
 export const CHECKOUT_COPY = {
   ADDRESS_TITLE: "Shipping address",
   REVIEW_TITLE: "Review your order",
-  PAYMENT_TITLE: "Pay securely with PhonePe",
+  PAYMENT_TITLE: "Pay securely online",
   WHATSAPP_CTA: "Order via WhatsApp",
-  PLACE_ORDER: "Pay with PhonePe",
+  PLACE_ORDER: "Pay now",
   EMPTY_CART: "Your cart is empty",
   CHECKOUT: "Checkout",
   PROCEED: "Proceed to checkout",

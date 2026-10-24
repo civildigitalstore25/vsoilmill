@@ -114,11 +114,11 @@ export default async function AdminOrderDetailPage({ params }: Props) {
           </div>
           <div className="flex justify-between">
             <span className="text-muted">{ADMIN_ORDERS_COPY.shipping}</span>
-            <span>{formatInr(data.pricing.shipping)}</span>
+            <span>{data.pricing.shipping === 0 ? "FREE" : formatInr(data.pricing.shipping)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted">{ADMIN_ORDERS_COPY.tax}</span>
-            <span>{formatInr(data.pricing.tax)}</span>
+            <span className="text-muted">GST (5%)</span>
+            <span>{data.pricing.tax === 0 ? "Included" : formatInr(data.pricing.tax)}</span>
           </div>
           <div className="flex justify-between font-display text-xl text-dark">
             <span>{ADMIN_ORDERS_COPY.total}</span>

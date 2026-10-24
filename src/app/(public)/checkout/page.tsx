@@ -11,7 +11,6 @@ import {
   Lock,
   RotateCcw,
   Truck,
-  Store,
   ShieldCheck,
   CreditCard,
   ShoppingBag,
@@ -26,14 +25,12 @@ import { Label } from "@/components/ui/label";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { API_ENDPOINTS } from "@/constants/api";
 import { CHECKOUT_COPY } from "@/constants/checkout";
+import { CHECKOUT_PAYMENT_COPY } from "@/constants/rich-text";
 import { ROUTES } from "@/constants/routes";
 import { ASSETS } from "@/constants/assets";
 import { useCartStore } from "@/hooks/useCartStore";
 import { useRequireLogin } from "@/hooks/useRequireLogin";
-import {
-  calculatePricing,
-  pricingFlagsFromLines,
-} from "@/lib/orders/pricing";
+import { calculatePricing } from "@/lib/orders/pricing";
 import { formatInr } from "@/lib/utils/format";
 import { cn } from "@/lib/utils/cn";
 import {
@@ -58,25 +55,17 @@ export default function CheckoutPage() {
   const router = useRouter();
   const items = useCartStore((s) => s.items);
   const clearCart = useCartStore((s) => s.clearCart);
-  const syncProductFlags = useCartStore((s) => s.syncProductFlags);
   const subtotal = useCartStore((s) => s.getSubtotal());
 
-  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+  const [currentStep, setCurrentStep] = useState<1 | 2>(1);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [address, setAddress] = useState<ShippingAddress>(EMPTY_ADDRESS);
   const [savedAddresses, setSavedAddresses] = useState<ShippingAddress[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const [deliveryMethod, setDeliveryMethod] = useState<"express" | "pickup">(
-    "express",
-  );
   const [loading, setLoading] = useState(false);
-
-  /** Live admin flags (source of truth for checkout preview). */
-  const [gstExemptByProduct, setGstExemptByProduct] = useState<
-    Record<string, boolean>
-  >({});
   const { requireLogin } = useRequireLogin();
+  const { total } = calculatePricing(subtotal, 0);
 
   useEffect(() => {
     async function loadAddresses() {
@@ -106,59 +95,6 @@ export default function CheckoutPage() {
     }
     void loadAddresses();
   }, []);
-
-  const productIdsKey = [...new Set(items.map((i) => i.productId))]
-    .sort()
-    .join(",");
-
-  // Load gstExempt from DB so admin toggle applies even if cart was old
-  useEffect(() => {
-    if (!productIdsKey) return;
-    const ids = productIdsKey.split(",");
-    let cancelled = false;
-    async function syncFlags() {
-      try {
-        const results = await Promise.all(
-          ids.map(async (id) => {
-            const res = await fetch(API_ENDPOINTS.PRODUCT(id), {
-              cache: "no-store",
-            });
-            if (!res.ok) return null;
-            const json = await res.json();
-            return {
-              productId: id,
-              gstExempt: Boolean(json.data?.gstExempt),
-            };
-          }),
-        );
-        if (cancelled) return;
-        const map: Record<string, boolean> = {};
-        const flags: Array<{ productId: string; gstExempt: boolean }> = [];
-        for (const row of results) {
-          if (!row) continue;
-          map[row.productId] = row.gstExempt;
-          flags.push(row);
-        }
-        setGstExemptByProduct(map);
-        syncProductFlags(flags);
-      } catch {
-        // server order pricing still uses DB flags
-      }
-    }
-    void syncFlags();
-    return () => {
-      cancelled = true;
-    };
-  }, [productIdsKey, syncProductFlags]);
-
-  const pricedLines = items.map((item) => ({
-    price: item.price,
-    quantity: item.quantity,
-    gstExempt:
-      gstExemptByProduct[item.productId] ?? Boolean(item.gstExempt),
-  }));
-  const flags = pricingFlagsFromLines(pricedLines);
-  const { shipping, tax, total } = calculatePricing(subtotal, 0, flags);
 
   function handleFirstNameChange(val: string) {
     setSelectedIndex(null);
@@ -301,8 +237,7 @@ export default function CheckoutPage() {
           <button
             type="button"
             onClick={() => {
-              if (currentStep === 3) setCurrentStep(2);
-              else if (currentStep === 2) setCurrentStep(1);
+              if (currentStep === 2) setCurrentStep(1);
               else router.push(ROUTES.CART);
             }}
             aria-label="Go back"
@@ -323,14 +258,7 @@ export default function CheckoutPage() {
             {/* Active Progress Line */}
             <div
               className="absolute left-10 top-4 -z-0 h-0.5 bg-primary transition-all duration-300"
-              style={{
-                width:
-                  currentStep === 1
-                    ? "0%"
-                    : currentStep === 2
-                    ? "calc(50% - 20px)"
-                    : "calc(100% - 80px)",
-              }}
+              style={{ width: currentStep === 1 ? "0%" : "calc(100% - 80px)" }}
             />
 
             {/* Step 1 */}
@@ -359,7 +287,7 @@ export default function CheckoutPage() {
               </span>
             </div>
 
-            {/* Step 2 */}
+            {/* Step 2: Payment */}
             <div className="relative z-10 flex flex-col items-center">
               <button
                 type="button"
@@ -370,43 +298,15 @@ export default function CheckoutPage() {
                   "flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold transition-all",
                   currentStep === 2
                     ? "bg-primary text-primary-foreground ring-4 ring-primary/20 shadow-xs"
-                    : currentStep > 2
-                    ? "bg-primary text-primary-foreground cursor-pointer"
                     : "border border-border bg-card text-muted",
                 )}
               >
-                {currentStep > 2 ? "✓" : "2"}
+                2
               </button>
               <span
                 className={cn(
                   "mt-2 text-xs sm:text-sm font-medium",
                   currentStep === 2 ? "text-dark font-semibold" : "text-muted",
-                )}
-              >
-                Delivery Method
-              </span>
-            </div>
-
-            {/* Step 3 */}
-            <div className="relative z-10 flex flex-col items-center">
-              <button
-                type="button"
-                onClick={() => {
-                  if (validateStep1()) setCurrentStep(3);
-                }}
-                className={cn(
-                  "flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold transition-all",
-                  currentStep === 3
-                    ? "bg-primary text-primary-foreground ring-4 ring-primary/20 shadow-xs"
-                    : "border border-border bg-card text-muted",
-                )}
-              >
-                3
-              </button>
-              <span
-                className={cn(
-                  "mt-2 text-xs sm:text-sm font-medium",
-                  currentStep === 3 ? "text-dark font-semibold" : "text-muted",
                 )}
               >
                 Payment
@@ -621,130 +521,20 @@ export default function CheckoutPage() {
                     }}
                     className="h-12 w-full rounded-xl bg-primary text-base font-medium text-white shadow-xs hover:bg-primary/90"
                   >
-                    Continue to Delivery Method →
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* STEP 2: Delivery Method */}
-            {currentStep === 2 && (
-              <div>
-                <h2 className="font-display text-2xl font-semibold text-dark">
-                  Delivery Method
-                </h2>
-                <p className="mt-1 text-sm text-muted">
-                  Choose how you would like to receive your Mara Chekku pure oils.
-                </p>
-
-                <div className="mt-6 space-y-4">
-                  {/* Option 1: Standard Mill Express Courier */}
-                  <div
-                    onClick={() => setDeliveryMethod("express")}
-                    className={cn(
-                      "flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition-all",
-                      deliveryMethod === "express"
-                        ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                        : "border-border bg-card hover:border-primary/40",
-                    )}
-                  >
-                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-primary">
-                      {deliveryMethod === "express" && (
-                        <div className="h-2.5 w-2.5 rounded-full bg-primary" />
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Truck className="h-4 w-4 text-primary" />
-                          <h4 className="font-semibold text-dark">
-                            Standard Mill Express Delivery
-                          </h4>
-                        </div>
-                        <span className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
-                          {shipping === 0 ? "FREE" : formatInr(shipping)}
-                        </span>
-                      </div>
-                      <p className="mt-1 text-xs text-muted leading-relaxed">
-                        Delivered across India in 2–4 business days with safe,
-                        shockproof tin packaging & live courier tracking.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Option 2: Store / Mill Pickup */}
-                  <div
-                    onClick={() => setDeliveryMethod("pickup")}
-                    className={cn(
-                      "flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition-all",
-                      deliveryMethod === "pickup"
-                        ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                        : "border-border bg-card hover:border-primary/40",
-                    )}
-                  >
-                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-primary">
-                      {deliveryMethod === "pickup" && (
-                        <div className="h-2.5 w-2.5 rounded-full bg-primary" />
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Store className="h-4 w-4 text-primary" />
-                          <h4 className="font-semibold text-dark">
-                            Direct Mill Store Pickup (Madurai)
-                          </h4>
-                        </div>
-                        <span className="rounded-md bg-accent/20 px-2 py-0.5 text-xs font-semibold text-accent-foreground">
-                          FREE
-                        </span>
-                      </div>
-                      <p className="mt-1 text-xs text-muted leading-relaxed">
-                        Collect directly at Vivekanandar Street, Thasildar Nagar,
-                        Vandiyur, Madurai. Ready for pickup within 2 hours.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Delivery Note */}
-                <div className="mt-6 flex items-start gap-2.5 rounded-xl bg-cream/70 p-3.5 text-xs text-dark/85">
-                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  <span>
-                    All orders are pressed fresh in small batches and packed in
-                    leak-proof, food-grade containers to ensure maximum nutrition.
-                  </span>
-                </div>
-
-                {/* Actions */}
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setCurrentStep(1)}
-                    className="order-2 sm:order-1 sm:w-auto"
-                  >
-                    ← Back to Address
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={() => setCurrentStep(3)}
-                    className="order-1 flex-1 h-12 rounded-xl bg-primary text-base font-medium text-white shadow-xs hover:bg-primary/90 sm:order-2"
-                  >
                     Continue to Payment →
                   </Button>
                 </div>
               </div>
             )}
 
-            {/* STEP 3: Payment */}
-            {currentStep === 3 && (
+            {/* STEP 2: Payment */}
+            {currentStep === 2 && (
               <div>
                 <h2 className="font-display text-2xl font-semibold text-dark">
                   Payment Method
                 </h2>
                 <p className="mt-1 text-sm text-muted">
-                  Review your order details and choose your preferred payment option.
+                  {CHECKOUT_PAYMENT_COPY.subtitle}
                 </p>
 
                 {/* Recap Cards */}
@@ -770,25 +560,6 @@ export default function CheckoutPage() {
                       Edit
                     </button>
                   </div>
-
-                  <div className="flex items-center justify-between border-t border-border/60 pt-2.5">
-                    <div>
-                      <span className="font-semibold text-dark">Method: </span>
-                      <span className="text-dark/90">
-                        {deliveryMethod === "pickup"
-                          ? "Direct Mill Store Pickup (Madurai)"
-                          : "Standard Mill Express Courier (2–4 days)"}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setCurrentStep(2)}
-                      className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
-                    >
-                      <Edit2 className="h-3 w-3" />
-                      Edit
-                    </button>
-                  </div>
                 </div>
 
                 {/* PhonePe Payment Option */}
@@ -800,10 +571,10 @@ export default function CheckoutPage() {
                       </div>
                       <div>
                         <h4 className="font-semibold text-dark">
-                          PhonePe Secure Payment Gateway
+                          {CHECKOUT_PAYMENT_COPY.gatewayTitle}
                         </h4>
                         <p className="text-xs text-muted">
-                          UPI (Google Pay, PhonePe, Paytm), Cards & NetBanking
+                          {CHECKOUT_PAYMENT_COPY.gatewayHint}
                         </p>
                       </div>
                     </div>
@@ -834,7 +605,7 @@ export default function CheckoutPage() {
                         Initiating Payment…
                       </span>
                     ) : (
-                      `Pay ${formatInr(total)} via PhonePe →`
+                      `${CHECKOUT_PAYMENT_COPY.pay(formatInr(total))} →`
                     )}
                   </Button>
 
@@ -859,10 +630,10 @@ export default function CheckoutPage() {
                   <Button
                     type="button"
                     variant="ghost"
-                    onClick={() => setCurrentStep(2)}
+                    onClick={() => setCurrentStep(1)}
                     className="w-full text-xs text-muted hover:text-dark"
                   >
-                    ← Back to Delivery Method
+                    ← Back to Address
                   </Button>
                 </div>
               </div>
@@ -918,22 +689,12 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between text-muted">
                 <span>Shipping</span>
-                <span
-                  className={
-                    shipping === 0
-                      ? "font-semibold text-primary"
-                      : "font-medium text-dark"
-                  }
-                >
-                  {shipping === 0 ? "FREE" : formatInr(shipping)}
-                </span>
+                <span className="font-semibold text-primary">FREE</span>
               </div>
-              {tax > 0 && (
-                <div className="flex justify-between text-muted">
-                  <span>GST (5%)</span>
-                  <span className="font-medium text-dark">{formatInr(tax)}</span>
-                </div>
-              )}
+              <div className="flex justify-between text-muted">
+                <span>GST (5%)</span>
+                <span className="font-medium text-dark">Included</span>
+              </div>
               <div className="flex justify-between border-t border-border/70 pt-3 text-lg font-bold text-dark">
                 <span>Total</span>
                 <span className="text-primary">{formatInr(total)}</span>
