@@ -18,6 +18,7 @@ const updateSchema = z.object({
   validTo: z.string().min(1, "Valid to date is required").optional(),
   usageLimit: z.number().int().min(0).optional(),
   applicableProducts: z.array(z.string()).optional(),
+  applicableVariants: z.array(z.string()).optional(),
   status: z.enum(["ACTIVE", "INACTIVE"]).optional(),
 });
 
@@ -66,7 +67,7 @@ export async function PUT(
       new: true,
       runValidators: true,
     })
-      .populate("applicableProducts", "name images categoryId")
+      .populate("applicableProducts", "name images categoryId variants")
       .lean();
 
     if (!updated) {

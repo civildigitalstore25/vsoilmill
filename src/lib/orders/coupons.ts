@@ -62,21 +62,49 @@ export async function validateAndCalculateCouponDiscount({
       return { discount: 0, error: "This coupon has reached its maximum usage limit" };
     }
 
-    // Determine eligible subtotal based on applicable products
+    // Determine eligible subtotal based on applicable products and variants
     let eligibleSubtotal = subtotal;
-    const applicable = dbCoupon.applicableProducts?.map((id: unknown) => String(id)) ?? [];
+    const applicableProducts =
+      dbCoupon.applicableProducts?.map((id: unknown) => String(id)) ?? [];
+    const applicableVariants =
+      (dbCoupon.applicableVariants as string[] | undefined)?.map((id: unknown) => String(id)) ?? [];
 
-    if (applicable.length > 0) {
+    const hasProductRestrictions = applicableProducts.length > 0;
+    const hasVariantRestrictions = applicableVariants.length > 0;
+
+    if (hasProductRestrictions || hasVariantRestrictions) {
       if (!items || items.length === 0) {
-        return { discount: 0, error: "Cart items required to validate product-specific coupon" };
+        return {
+          discount: 0,
+          error: "Cart items required to validate coupon restrictions",
+        };
       }
-      const eligibleItems = items.filter((item) =>
-        applicable.includes(String(item.productId)),
-      );
+
+      const eligibleItems = items.filter((item) => {
+        const pId = String(item.productId);
+        const vId = item.variantId ? String(item.variantId) : "";
+
+        // If specific variants are configured on this coupon:
+        if (hasVariantRestrictions) {
+          if (vId && applicableVariants.includes(vId)) {
+            return true;
+          }
+        }
+
+        // If product is in applicableProducts and no specific variant restrictions exist:
+        if (hasProductRestrictions && applicableProducts.includes(pId)) {
+          if (!hasVariantRestrictions) {
+            return true;
+          }
+        }
+
+        return false;
+      });
+
       if (eligibleItems.length === 0) {
         return {
           discount: 0,
-          error: "This coupon is not applicable to any products in your cart",
+          error: "This coupon is not applicable to any products or variants in your cart",
         };
       }
       eligibleSubtotal = eligibleItems.reduce(

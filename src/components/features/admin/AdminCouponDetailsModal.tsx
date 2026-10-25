@@ -19,11 +19,20 @@ import { cn } from "@/lib/utils/cn";
 import { ASSETS } from "@/constants/assets";
 import type { Coupon } from "@/types/coupon";
 
+export interface ProductVariantOption {
+  _id: string;
+  label: string;
+  price: number;
+  sku?: string;
+  stock?: number;
+}
+
 interface ProductOption {
   _id: string;
   name: string;
   categoryId: string;
   images?: string[];
+  variants?: ProductVariantOption[];
 }
 
 interface CategoryOption {
@@ -310,9 +319,16 @@ export function AdminCouponDetailsModal({
 
             {/* Applicable Products */}
             <div className="space-y-3">
-              <h3 className="font-semibold text-xs uppercase tracking-wider text-muted">
-                Applicable Products
-              </h3>
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-xs uppercase tracking-wider text-muted">
+                  Applicable Products & Sizes
+                </h3>
+                {applicableIds.length > 0 && (
+                  <span className="text-xs text-muted font-medium">
+                    {matchedProducts.length} {matchedProducts.length === 1 ? "product" : "products"}
+                  </span>
+                )}
+              </div>
               {applicableIds.length === 0 ? (
                 <div className="flex items-center gap-3 p-4 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-900">
                   <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
@@ -324,27 +340,58 @@ export function AdminCouponDetailsModal({
                   </div>
                 </div>
               ) : (
-                <div className="rounded-xl border border-border/80 bg-cream/30 divide-y divide-border/60 max-h-48 overflow-y-auto">
+                <div className="rounded-xl border border-border/80 bg-cream/30 divide-y divide-border/60 max-h-56 overflow-y-auto">
                   {matchedProducts.map((p) => {
                     const cat = categories.find((c) => String(c._id) === String(p.categoryId));
+                    const couponVariants = coupon.applicableVariants || [];
+                    const specificVariants = (p.variants || []).filter((v) =>
+                      couponVariants.includes(v._id),
+                    );
+
                     return (
-                      <div key={p._id} className="flex items-center gap-3 p-3">
-                        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-border bg-white">
-                          <Image
-                            src={p.images?.[0] || ASSETS.PLACEHOLDER_PRODUCT}
-                            alt={p.name}
-                            fill
-                            className="object-cover"
-                            unoptimized
-                          />
+                      <div key={p._id} className="p-3 space-y-2">
+                        <div className="flex items-center gap-3">
+                          <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-border bg-white">
+                            <Image
+                              src={p.images?.[0] || ASSETS.PLACEHOLDER_PRODUCT}
+                              alt={p.name}
+                              fill
+                              className="object-cover"
+                              unoptimized
+                            />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-semibold text-dark truncate">
+                              {p.name}
+                            </p>
+                            <p className="text-[11px] text-muted truncate">
+                              {cat?.name || "General"}
+                            </p>
+                          </div>
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-xs font-semibold text-dark truncate">
-                            {p.name}
-                          </p>
-                          <p className="text-[11px] text-muted truncate">
-                            {cat?.name || "General"}
-                          </p>
+
+                        {/* Specific variants / sizes breakdown */}
+                        <div className="pl-13">
+                          {couponVariants.length > 0 && specificVariants.length > 0 ? (
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <span className="text-[10px] text-muted uppercase font-semibold tracking-wider">
+                                Allowed sizes:
+                              </span>
+                              {specificVariants.map((v) => (
+                                <span
+                                  key={v._id}
+                                  className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-primary/10 text-primary border border-primary/20"
+                                >
+                                  {v.label} ({formatInr(v.price)})
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700 font-medium">
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                              All sizes applicable
+                            </span>
+                          )}
                         </div>
                       </div>
                     );

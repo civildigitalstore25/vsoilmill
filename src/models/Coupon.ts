@@ -55,6 +55,10 @@ const CouponSchema = new Schema(
         ref: "Product",
       },
     ],
+    applicableVariants: {
+      type: [String],
+      default: [],
+    },
     status: {
       type: String,
       enum: ["ACTIVE", "INACTIVE"],
@@ -69,4 +73,11 @@ const CouponSchema = new Schema(
 CouponSchema.index({ code: 1, status: 1 });
 CouponSchema.index({ validFrom: 1, validTo: 1 });
 
-export const CouponModel = models.Coupon ?? model("Coupon", CouponSchema);
+const ExistingCoupon = models.Coupon;
+if (ExistingCoupon) {
+  if (!ExistingCoupon.schema.path("applicableVariants")) {
+    ExistingCoupon.schema.add({ applicableVariants: { type: [String], default: [] } });
+  }
+}
+
+export const CouponModel = ExistingCoupon ?? model("Coupon", CouponSchema);

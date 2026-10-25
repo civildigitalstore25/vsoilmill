@@ -13,6 +13,7 @@ export interface Coupon {
   usageLimit: number;
   timesUsed: number;
   applicableProducts: string[];
+  applicableVariants?: string[];
   status: CouponStatus;
   createdAt: string;
   updatedAt: string;
@@ -27,6 +28,7 @@ export interface CouponValidationResult {
     discountValue: number;
     discount: number;
     applicableProducts?: string[];
+    applicableVariants?: string[];
   };
   error?: string;
 }

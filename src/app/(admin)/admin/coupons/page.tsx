@@ -13,7 +13,7 @@ export default async function AdminCouponsPage() {
   const [rawCoupons, rawCategories, rawProducts] = await Promise.all([
     CouponModel.find().sort({ createdAt: -1 }).lean(),
     CategoryModel.find().select("_id name slug").sort({ name: 1 }).lean(),
-    ProductModel.find().select("_id name categoryId images").sort({ name: 1 }).lean(),
+    ProductModel.find().select("_id name categoryId images variants").sort({ name: 1 }).lean(),
   ]);
 
   const coupons: Coupon[] = JSON.parse(JSON.stringify(rawCoupons));

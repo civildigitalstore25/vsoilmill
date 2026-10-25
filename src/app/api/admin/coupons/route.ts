@@ -17,6 +17,7 @@ const couponSchema = z.object({
   validTo: z.string().min(1, "Valid to date is required"),
   usageLimit: z.number().int().min(0).default(0),
   applicableProducts: z.array(z.string()).default([]),
+  applicableVariants: z.array(z.string()).default([]),
   status: z.enum(["ACTIVE", "INACTIVE"]).default("ACTIVE"),
 });
 
@@ -27,7 +28,7 @@ export async function GET() {
   try {
     await connectDb();
     const coupons = await CouponModel.find()
-      .populate("applicableProducts", "name images categoryId")
+      .populate("applicableProducts", "name images categoryId variants")
       .sort({ createdAt: -1 })
       .lean();
 
@@ -93,11 +94,12 @@ export async function POST(request: Request) {
       usageLimit: parsed.data.usageLimit,
       timesUsed: 0,
       applicableProducts: parsed.data.applicableProducts,
+      applicableVariants: parsed.data.applicableVariants,
       status: parsed.data.status,
     });
 
     const populated = await CouponModel.findById(created._id)
-      .populate("applicableProducts", "name images categoryId")
+      .populate("applicableProducts", "name images categoryId variants")
       .lean();
 
     return NextResponse.json({ data: JSON.parse(JSON.stringify(populated)) }, { status: 201 });

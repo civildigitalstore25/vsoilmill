@@ -8,15 +8,28 @@ import {
   ChevronDown,
   ChevronUp,
   Tag,
+  Search,
+  Layers,
 } from "lucide-react";
 import { API_ENDPOINTS } from "@/constants/api";
+import { formatInr } from "@/lib/utils/format";
 import { cn } from "@/lib/utils/cn";
 import type { Coupon, DiscountType, CouponStatus } from "@/types/coupon";
 
-interface ProductOption {
+export interface ProductVariantOption {
+  _id: string;
+  label: string;
+  price: number;
+  sku?: string;
+  stock?: number;
+}
+
+export interface ProductOption {
   _id: string;
   name: string;
   categoryId: string;
+  images?: string[];
+  variants?: ProductVariantOption[];
 }
 
 interface CategoryOption {
@@ -64,6 +77,9 @@ export function AdminCouponModal({
   const [validTo, setValidTo] = useState("");
   const [usageLimit, setUsageLimit] = useState<number>(100);
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+  const [selectedVariantIds, setSelectedVariantIds] = useState<string[]>([]);
+  const [expandedProductIds, setExpandedProductIds] = useState<Record<string, boolean>>({});
+  const [productSearch, setProductSearch] = useState("");
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>("ALL");
   const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
   const [status, setStatus] = useState<CouponStatus>("ACTIVE");
@@ -84,6 +100,9 @@ export function AdminCouponModal({
           typeof p === "string" ? p : p._id,
         ),
       );
+      setSelectedVariantIds(
+        (editingCoupon.applicableVariants || []).map((v) => String(v)),
+      );
       setStatus(editingCoupon.status);
     } else {
       // Default new coupon values
@@ -100,6 +119,7 @@ export function AdminCouponModal({
       setValidTo(formatDateForInput(inOneMonth));
       setUsageLimit(100);
       setSelectedProductIds([]);
+      setSelectedVariantIds([]);
       setStatus("ACTIVE");
     }
   }, [editingCoupon, isOpen]);
@@ -111,28 +131,87 @@ export function AdminCouponModal({
   }
 
   function toggleProduct(productId: string) {
-    setSelectedProductIds((prev) =>
-      prev.includes(productId)
-        ? prev.filter((id) => id !== productId)
-        : [...prev, productId],
-    );
+    const prod = products.find((p) => p._id === productId);
+    const variants = prod?.variants || [];
+    const prodVariantIds = variants.map((v) => v._id);
+
+    const isProdSelected = selectedProductIds.includes(productId);
+    const allVariantsSelected =
+      prodVariantIds.length > 0 &&
+      prodVariantIds.every((vId) => selectedVariantIds.includes(vId));
+
+    if (isProdSelected && (allVariantsSelected || prodVariantIds.length === 0)) {
+      // Deselect product and all its variants
+      setSelectedProductIds((prev) => prev.filter((id) => id !== productId));
+      if (prodVariantIds.length > 0) {
+        setSelectedVariantIds((prev) =>
+          prev.filter((vId) => !prodVariantIds.includes(vId)),
+        );
+      }
+    } else {
+      // Select product and all its variants
+      if (!isProdSelected) {
+        setSelectedProductIds((prev) => [...prev, productId]);
+      }
+      if (prodVariantIds.length > 0) {
+        setSelectedVariantIds((prev) => [
+          ...prev.filter((vId) => !prodVariantIds.includes(vId)),
+          ...prodVariantIds,
+        ]);
+      }
+    }
+  }
+
+  function toggleVariant(productId: string, variantId: string) {
+    if (selectedVariantIds.includes(variantId)) {
+      const nextVariants = selectedVariantIds.filter((id) => id !== variantId);
+      setSelectedVariantIds(nextVariants);
+
+      const prod = products.find((p) => p._id === productId);
+      const prodVariantIds = (prod?.variants || []).map((v) => v._id);
+      const anyRemainingInProduct = prodVariantIds.some((vId) =>
+        nextVariants.includes(vId),
+      );
+      if (!anyRemainingInProduct) {
+        setSelectedProductIds((prev) => prev.filter((id) => id !== productId));
+      }
+    } else {
+      setSelectedVariantIds((prev) => [...prev, variantId]);
+      if (!selectedProductIds.includes(productId)) {
+        setSelectedProductIds((prev) => [...prev, productId]);
+      }
+    }
   }
 
   function removeProductChip(productId: string) {
+    const prod = products.find((p) => p._id === productId);
+    const prodVariantIds = (prod?.variants || []).map((v) => v._id);
     setSelectedProductIds((prev) => prev.filter((id) => id !== productId));
+    setSelectedVariantIds((prev) =>
+      prev.filter((vId) => !prodVariantIds.includes(vId)),
+    );
+  }
+
+  function removeVariantChip(productId: string, variantId: string) {
+    toggleVariant(productId, variantId);
   }
 
   function handleSelectAllProducts() {
-    // If all products are already selected, clear to site-wide (empty array means all)
     if (selectedProductIds.length === products.length) {
       setSelectedProductIds([]);
+      setSelectedVariantIds([]);
     } else {
       setSelectedProductIds(products.map((p) => p._id));
+      const allVariantIds = products.flatMap((p) =>
+        (p.variants || []).map((v) => v._id),
+      );
+      setSelectedVariantIds(allVariantIds);
     }
   }
 
   function handleSetSiteWide() {
     setSelectedProductIds([]);
+    setSelectedVariantIds([]);
   }
 
   function toggleCategoryCollapse(categoryId: string) {
@@ -142,7 +221,13 @@ export function AdminCouponModal({
     }));
   }
 
-  // Filter products by selected category filter
+  function toggleExpandProduct(productId: string) {
+    setExpandedProductIds((prev) => ({
+      ...prev,
+      [productId]: !prev[productId],
+    }));
+  }
+
   const visibleCategories =
     selectedCategoryFilter === "ALL"
       ? categories
@@ -179,6 +264,7 @@ export function AdminCouponModal({
         validTo: new Date(validTo).toISOString(),
         usageLimit: Number(usageLimit),
         applicableProducts: selectedProductIds,
+        applicableVariants: selectedVariantIds,
         status,
       };
 
@@ -379,19 +465,19 @@ export function AdminCouponModal({
               </p>
             </div>
 
-            {/* Applicable Products */}
+            {/* Applicable Products & Variants */}
             <div className="space-y-3 pt-1">
               <div>
                 <div className="flex items-center justify-between">
                   <label className="block font-semibold text-[#1e293b]">
-                    Applicable products
+                    Applicable products & sizes
                   </label>
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={handleSetSiteWide}
                       className={cn(
-                        "text-xs px-2 py-0.5 rounded font-medium transition-colors",
+                        "text-xs px-2.5 py-1 rounded-md font-medium transition-colors",
                         selectedProductIds.length === 0
                           ? "bg-emerald-100 text-emerald-800 font-semibold"
                           : "text-[#0284c7] hover:underline",
@@ -402,68 +488,134 @@ export function AdminCouponModal({
                     <button
                       type="button"
                       onClick={handleSelectAllProducts}
-                      className="text-xs text-[#0284c7] hover:underline font-medium"
+                      className="text-xs text-[#0284c7] hover:underline font-medium px-2 py-1"
                     >
                       {selectedProductIds.length === products.length
-                        ? "Clear"
+                        ? "Clear all"
                         : "Select all"}
                     </button>
                   </div>
                 </div>
                 <p className="mt-1 text-xs text-[#64748b] leading-relaxed">
-                  Leave empty for site-wide coupon. Pick a category below, then tick
-                  products. Selected products can be removed from the chips.
+                  Leave empty for site-wide. Or select specific products and variants (e.g. 1 Litre, 500 ml).
                 </p>
               </div>
 
-              {/* Selected Products Chips */}
+              {/* Selected Items Chips */}
               {selectedProductIds.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 p-2 bg-[#f8fafc] rounded-lg border border-[#e2e8f0] max-h-24 overflow-y-auto">
-                  {selectedProductIds.map((id) => {
-                    const prod = products.find((p) => p._id === id);
+                <div className="flex flex-wrap gap-1.5 p-2 bg-[#f8fafc] rounded-lg border border-[#e2e8f0] max-h-28 overflow-y-auto">
+                  {selectedProductIds.map((pId) => {
+                    const prod = products.find((p) => p._id === pId);
                     if (!prod) return null;
-                    return (
+                    const variants = prod.variants || [];
+                    const selectedVarsInProd = variants.filter((v) =>
+                      selectedVariantIds.includes(v._id),
+                    );
+
+                    // If all variants or no specific variants were picked for this product
+                    if (
+                      variants.length === 0 ||
+                      selectedVarsInProd.length === variants.length ||
+                      (selectedVariantIds.length === 0 && selectedVarsInProd.length === 0)
+                    ) {
+                      return (
+                        <span
+                          key={`prod-${pId}`}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-[#e0f2fe] text-[#0369a1] font-medium border border-[#bae6fd]"
+                        >
+                          <Tag className="h-3 w-3 shrink-0" />
+                          <span className="max-w-[160px] truncate">
+                            {prod.name} {variants.length > 0 ? `(All ${variants.length} sizes)` : ""}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => removeProductChip(pId)}
+                            className="hover:text-red-600 rounded-full p-0.5"
+                            aria-label={`Remove ${prod.name}`}
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </span>
+                      );
+                    }
+
+                    // Otherwise show individual chips for each selected variant
+                    return selectedVarsInProd.map((v) => (
                       <span
-                        key={id}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs bg-[#e0f2fe] text-[#0369a1] font-medium"
+                        key={`var-${v._id}`}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-amber-50 text-amber-900 font-medium border border-amber-200"
                       >
-                        <Tag className="h-3 w-3" />
-                        <span className="max-w-[140px] truncate">{prod.name}</span>
+                        <Layers className="h-3 w-3 shrink-0 text-amber-600" />
+                        <span className="max-w-[180px] truncate">
+                          {prod.name} • <strong>{v.label}</strong>
+                        </span>
                         <button
                           type="button"
-                          onClick={() => removeProductChip(id)}
+                          onClick={() => removeVariantChip(pId, v._id)}
                           className="hover:text-red-600 rounded-full p-0.5"
+                          aria-label={`Remove ${v.label}`}
                         >
                           <X className="h-3 w-3" />
                         </button>
                       </span>
-                    );
+                    ));
                   })}
                 </div>
               )}
 
-              {/* Category Dropdown Filter */}
-              <select
-                value={selectedCategoryFilter}
-                onChange={(e) => setSelectedCategoryFilter(e.target.value)}
-                className="w-full rounded-lg border border-[#cbd5e1] px-3 py-2 text-sm bg-white focus:border-[#0284c7] focus:ring-2 focus:ring-[#0284c7]/20 outline-none transition-all"
-              >
-                <option value="ALL">All categories</option>
-                {categories.map((c) => (
-                  <option key={c._id} value={c._id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+              {/* Search & Category Filter Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-[#94a3b8]" />
+                  <input
+                    type="text"
+                    placeholder="Filter product or size (e.g. 1L)..."
+                    value={productSearch}
+                    onChange={(e) => setProductSearch(e.target.value)}
+                    className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-[#cbd5e1] bg-white focus:border-[#0284c7] focus:ring-2 focus:ring-[#0284c7]/20 outline-none transition-all"
+                  />
+                  {productSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setProductSearch("")}
+                      className="absolute right-2.5 top-2.5 text-[#94a3b8] hover:text-[#334155]"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
 
-              {/* Products List Grouped by Category with Accordion Carets */}
-              <div className="border border-[#cbd5e1] rounded-lg max-h-56 overflow-y-auto divide-y divide-[#e2e8f0] bg-white">
+                <select
+                  value={selectedCategoryFilter}
+                  onChange={(e) => setSelectedCategoryFilter(e.target.value)}
+                  className="w-full rounded-lg border border-[#cbd5e1] px-3 py-1.5 text-xs bg-white focus:border-[#0284c7] focus:ring-2 focus:ring-[#0284c7]/20 outline-none transition-all"
+                >
+                  <option value="ALL">All categories</option>
+                  {categories.map((c) => (
+                    <option key={c._id} value={c._id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Products & Variants List */}
+              <div className="border border-[#cbd5e1] rounded-lg max-h-64 overflow-y-auto divide-y divide-[#e2e8f0] bg-white shadow-2xs">
                 {visibleCategories.map((cat) => {
-                  const catProducts = products.filter(
-                    (p) => String(p.categoryId) === String(cat._id),
-                  );
+                  const query = productSearch.toLowerCase().trim();
+                  const catProducts = products.filter((p) => {
+                    if (String(p.categoryId) !== String(cat._id)) return false;
+                    if (!query) return true;
+                    const nameMatches = p.name.toLowerCase().includes(query);
+                    const variantMatches = (p.variants || []).some((v) =>
+                      v.label.toLowerCase().includes(query) ||
+                      (v.sku && v.sku.toLowerCase().includes(query)),
+                    );
+                    return nameMatches || variantMatches;
+                  });
+
                   if (catProducts.length === 0) return null;
-                  const isCollapsed = Boolean(collapsedCategories[cat._id]);
+                  const isCatCollapsed = Boolean(collapsedCategories[cat._id]);
 
                   return (
                     <div key={cat._id} className="bg-white">
@@ -474,33 +626,139 @@ export function AdminCouponModal({
                         className="w-full flex items-center justify-between px-3 py-2 bg-[#f8fafc] text-left hover:bg-[#f1f5f9] transition-colors"
                       >
                         <span className="font-semibold text-xs tracking-wider uppercase text-[#334155]">
-                          {cat.name}
+                          {cat.name} ({catProducts.length})
                         </span>
-                        {isCollapsed ? (
+                        {isCatCollapsed ? (
                           <ChevronDown className="h-4 w-4 text-[#64748b]" />
                         ) : (
                           <ChevronUp className="h-4 w-4 text-[#64748b]" />
                         )}
                       </button>
 
-                      {/* Products Checkbox List */}
-                      {!isCollapsed && (
-                        <div className="px-3 py-1 space-y-1">
+                      {/* Products List */}
+                      {!isCatCollapsed && (
+                        <div className="px-3 py-1.5 space-y-2">
                           {catProducts.map((prod) => {
-                            const isChecked = selectedProductIds.includes(prod._id);
+                            const isProdChecked = selectedProductIds.includes(prod._id);
+                            const variants = prod.variants || [];
+                            const selectedVarsInProd = variants.filter((v) =>
+                              selectedVariantIds.includes(v._id),
+                            );
+                            const allVariantsSelected =
+                              variants.length > 0 &&
+                              selectedVarsInProd.length === variants.length;
+                            const isPartiallySelected =
+                              variants.length > 0 &&
+                              selectedVarsInProd.length > 0 &&
+                              selectedVarsInProd.length < variants.length;
+                            const isExpanded =
+                              expandedProductIds[prod._id] ?? (selectedVarsInProd.length > 0 || Boolean(query));
+
                             return (
-                              <label
+                              <div
                                 key={prod._id}
-                                className="flex items-center gap-2.5 py-1.5 px-1 rounded hover:bg-[#f8fafc] cursor-pointer text-xs sm:text-sm text-[#1e293b]"
+                                className={cn(
+                                  "rounded-lg border transition-colors",
+                                  isProdChecked
+                                    ? "border-[#0284c7]/40 bg-[#f0f9ff]/40"
+                                    : "border-[#e2e8f0] bg-white",
+                                )}
                               >
-                                <input
-                                  type="checkbox"
-                                  checked={isChecked}
-                                  onChange={() => toggleProduct(prod._id)}
-                                  className="h-4 w-4 rounded border-[#cbd5e1] text-[#0284c7] focus:ring-[#0284c7]"
-                                />
-                                <span>{prod.name}</span>
-                              </label>
+                                {/* Product Row */}
+                                <div className="flex items-center justify-between p-2">
+                                  <label className="flex items-center gap-2.5 cursor-pointer text-xs sm:text-sm text-[#1e293b] flex-1 min-w-0">
+                                    <input
+                                      type="checkbox"
+                                      checked={isProdChecked && (allVariantsSelected || variants.length === 0)}
+                                      ref={(el) => {
+                                        if (el) el.indeterminate = isPartiallySelected;
+                                      }}
+                                      onChange={() => toggleProduct(prod._id)}
+                                      className="h-4 w-4 rounded border-[#cbd5e1] text-[#0284c7] focus:ring-[#0284c7]"
+                                    />
+                                    <span className="font-medium truncate">{prod.name}</span>
+                                    {variants.length > 0 && (
+                                      <span
+                                        className={cn(
+                                          "text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0",
+                                          isPartiallySelected
+                                            ? "bg-amber-100 text-amber-800"
+                                            : allVariantsSelected
+                                            ? "bg-emerald-100 text-emerald-800"
+                                            : "bg-slate-100 text-slate-600",
+                                        )}
+                                      >
+                                        {selectedVarsInProd.length > 0
+                                          ? `${selectedVarsInProd.length}/${variants.length} selected`
+                                          : `${variants.length} sizes`}
+                                      </span>
+                                    )}
+                                  </label>
+
+                                  {variants.length > 0 && (
+                                    <button
+                                      type="button"
+                                      onClick={() => toggleExpandProduct(prod._id)}
+                                      className="p-1 text-[#64748b] hover:text-[#0284c7] hover:bg-[#e0f2fe] rounded transition-colors text-xs flex items-center gap-1"
+                                      title={isExpanded ? "Collapse sizes" : "Expand sizes"}
+                                    >
+                                      <span className="text-[11px] font-semibold text-[#0284c7]">
+                                        {isExpanded ? "Hide sizes" : "Choose sizes"}
+                                      </span>
+                                      {isExpanded ? (
+                                        <ChevronUp className="h-3.5 w-3.5" />
+                                      ) : (
+                                        <ChevronDown className="h-3.5 w-3.5" />
+                                      )}
+                                    </button>
+                                  )}
+                                </div>
+
+                                {/* Variants Sub-list */}
+                                {variants.length > 0 && isExpanded && (
+                                  <div className="border-t border-[#e2e8f0] bg-[#f8fafc] px-3 py-2 space-y-1.5 rounded-b-lg">
+                                    <p className="text-[11px] text-[#64748b] font-medium mb-1 flex items-center justify-between">
+                                      <span>Select specific sizes:</span>
+                                      <button
+                                        type="button"
+                                        onClick={() => toggleProduct(prod._id)}
+                                        className="text-[#0284c7] hover:underline text-[10px] font-semibold"
+                                      >
+                                        {allVariantsSelected ? "Deselect all sizes" : "Select all sizes"}
+                                      </button>
+                                    </p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                                      {variants.map((v) => {
+                                        const isVariantChecked = selectedVariantIds.includes(v._id);
+                                        return (
+                                          <label
+                                            key={v._id}
+                                            className={cn(
+                                              "flex items-center justify-between p-1.5 rounded border text-xs cursor-pointer transition-colors",
+                                              isVariantChecked
+                                                ? "border-[#0284c7] bg-white text-[#0369a1] font-semibold shadow-2xs"
+                                                : "border-[#e2e8f0] bg-white hover:bg-slate-50 text-[#334155]",
+                                            )}
+                                          >
+                                            <div className="flex items-center gap-2 min-w-0">
+                                              <input
+                                                type="checkbox"
+                                                checked={isVariantChecked}
+                                                onChange={() => toggleVariant(prod._id, v._id)}
+                                                className="h-3.5 w-3.5 rounded border-[#cbd5e1] text-[#0284c7] focus:ring-[#0284c7]"
+                                              />
+                                              <span className="truncate">{v.label}</span>
+                                            </div>
+                                            <span className="text-[11px] font-mono text-[#64748b] ml-1 shrink-0">
+                                              {formatInr(v.price)}
+                                            </span>
+                                          </label>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
                             );
                           })}
                         </div>

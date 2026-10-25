@@ -32,10 +32,26 @@ import { formatInr } from "@/lib/utils/format";
 import { cn } from "@/lib/utils/cn";
 import type { Coupon } from "@/types/coupon";
 
+export interface ProductVariantOption {
+  _id: string;
+  label: string;
+  price: number;
+  sku?: string;
+  stock?: number;
+}
+
+export interface CouponProductOption {
+  _id: string;
+  name: string;
+  categoryId: string;
+  images?: string[];
+  variants?: ProductVariantOption[];
+}
+
 interface AdminCouponsClientProps {
   initialCoupons: Coupon[];
   categories: Array<{ _id: string; name: string }>;
-  products: Array<{ _id: string; name: string; categoryId: string; images?: string[] }>;
+  products: CouponProductOption[];
   stats?: {
     total: number;
     active: number;
