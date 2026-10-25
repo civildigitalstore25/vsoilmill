@@ -12,15 +12,25 @@ export function Footer() {
       <PageContainer className="grid gap-8 py-8 sm:py-10 md:grid-cols-4 md:gap-8 md:py-14">
         {/* Col 1: Brand & Contact Info */}
         <div className="md:pr-2">
-          <Link href={ROUTES.HOME} className="mb-2 inline-block">
-            <Image
-              src={ASSETS.LOGO}
-              alt="VS OilMill Logo"
-              width={140}
-              height={42}
-              unoptimized
-              className="h-8 w-auto rounded-md object-contain sm:h-10"
-            />
+          <Link href={ROUTES.HOME} className="mb-4 inline-flex items-center gap-3.5 group" aria-label="VS OilMill Home">
+            <div className="overflow-hidden rounded-2xl bg-white p-2.5 shadow-lg border border-white/20 transition-transform group-hover:scale-105">
+              <Image
+                src={ASSETS.LOGO}
+                alt="VS OilMill Logo"
+                width={120}
+                height={110}
+                unoptimized
+                className="h-16 sm:h-20 w-auto object-contain"
+              />
+            </div>
+            <div>
+              <span className="block font-display text-xl sm:text-2xl font-bold text-cream leading-tight">
+                {UI.brand}
+              </span>
+              <span className="block text-[11px] sm:text-xs text-accent tracking-wider uppercase font-medium mt-0.5">
+                Traditional Mara Chekku
+              </span>
+            </div>
           </Link>
           <p className="mt-2 text-xs text-cream/70 sm:text-sm">{UI.since}</p>
           <p className="mt-2 text-xs leading-snug text-cream/80 sm:mt-3 sm:text-sm sm:leading-relaxed">

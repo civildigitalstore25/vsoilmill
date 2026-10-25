@@ -1,5 +1,5 @@
 import { connectDb } from "@/lib/db/mongoose";
-import { getCouponDiscount } from "@/lib/orders/coupons";
+import { validateAndCalculateCouponDiscount } from "@/lib/orders/coupons";
 import { resolveOrderItemsFromCatalog } from "@/lib/orders/inventory";
 import {
   calculatePricing,
@@ -7,6 +7,7 @@ import {
 } from "@/lib/orders/pricing";
 import { saveCheckoutAddressForUser } from "@/lib/user/save-checkout-address";
 import { OrderModel } from "@/models/Order";
+import { CouponModel } from "@/models/Coupon";
 import { auth } from "@/lib/auth/auth";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -61,7 +62,16 @@ export async function POST(request: Request) {
       (sum, item) => sum + item.price * item.quantity,
       0,
     );
-    const coupon = getCouponDiscount(parsed.data.couponCode, subtotal);
+    const coupon = await validateAndCalculateCouponDiscount({
+      code: parsed.data.couponCode,
+      items: resolved.items.map((line) => ({
+        productId: String(line.productId),
+        variantId: String(line.variantId),
+        price: line.price,
+        quantity: line.quantity,
+      })),
+      subtotal,
+    });
     if (coupon.error) {
       return NextResponse.json({ error: coupon.error }, { status: 400 });
     }
@@ -89,6 +99,12 @@ export async function POST(request: Request) {
       paymentStatus: "PENDING",
       stockDecremented: false,
     });
+
+    if (coupon.couponDoc?._id) {
+      await CouponModel.findByIdAndUpdate(coupon.couponDoc._id, {
+        $inc: { timesUsed: 1 },
+      }).catch(() => undefined);
+    }
 
     await saveCheckoutAddressForUser(session.user.id, shippingAddress).catch(
       () => undefined,

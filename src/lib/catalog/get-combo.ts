@@ -35,10 +35,10 @@ export async function getComboBySlug(slug: string): Promise<{
     const variant = product?.variants.find(
       (entry) => String(entry._id) === String(item.variantId),
     );
-    const custom = item.isCustom || !product;
+    const custom = Boolean(item.isCustom || !product || !variant);
     const unitPrice = custom
-      ? item.customPrice ?? 0
-      : variant
+      ? item.customPrice ?? (product && variant ? sellingPrice(product, variant) : 0)
+      : product && variant
         ? sellingPrice(product, variant)
         : 0;
     return {
@@ -48,7 +48,7 @@ export async function getComboBySlug(slug: string): Promise<{
       quantity: item.quantity,
       unitPrice,
       image: custom
-        ? item.customImage || ""
+        ? item.customImage || (variant ? variantDisplayImage(product?.images, variant) : product?.images?.[0] || "")
         : variantDisplayImage(product?.images, variant),
     };
   });

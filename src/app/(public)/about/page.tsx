@@ -42,7 +42,7 @@ export default function AboutPage() {
           </h2>
           <p className="mt-2 text-xs leading-relaxed text-muted sm:text-sm">
             Watch real video footage of our Mara Chekku wooden pressing, see our farm seed lots,
-            and follow daily updates from founder Sarathkumar on YouTube, Instagram, and Facebook:
+            and follow daily updates from founder Sarathkumar on WhatsApp, YouTube, Instagram, and Facebook:
           </p>
           <div className="mt-5">
             <SocialLinks variant="pill" className="gap-2.5" />

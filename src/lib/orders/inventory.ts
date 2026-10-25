@@ -138,13 +138,13 @@ export async function decrementStockForItems(
     );
     if (result.modifiedCount === 0) {
       const combo = (await ComboModel.findById(item.productId).lean()) as {
-        items?: Array<{ productId: unknown; variantId: string; quantity?: number }>;
+        items?: Array<{ productId: unknown; variantId: string; quantity?: number; isCustom?: boolean }>;
       } | null;
       if (!combo) {
         throw new Error("Failed to reserve stock for one or more items");
       }
       for (const line of combo.items ?? []) {
-        if (!line.productId || !line.variantId) continue;
+        if (!line.productId || !line.variantId || line.isCustom) continue;
         await decrementStockForItems([
           {
             productId: String(line.productId),

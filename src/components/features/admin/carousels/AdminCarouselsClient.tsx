@@ -131,6 +131,23 @@ export function AdminCarouselsClient({
         />
       </div>
 
+      {/* Banner Dimension Guidelines Notice */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-xl border border-accent/30 bg-accent/10 p-4 text-sm text-dark shadow-2xs">
+        <div className="flex items-start gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/25 text-accent-foreground font-bold text-base shadow-xs">
+            📐
+          </span>
+          <div className="space-y-0.5">
+            <p className="font-semibold text-dark">
+              Recommended Banner Dimensions: 1920 × 650 px (or 1920 × 800 px)
+            </p>
+            <p className="text-xs text-muted leading-relaxed">
+              For crisp, sharp rendering across desktop displays, tablets, and phones, upload images at <strong>1920 × 650 px</strong> (Aspect ratio ~21:9 or 16:9, min 1200 × 500 px). Keep focal visuals in the center or on the right side as headline text overlays on the left.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Main Listing Table */}
       <AdminListControls list={list} />
       {list.noMatches ? (

@@ -7,6 +7,7 @@ import {
   ShoppingBag,
   Star,
   Users,
+  Ticket,
 } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
 
@@ -46,6 +47,12 @@ export const ADMIN_NAV = [
     label: "Orders",
     description: "Fulfillment",
     icon: ShoppingBag,
+  },
+  {
+    href: ROUTES.ADMIN.COUPONS,
+    label: "Coupons",
+    description: "Discounts & promo codes",
+    icon: Ticket,
   },
   {
     href: ROUTES.ADMIN.USERS,
@@ -236,6 +243,9 @@ export const ADMIN_CAROUSEL_COPY = {
   empty: "No carousel slides found. Click \"Add Carousel Slide\" to create your first slide.",
   imageUrl: "Image URL",
   imageUrlPlaceholder: "https://ik.imagekit.io/... (Paste high-res banner URL)",
+  imageDimensionsRequired: "Required Image Dimensions: 1920 × 650 px (Width: 1920px, Height: 650px)",
+  imageDimensionsHint: "Recommended size: 1920 × 650 px (or 1920 × 800 px, 21:9 / 16:9 ratio). Minimum resolution: 1200 × 500 px.",
+  imageCompositionTip: "Tip: Keep important subjects centered or on the right side. The left side is reserved for text overlay and buttons.",
   navigationLink: "Navigation Link",
   navigationLinkPlaceholder: "/shop, /bestsellers, or https://...",
   headline: "Headline",

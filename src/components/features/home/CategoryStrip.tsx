@@ -27,6 +27,8 @@ const DEFAULT_CATEGORY_IMAGES: Record<string, string> = {
     "https://ik.imagekit.io/mnm0iz0ng2/category/combo.jpg",
   "home-cleaning":
     "https://ik.imagekit.io/mnm0iz0ng2/category/clean_tool.png",
+  "honey-dry-nuts":
+    "https://ik.imagekit.io/r33t79noj/vsoilmill/vsupdated/honey.jpeg?updatedAt=1792839297577",
 };
 
 export function CategoryStrip({ categories }: { categories: Category[] }) {
@@ -46,10 +48,11 @@ export function CategoryStrip({ categories }: { categories: Category[] }) {
             const isSvgImage = category.image?.endsWith(".svg");
             const isUnsplash = category.image?.includes("unsplash.com");
             const imageUrl =
-              DEFAULT_CATEGORY_IMAGES[category.slug] ||
               (category.image && !isSvgImage && !isUnsplash
                 ? category.image
-                : DEFAULT_CATEGORY_IMAGES["wood-pressed-oils"]);
+                : DEFAULT_CATEGORY_IMAGES[category.slug]) ||
+              DEFAULT_CATEGORY_IMAGES[category.slug] ||
+              DEFAULT_CATEGORY_IMAGES["wood-pressed-oils"];
 
             return (
               <StaggerItem key={category._id}>

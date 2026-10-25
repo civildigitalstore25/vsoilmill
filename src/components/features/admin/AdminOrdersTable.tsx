@@ -79,24 +79,35 @@ export function AdminOrdersTable({ orders }: { orders: Order[] }) {
             </tr>
           </thead>
           <tbody>
-            {orders.map((order) => (
-              <tr
-                key={order._id}
-                className="border-b border-border/70 align-middle transition hover:bg-cream/40"
-              >
-                <td className="px-5 py-4">
-                  <div className="flex items-center gap-3">
-                    <UserAvatar name={order.shippingAddress.fullName} />
-                    <div>
-                      <p className="font-medium text-dark">
-                        {order.shippingAddress.fullName}
-                      </p>
-                      <p className="mt-1 text-xs text-muted">
-                        {order.shippingAddress.phone} · {order.shippingAddress.city}
-                      </p>
+            {orders.map((order) => {
+              const customerPhone = (
+                order.shippingAddress?.phone ||
+                (typeof order.userId === "object" && order.userId && "phone" in order.userId
+                  ? (order.userId as { phone?: string }).phone
+                  : "") ||
+                ""
+              ).trim();
+
+              return (
+                <tr
+                  key={order._id}
+                  className="border-b border-border/70 align-middle transition hover:bg-cream/40"
+                >
+                  <td className="px-5 py-4">
+                    <div className="flex items-center gap-3">
+                      <UserAvatar name={order.shippingAddress?.fullName || "Customer"} />
+                      <div>
+                        <p className="font-medium text-dark">
+                          {order.shippingAddress?.fullName || "Customer"}
+                        </p>
+                        {customerPhone ? (
+                          <p className="mt-1 text-xs text-muted">
+                            {customerPhone}
+                          </p>
+                        ) : null}
+                      </div>
                     </div>
-                  </div>
-                </td>
+                  </td>
                 <td className="px-5 py-4 whitespace-nowrap text-muted">
                   {formatOrderDate(order.createdAt)}
                 </td>
@@ -143,7 +154,8 @@ export function AdminOrdersTable({ orders }: { orders: Order[] }) {
                   </div>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

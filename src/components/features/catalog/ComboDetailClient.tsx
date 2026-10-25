@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Video } from "lucide-react";
 import { toast } from "sonner";
 import { AdminEditLink } from "@/components/features/products/AdminEditLink";
 import { ProductShare } from "@/components/features/products/ProductShare";
@@ -38,7 +38,7 @@ export function ComboDetailClient({
   const buyNowItem = useCartStore((s) => s.buyNowItem);
   const { requireLogin } = useRequireLogin();
   const name = stripHtml(combo.name);
-  const image = combo.images[0] || ASSETS.PLACEHOLDER_PRODUCT;
+  const image = combo.images[0] || combo.videos?.[0] || ASSETS.PLACEHOLDER_PRODUCT;
   const worth = Math.max(separateTotal, combo.originalPrice);
   const save = worth > combo.price ? worth - combo.price : 0;
   const summary = lines
@@ -88,11 +88,19 @@ export function ComboDetailClient({
         <AdminEditLink href={ROUTES.ADMIN.COMBO_EDIT(combo._id)} />
       </div>
       <div className="grid gap-10 lg:grid-cols-2">
-        <ProductMediaGallery image={image} images={combo.images} videos={[]} alt={name} />
+        <ProductMediaGallery image={image} images={combo.images} videos={combo.videos ?? []} alt={name} />
         <div>
-          <Badge className="mb-3 bg-primary text-primary-foreground">
-            {CATALOG_COPY.comboChip}
-          </Badge>
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <Badge className="bg-primary text-primary-foreground">
+              {CATALOG_COPY.comboChip}
+            </Badge>
+            {combo.videos && combo.videos.length > 0 ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary border border-primary/20">
+                <Video className="h-3.5 w-3.5" />
+                Video Available
+              </span>
+            ) : null}
+          </div>
           <h1 className="font-display text-3xl text-dark md:text-4xl">{name}</h1>
           {combo.endsAt ? <OfferCountdown endsAt={combo.endsAt} /> : null}
           <div className="mt-6 flex flex-wrap items-baseline gap-3">

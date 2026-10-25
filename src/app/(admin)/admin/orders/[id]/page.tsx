@@ -11,6 +11,8 @@ import { connectDb } from "@/lib/db/mongoose";
 import { formatInr } from "@/lib/utils/format";
 import { OrderModel } from "@/models/Order";
 
+import { UserModel } from "@/models/User";
+
 export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ id: string }> };
@@ -18,9 +20,17 @@ type Props = { params: Promise<{ id: string }> };
 export default async function AdminOrderDetailPage({ params }: Props) {
   const { id } = await params;
   await connectDb();
-  const order = await OrderModel.findById(id).lean();
+  void UserModel;
+  const order = await OrderModel.findById(id).populate("userId", "name email phone").lean();
   if (!order) notFound();
   const data = JSON.parse(JSON.stringify(order));
+  const customerPhone = (
+    data.shippingAddress?.phone ||
+    (typeof data.userId === "object" && data.userId && "phone" in data.userId
+      ? data.userId.phone
+      : "") ||
+    ""
+  ).trim();
 
   return (
     <div>
@@ -45,23 +55,27 @@ export default async function AdminOrderDetailPage({ params }: Props) {
             {ADMIN_ORDERS_COPY.customerTitle}
           </h2>
           <div className="mt-4 flex items-start gap-3">
-            <UserAvatar name={data.shippingAddress.fullName} />
+            <UserAvatar name={data.shippingAddress?.fullName || "Customer"} />
             <p className="text-sm leading-relaxed text-muted">
-              {data.shippingAddress.fullName}
-            <br />
-            {data.shippingAddress.phone}
-            {data.shippingAddress.email ? (
-              <>
-                <br />
-                {data.shippingAddress.email}
-              </>
-            ) : null}
-            <br />
-            {data.shippingAddress.line1}
-            {data.shippingAddress.line2 ? `, ${data.shippingAddress.line2}` : ""}
-            <br />
-            {data.shippingAddress.city}, {data.shippingAddress.state}{" "}
-            {data.shippingAddress.pincode}
+              <span className="font-medium text-dark">{data.shippingAddress?.fullName}</span>
+              {customerPhone ? (
+                <>
+                  <br />
+                  {customerPhone}
+                </>
+              ) : null}
+              {data.shippingAddress?.email ? (
+                <>
+                  <br />
+                  {data.shippingAddress.email}
+                </>
+              ) : null}
+              <br />
+              {data.shippingAddress?.line1}
+              {data.shippingAddress?.line2 ? `, ${data.shippingAddress.line2}` : ""}
+              <br />
+              {data.shippingAddress?.city}, {data.shippingAddress?.state}{" "}
+              {data.shippingAddress?.pincode}
             </p>
           </div>
         </AdminCard>

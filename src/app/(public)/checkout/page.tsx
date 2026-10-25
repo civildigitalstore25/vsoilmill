@@ -16,6 +16,7 @@ import {
   Edit2,
   Loader2,
   MessageCircle,
+  Ticket,
 } from "lucide-react";
 import { CheckoutSavedAddresses } from "@/components/features/checkout/CheckoutSavedAddresses";
 import { Button } from "@/components/ui/button";
@@ -64,7 +65,63 @@ export default function CheckoutPage() {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const { requireLogin } = useRequireLogin();
-  const { total } = calculatePricing(subtotal, 0);
+
+  const [couponInput, setCouponInput] = useState("");
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    name: string;
+    discountType: "PERCENTAGE" | "FIXED";
+    discountValue: number;
+    discount: number;
+  } | null>(null);
+
+  const discount = appliedCoupon?.discount ?? 0;
+  const { total } = calculatePricing(subtotal, discount);
+
+  async function handleApplyCoupon() {
+    const code = couponInput.trim();
+    if (!code) {
+      toast.error("Please enter a coupon code");
+      return;
+    }
+    setApplyingCoupon(true);
+    try {
+      const res = await fetch(API_ENDPOINTS.COUPON_VALIDATE, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code,
+          items: items.map((i) => ({
+            productId: i.productId,
+            variantId: i.variantId,
+            price: i.price,
+            quantity: i.quantity,
+          })),
+          subtotal,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.valid) {
+        throw new Error(json.error || "Invalid coupon code");
+      }
+
+      setAppliedCoupon(json.data);
+      toast.success(
+        `Coupon "${json.data.code}" applied! You saved ${formatInr(json.data.discount)}`,
+      );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to apply coupon");
+    } finally {
+      setApplyingCoupon(false);
+    }
+  }
+
+  function handleRemoveCoupon() {
+    setAppliedCoupon(null);
+    setCouponInput("");
+    toast.info("Coupon removed");
+  }
 
   useEffect(() => {
     async function loadAddresses() {
@@ -174,6 +231,7 @@ export default function CheckoutPage() {
             ...address,
             fullName: [firstName, lastName].filter(Boolean).join(" "),
           },
+          couponCode: appliedCoupon?.code,
         }),
       });
       const orderJson = await orderRes.json();
@@ -678,14 +736,87 @@ export default function CheckoutPage() {
               ))}
             </div>
 
+            {/* Coupon Code Section */}
+            <div className="mt-6 border-t border-border/70 pt-4">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-muted mb-2">
+                Have a Coupon Code?
+              </label>
+              {appliedCoupon ? (
+                <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl border border-emerald-300 bg-emerald-50/80">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white">
+                      <Ticket className="h-4 w-4" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-emerald-950 font-mono tracking-wide">
+                        {appliedCoupon.code}
+                      </p>
+                      <p className="text-[11px] text-emerald-700 truncate">
+                        {appliedCoupon.discountType === "PERCENTAGE"
+                          ? `${appliedCoupon.discountValue}% OFF applied`
+                          : `${formatInr(appliedCoupon.discountValue)} OFF applied`}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRemoveCoupon}
+                    className="text-xs font-medium text-red-600 hover:text-red-700 hover:underline px-2 py-1"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <input
+                      type="text"
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          void handleApplyCoupon();
+                        }
+                      }}
+                      placeholder="Enter coupon code"
+                      className="w-full rounded-xl border border-border bg-white px-3.5 py-2 text-xs uppercase font-mono tracking-wider placeholder:normal-case placeholder:font-sans placeholder:text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={handleApplyCoupon}
+                    disabled={applyingCoupon || !couponInput.trim()}
+                    size="sm"
+                    className="rounded-xl px-4 text-xs font-semibold shrink-0"
+                  >
+                    {applyingCoupon ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      "Apply"
+                    )}
+                  </Button>
+                </div>
+              )}
+            </div>
+
             {/* Price Calculations */}
-            <div className="mt-6 space-y-2.5 border-t border-border/70 pt-4 text-sm">
+            <div className="mt-4 space-y-2.5 border-t border-border/70 pt-4 text-sm">
               <div className="flex justify-between text-muted">
                 <span>Subtotal</span>
                 <span className="font-medium text-dark">
                   {formatInr(subtotal)}
                 </span>
               </div>
+              {discount > 0 && (
+                <div className="flex justify-between text-emerald-700 font-medium">
+                  <span className="flex items-center gap-1">
+                    <Ticket className="h-3.5 w-3.5" />
+                    Coupon Discount ({appliedCoupon?.code})
+                  </span>
+                  <span>-{formatInr(discount)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-muted">
                 <span>Shipping</span>
                 <span className="font-semibold text-primary">FREE</span>

@@ -42,10 +42,10 @@ export default async function HomePage() {
   return (
     <>
       <HomeHeroCarousel slides={carousels} />
+      <CombosSection combos={combos} />
       <CategoryStrip categories={categories} />
       <HomeProductShowcase products={products} categories={categories} />
       <OffersSection products={offers} />
-      <CombosSection combos={combos} />
       <ProcessSection />
       <TestimonialsSection />
       <WhyUsSection />

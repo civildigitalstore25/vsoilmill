@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +16,7 @@ import { ROUTES } from "@/constants/routes";
 import { ASSETS } from "@/constants/assets";
 import { LAYOUT } from "@/constants/layout";
 import { useCartStore } from "@/hooks/useCartStore";
+import { useRequireLogin } from "@/hooks/useRequireLogin";
 import { cn } from "@/lib/utils/cn";
 import { formatInr } from "@/lib/utils/format";
 import {
@@ -28,7 +30,10 @@ import { getProductImageUrl } from "@/lib/utils/image";
 import type { ProductCardProps } from "@/types/product";
 
 export function ProductCard({ product }: ProductCardProps) {
+  const router = useRouter();
+  const { requireLogin } = useRequireLogin();
   const addItem = useCartStore((s) => s.addItem);
+  const buyNowItem = useCartStore((s) => s.buyNowItem);
   const [variantIndex, setVariantIndex] = useState(0);
   const variant = product.variants[variantIndex] ?? product.variants[0];
   const unitPrice = variant ? sellingPrice(product, variant) : 0;
@@ -48,7 +53,11 @@ export function ProductCard({ product }: ProductCardProps) {
       ? Math.round(((strikePrice - unitPrice) / strikePrice) * 100)
       : 0;
 
-  function handleAdd() {
+  function handleAdd(e?: React.MouseEvent) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (!variant || !available) {
       toast.error(CATALOG_COPY.outOfStock);
       return;
@@ -66,6 +75,31 @@ export function ProductCard({ product }: ProductCardProps) {
       gstExempt: Boolean(product.gstExempt),
     });
     toast.success(CHECKOUT_COPY.ADDED_TO_CART);
+  }
+
+  function handleBuyNow(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!variant || !available) {
+      toast.error(CATALOG_COPY.outOfStock);
+      return;
+    }
+    if (!requireLogin()) return;
+    buyNowItem({
+      productId: product._id,
+      variantId: String(variant._id),
+      slug: product.slug,
+      name: product.name,
+      variantLabel: variant.label,
+      image: imgSrc,
+      price: unitPrice,
+      originalPrice: strikePrice,
+      stock: variant.stock,
+      quantity: 1,
+      gstExempt: Boolean(product.gstExempt),
+    });
+    toast.success(CHECKOUT_COPY.BUY_NOW_SUCCESS);
+    router.push(ROUTES.CHECKOUT);
   }
 
   return (
@@ -143,14 +177,24 @@ export function ProductCard({ product }: ProductCardProps) {
           <OfferCountdown endsAt={product.offerEndsAt} compact />
         ) : null}
 
-        <div className="mt-auto pt-2">
+        <div className="mt-auto pt-2 grid grid-cols-2 gap-1.5">
           <Button
             size="sm"
-            className="w-full"
+            variant="outline"
+            className="w-full text-xs font-medium border-primary/30 text-primary hover:bg-primary hover:text-white px-1 sm:px-2 transition-colors"
             onClick={handleAdd}
             disabled={!variant || !available}
           >
             {CHECKOUT_COPY.ADD_TO_CART}
+          </Button>
+          <Button
+            size="sm"
+            variant="accent"
+            className="w-full text-xs font-semibold px-1 sm:px-2 shadow-xs transition-colors"
+            onClick={handleBuyNow}
+            disabled={!variant || !available}
+          >
+            {CHECKOUT_COPY.BUY_NOW}
           </Button>
         </div>
       </article>

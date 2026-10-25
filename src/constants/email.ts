@@ -37,10 +37,11 @@ function whatsappHref(): string {
 /** Only links with a real href are shown in the email footer. */
 export function getEmailSocialLinks(): EmailSocialLink[] {
   const links: EmailSocialLink[] = [
-    { label: "WhatsApp", href: whatsappHref() },
-    { label: "Instagram", href: "https://www.instagram.com/vsoilmillstore/" },
-    { label: "Facebook", href: "https://www.facebook.com/VSOilMillStore/" },
-    { label: "YouTube", href: "https://www.youtube.com/@Sarathkumar-pd" },
+    { label: "WhatsApp Channel", href: UI.social.whatsapp },
+    { label: "WhatsApp Chat", href: whatsappHref() },
+    { label: "YouTube", href: UI.social.youtube },
+    { label: "Instagram", href: UI.social.instagram },
+    { label: "Facebook", href: UI.social.facebook },
   ];
   return links.filter((l) => Boolean(l.href));
 }

@@ -30,4 +30,7 @@ export const API_ENDPOINTS = {
   CAROUSEL: (id: string) => `/api/carousels/${id}`,
   CAROUSEL_STATUS: (id: string) => `/api/carousels/${id}/status`,
   CAROUSELS_PUBLIC: "/api/carousels/public",
+  ADMIN_COUPONS: "/api/admin/coupons",
+  ADMIN_COUPON: (id: string) => `/api/admin/coupons/${id}`,
+  COUPON_VALIDATE: "/api/coupons/validate",
 } as const;

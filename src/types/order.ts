@@ -61,7 +61,14 @@ export interface AdminCreateOrderInput {
 
 export interface Order {
   _id: string;
-  userId?: string;
+  userId?:
+    | string
+    | {
+        _id: string;
+        name?: string;
+        email?: string;
+        phone?: string;
+      };
   items: OrderItem[];
   shippingAddress: ShippingAddress;
   pricing: OrderPricing;

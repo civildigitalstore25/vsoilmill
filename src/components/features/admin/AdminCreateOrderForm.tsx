@@ -86,7 +86,7 @@ export function AdminCreateOrderForm({
             quantity: qty,
           })),
           status: OrderStatus.CONFIRMED,
-          paymentStatus: PaymentStatus.PENDING,
+          paymentStatus: PaymentStatus.PAID,
         }),
       });
       if (!res.ok) throw new Error(ADMIN_ACTIONS.createFailed);

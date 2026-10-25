@@ -45,6 +45,7 @@ export function useAdminList<T>(
 
   return {
     pageItems,
+    filteredItems: filtered,
     query,
     setQuery,
     pageSize,

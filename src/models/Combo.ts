@@ -20,6 +20,7 @@ const ComboSchema = new Schema(
     slug: { type: String, required: true, unique: true },
     description: String,
     images: { type: [String], default: [] },
+    videos: { type: [String], default: [] },
     price: { type: Number, required: true },
     originalPrice: { type: Number, required: true },
     isActive: { type: Boolean, default: true },
@@ -37,7 +38,7 @@ if (ExistingCombo) {
       schema?: { path: (name: string) => unknown };
     }
   )?.schema;
-  if (itemSchema && !itemSchema.path("isCustom")) {
+  if (!ExistingCombo.schema.path("videos") || (itemSchema && !itemSchema.path("isCustom"))) {
     delete models.Combo;
   }
 }

@@ -11,9 +11,18 @@ export async function PUT(request: Request, { params }: Params) {
   if (!admin.ok) return admin.response;
   const { id } = await params;
   const body = await request.json();
-  if (body.name) body.slug = slugify(stripHtml(body.name));
-  if (body.startsAt) body.startsAt = new Date(body.startsAt);
-  if (body.endsAt) body.endsAt = new Date(body.endsAt);
+  if (body.name) {
+    const rawSlug = slugify(stripHtml(body.name));
+    if (rawSlug) body.slug = rawSlug;
+  }
+  if (body.startsAt !== undefined) {
+    const d = body.startsAt ? new Date(body.startsAt) : null;
+    body.startsAt = d && !Number.isNaN(d.getTime()) ? d : null;
+  }
+  if (body.endsAt !== undefined) {
+    const d = body.endsAt ? new Date(body.endsAt) : null;
+    body.endsAt = d && !Number.isNaN(d.getTime()) ? d : null;
+  }
   await connectDb();
   const combo = await ComboModel.findByIdAndUpdate(id, { $set: body }, { new: true }).lean();
   if (!combo) return NextResponse.json({ error: "Not found" }, { status: 404 });

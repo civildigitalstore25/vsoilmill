@@ -28,7 +28,7 @@ export function Header({ categories }: { categories: Category[] }) {
   const itemCount = useCartStore((s) => s.getItemCount());
   const [cartOpen, setCartOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [menus, setMenus] = useState({ hasOffers: false, hasCombos: false });
+  const [menus, setMenus] = useState({ hasOffers: true, hasCombos: true });
 
   useEffect(() => {
     void fetch(API_ENDPOINTS.CATALOG_HIGHLIGHTS)
@@ -64,18 +64,26 @@ export function Header({ categories }: { categories: Category[] }) {
 
         <Link
           href={ROUTES.HOME}
-          className="flex items-center shrink-0 transition-transform hover:scale-105 py-0.5"
+          className="flex items-center gap-2.5 sm:gap-3 shrink-0 transition-opacity hover:opacity-90 py-0.5 group"
           aria-label="VS OilMill Home"
         >
           <Image
             src={ASSETS.LOGO}
             alt="VS OilMill Logo"
-            width={140}
-            height={128}
+            width={120}
+            height={110}
             priority
             unoptimized
-            className="h-14 sm:h-16 md:h-18 lg:h-20 w-auto object-contain mix-blend-multiply"
+            className="h-12 w-auto sm:h-14 md:h-16 object-contain mix-blend-multiply transition-transform group-hover:scale-105"
           />
+          <div className="flex flex-col">
+            <span className="font-display text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-primary leading-none">
+              {UI.brand}
+            </span>
+            <span className="text-[10px] sm:text-[11px] font-medium tracking-wider uppercase text-accent mt-0.5 leading-none">
+              Pure & Traditional
+            </span>
+          </div>
         </Link>
 
         {/* Main Desktop Navigation */}

@@ -16,12 +16,14 @@ import { cn } from "@/lib/utils/cn";
 function SidebarNav({
   pathname,
   onNavigate,
+  className,
 }: {
   pathname: string;
   onNavigate?: () => void;
+  className?: string;
 }) {
   return (
-    <nav className="mt-8 space-y-1.5">
+    <nav className={cn("space-y-1.5", className)}>
       {ADMIN_NAV.map(({ href, label, description, icon: Icon }) => {
         const active = pathname.startsWith(href);
         return (
@@ -38,13 +40,13 @@ function SidebarNav({
           >
             <span
               className={cn(
-                "flex h-9 w-9 items-center justify-center rounded-lg",
+                "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
                 active ? "bg-cream/15" : "bg-cream/5 group-hover:bg-cream/10",
               )}
             >
               <Icon className="h-4 w-4" />
             </span>
-            <span className="min-w-0">
+            <span className="min-w-0 flex-1">
               <span className="block text-sm font-semibold">{label}</span>
               <span
                 className={cn(
@@ -70,9 +72,15 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,var(--color-cream)_0%,var(--color-cream-dark)_100%)] lg:h-screen lg:overflow-hidden">
-      <div className="mx-auto flex min-h-screen max-w-[1600px] lg:h-full">
-        <aside className="hidden w-72 shrink-0 flex-col border-r border-dark/10 bg-dark p-5 text-cream lg:flex">
-          <Link href={ROUTES.ADMIN.DASHBOARD} className="flex flex-col items-center text-center group" aria-label="Admin Dashboard">
+      <div className="flex min-h-screen w-full lg:h-full">
+        {/* Fixed Desktop Sidebar */}
+        <aside className="hidden w-72 shrink-0 flex-col border-r border-dark/10 bg-dark p-5 text-cream lg:flex lg:h-full lg:overflow-hidden">
+          {/* Top Brand & Logo (Fixed) */}
+          <Link
+            href={ROUTES.ADMIN.DASHBOARD}
+            className="flex shrink-0 flex-col items-center text-center group"
+            aria-label="Admin Dashboard"
+          >
             <div className="overflow-hidden rounded-2xl bg-white p-2.5 shadow-md border border-white/20 transition-transform group-hover:scale-105">
               <Image
                 src={ASSETS.LOGO}
@@ -87,36 +95,43 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               {ADMIN_COPY.panelLabel}
             </p>
           </Link>
-          <SidebarNav pathname={pathname} />
-          <div className="mt-auto space-y-2 border-t border-cream/10 pt-5">
+
+          {/* Middle Nav Items (Scrollable with Sleek Scrollbar) */}
+          <div className="my-5 min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1.5 custom-scrollbar">
+            <SidebarNav pathname={pathname} />
+          </div>
+
+          {/* Bottom Actions (Pinned / Fixed) */}
+          <div className="shrink-0 space-y-2 border-t border-cream/10 pt-4">
             <Link
               href={ROUTES.HOME}
               className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-cream/70 transition hover:bg-cream/10 hover:text-cream"
             >
-              <ExternalLink className="h-4 w-4" />
-              {ADMIN_COPY.storefront}
+              <ExternalLink className="h-4 w-4 shrink-0" />
+              <span>{ADMIN_COPY.storefront}</span>
             </Link>
             <button
               type="button"
               onClick={() => signOut({ callbackUrl: getPostLogoutRoute() })}
               className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-cream/70 transition hover:bg-cream/10 hover:text-cream"
             >
-              <LogOut className="h-4 w-4" />
-              {ADMIN_COPY.signOut}
+              <LogOut className="h-4 w-4 shrink-0" />
+              <span>{ADMIN_COPY.signOut}</span>
             </button>
           </div>
         </aside>
 
+        {/* Mobile Slide-over Navigation Drawer */}
         {open ? (
           <div className="fixed inset-0 z-50 lg:hidden">
             <button
               type="button"
-              className="absolute inset-0 bg-dark/50"
+              className="absolute inset-0 bg-dark/50 backdrop-blur-xs transition-opacity"
               aria-label="Close menu"
               onClick={() => setOpen(false)}
             />
             <aside className="absolute left-0 top-0 flex h-full w-72 flex-col bg-dark p-5 text-cream shadow-2xl">
-              <div className="flex items-center justify-between">
+              <div className="flex shrink-0 items-center justify-between pb-3 border-b border-cream/10">
                 <Link
                   href={ROUTES.ADMIN.DASHBOARD}
                   className="flex items-center gap-3"
@@ -140,22 +155,48 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                   type="button"
                   aria-label="Close"
                   onClick={() => setOpen(false)}
+                  className="rounded-lg p-1 text-cream/70 hover:bg-cream/10 hover:text-cream transition"
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
-              <SidebarNav pathname={pathname} onNavigate={() => setOpen(false)} />
+
+              {/* Scrollable Nav on Mobile Drawer */}
+              <div className="my-4 min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1.5 custom-scrollbar">
+                <SidebarNav pathname={pathname} onNavigate={() => setOpen(false)} />
+              </div>
+
+              {/* Bottom Actions on Mobile Drawer */}
+              <div className="shrink-0 space-y-2 border-t border-cream/10 pt-4">
+                <Link
+                  href={ROUTES.HOME}
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-cream/70 transition hover:bg-cream/10 hover:text-cream"
+                >
+                  <ExternalLink className="h-4 w-4 shrink-0" />
+                  <span>{ADMIN_COPY.storefront}</span>
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => signOut({ callbackUrl: getPostLogoutRoute() })}
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-cream/70 transition hover:bg-cream/10 hover:text-cream"
+                >
+                  <LogOut className="h-4 w-4 shrink-0" />
+                  <span>{ADMIN_COPY.signOut}</span>
+                </button>
+              </div>
             </aside>
           </div>
         ) : null}
 
-        <div className="flex min-w-0 flex-1 flex-col lg:min-h-0 lg:overflow-y-auto">
-          <header className={cn("sticky top-0 z-30 border-b border-border/70 bg-cream/80 py-4 backdrop-blur-md", LAYOUT.container)}>
+        {/* Right Side Content Panel (Fixed layout & header, independent scroll container) */}
+        <div className="flex min-w-0 flex-1 flex-col lg:h-full lg:min-h-0 lg:overflow-y-auto overscroll-contain">
+          <header className={cn("sticky top-0 z-30 border-b border-border/70 bg-cream/90 py-4 backdrop-blur-md shadow-2xs", LAYOUT.container)}>
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <button
                   type="button"
-                  className="rounded-xl border border-border bg-card p-2 lg:hidden"
+                  className="rounded-xl border border-border bg-card p-2 lg:hidden transition hover:bg-cream-dark/40"
                   aria-label="Open menu"
                   onClick={() => setOpen(true)}
                 >
@@ -165,25 +206,27 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
                     {page?.label ?? "Admin"}
                   </p>
-                  <p className="text-sm text-dark/80">
+                  <p className="text-sm font-medium text-dark/80">
                     {page?.description ?? "Manage your store"}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <div className="hidden text-right sm:block">
-                  <p className="text-sm font-medium text-dark">
+                  <p className="text-sm font-semibold text-dark">
                     {session?.user?.name ?? "Admin"}
                   </p>
                   <p className="text-xs text-muted">{session?.user?.email}</p>
                 </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground shadow-sm">
                   {(session?.user?.name ?? "A").slice(0, 1).toUpperCase()}
                 </div>
               </div>
             </div>
           </header>
-          <main className={cn("flex-1 py-6 md:py-8", LAYOUT.container)}>{children}</main>
+          <div className="mx-auto w-full max-w-[1600px] flex-1">
+            <main className={cn("py-6 md:py-8", LAYOUT.container)}>{children}</main>
+          </div>
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ProductShare } from "@/components/features/products/ProductShare";
+import { WhatsAppIcon } from "@/components/features/products/ProductShareIcons";
 import { QuantityStepper } from "@/components/features/products/QuantityStepper";
 import { CATALOG_COPY } from "@/constants/catalog";
 import { CHECKOUT_COPY } from "@/constants/checkout";
@@ -25,7 +26,7 @@ export function ProductPurchaseActions({
   onQuantity: (next: number) => void;
   onAdd: () => void;
   onBuy: () => void;
-  onWhatsApp: () => boolean;
+  onWhatsApp?: () => boolean;
   productName: string;
   shareText: string;
   variantLabel?: string;
@@ -49,9 +50,9 @@ export function ProductPurchaseActions({
         <Button
           size="lg"
           variant="whatsapp"
-          className="mt-3 w-full"
+          className="mt-3 w-full flex items-center justify-center gap-2.5 font-semibold text-white bg-[#25D366] hover:bg-[#1ebe57] transition-all shadow-sm hover:shadow-md py-6 rounded-xl text-base"
           onClick={() => {
-            if (!onWhatsApp()) return;
+            if (onWhatsApp && !onWhatsApp()) return;
             window.open(
               buildWhatsAppUrl(
                 buildProductWhatsAppMessage(productName, variantLabel, unitPrice, quantity),
@@ -61,7 +62,10 @@ export function ProductPurchaseActions({
             );
           }}
         >
-          {CHECKOUT_COPY.WHATSAPP_CTA}
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20 p-1">
+            <WhatsAppIcon className="h-4 w-4 text-white" />
+          </span>
+          <span>Chat on WhatsApp ({variantLabel})</span>
         </Button>
       ) : null}
       <div className="mt-4">

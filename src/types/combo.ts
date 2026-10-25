@@ -24,6 +24,7 @@ export interface ComboOffer {
   slug: string;
   description?: string;
   images: string[];
+  videos?: string[];
   price: number;
   originalPrice: number;
   isActive: boolean;

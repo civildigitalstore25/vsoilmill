@@ -158,10 +158,16 @@ export function CarouselSlideForm({
     <form onSubmit={handleSubmit} className="space-y-5 text-left">
       {/* Field A: Image URL (Required) */}
       <div className="space-y-1.5">
-        <Label htmlFor="carousel-image-url" className="text-sm font-semibold">
-          {ADMIN_CAROUSEL_COPY.imageUrl}{" "}
-          <span className="text-destructive">*</span>
-        </Label>
+        <div className="flex flex-wrap items-center justify-between gap-1">
+          <Label htmlFor="carousel-image-url" className="text-sm font-semibold">
+            {ADMIN_CAROUSEL_COPY.imageUrl}{" "}
+            <span className="text-destructive">*</span>
+          </Label>
+          <span className="inline-flex items-center rounded-md bg-accent/20 px-2 py-0.5 text-[11px] font-semibold text-accent-foreground border border-accent/30">
+            📐 Required: 1920 × 650 px
+          </span>
+        </div>
+
         <Input
           id="carousel-image-url"
           placeholder={ADMIN_CAROUSEL_COPY.imageUrlPlaceholder}
@@ -173,6 +179,20 @@ export function CarouselSlideForm({
           disabled={isSubmitting}
           aria-invalid={Boolean(errors.imageUrl)}
         />
+
+        <div className="rounded-lg bg-cream/70 p-2.5 text-xs text-muted space-y-1 border border-border/70">
+          <p className="font-medium text-dark/90 flex items-center gap-1.5">
+            <span className="text-primary font-bold">✓</span>
+            {ADMIN_CAROUSEL_COPY.imageDimensionsRequired}
+          </p>
+          <p className="text-[11px] text-muted">
+            {ADMIN_CAROUSEL_COPY.imageDimensionsHint}
+          </p>
+          <p className="text-[11px] text-muted/80 italic">
+            {ADMIN_CAROUSEL_COPY.imageCompositionTip}
+          </p>
+        </div>
+
         {errors.imageUrl ? (
           <p className="text-xs text-destructive">{errors.imageUrl}</p>
         ) : null}

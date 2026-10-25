@@ -23,11 +23,30 @@ export const UI = {
   social: {
     instagram: "https://www.instagram.com/vsoilmillstore/",
     facebook: "https://www.facebook.com/VSOilMillStore/",
-    youtube: "https://www.youtube.com/@Sarathkumar-pd",
+    youtube: "https://youtube.com/@sarathkumar-pd7mj?si=l8KBMkxUho5xTxR_",
+    whatsapp: "https://whatsapp.com/channel/0029VbCAzla3wtazyd5uvS1f",
   },
 } as const;
 
 export const SOCIAL_LINKS = [
+  {
+    id: "whatsapp",
+    name: "WhatsApp Channel",
+    label: "VS OilMill Channel",
+    href: "https://whatsapp.com/channel/0029VbCAzla3wtazyd5uvS1f",
+    handle: "vsoilmill",
+    description: "Join our official WhatsApp Channel for daily cold-press updates, discounts & health tips.",
+    color: "#25D366",
+  },
+  {
+    id: "youtube",
+    name: "YouTube",
+    label: "@sarathkumar-pd7mj",
+    href: "https://youtube.com/@sarathkumar-pd7mj?si=l8KBMkxUho5xTxR_",
+    handle: "@sarathkumar-pd7mj",
+    description: "Subscribe for traditional wooden-press videos & mill tours by founder Sarathkumar.",
+    color: "#FF0000",
+  },
   {
     id: "instagram",
     name: "Instagram",
@@ -45,15 +64,6 @@ export const SOCIAL_LINKS = [
     handle: "VSOilMillStore",
     description: "Follow our official community for fresh batches, updates & healthy tips.",
     color: "#1877F2",
-  },
-  {
-    id: "youtube",
-    name: "YouTube",
-    label: "@Sarathkumar-pd",
-    href: "https://www.youtube.com/@Sarathkumar-pd",
-    handle: "@Sarathkumar-pd",
-    description: "Subscribe for traditional wooden-press videos & mill tours by founder Sarathkumar.",
-    color: "#FF0000",
   },
 ] as const;
 

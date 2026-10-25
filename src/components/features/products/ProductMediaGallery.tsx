@@ -41,15 +41,30 @@ export function ProductMediaGallery({
         {isVideo ? (
           <VideoFrame url={current} kind={kind} title={alt} />
         ) : (
-          <Image
-            src={failed ? ASSETS.PLACEHOLDER_PRODUCT : current}
-            alt={alt}
-            fill
-            unoptimized
-            priority
-            onError={() => setFailed(true)}
-            className="object-contain p-3 lg:object-cover lg:p-0"
-          />
+          <>
+            <Image
+              src={failed ? ASSETS.PLACEHOLDER_PRODUCT : current}
+              alt={alt}
+              fill
+              unoptimized
+              priority
+              onError={() => setFailed(true)}
+              className="object-contain p-3 lg:object-cover lg:p-0"
+            />
+            {videos.length > 0 ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setFailed(false);
+                  setActive(videos[0]);
+                }}
+                className="absolute bottom-3 right-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-dark/85 px-3.5 py-2 text-xs font-bold text-white shadow-lg backdrop-blur-sm transition-all hover:bg-primary hover:scale-105 active:scale-95"
+              >
+                <Play className="h-3.5 w-3.5 fill-white text-white" />
+                Watch Video
+              </button>
+            ) : null}
+          </>
         )}
       </div>
       {thumbs.length > 1 ? (
@@ -64,11 +79,16 @@ export function ProductMediaGallery({
               }}
               className={cn(
                 "relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border lg:h-16 lg:w-16 lg:rounded-md",
-                src === current ? "border-primary" : "border-border",
+                src === current ? "border-primary ring-2 ring-primary/30" : "border-border",
               )}
             >
               {videos.includes(src) ? (
-                <VideoThumb url={src} />
+                <div className="relative h-full w-full">
+                  <VideoThumb url={src} />
+                  <span className="absolute bottom-0 left-0 right-0 bg-primary/95 py-0.5 text-center text-[9px] font-bold uppercase tracking-wider text-white">
+                    Video
+                  </span>
+                </div>
               ) : (
                 <Image src={src} alt="" fill unoptimized className="object-cover" />
               )}
@@ -123,7 +143,15 @@ function VideoFrame({
   title: string;
 }) {
   if (kind === "file") {
-    return <video src={url} controls className="h-full w-full object-contain" />;
+    return (
+      <video
+        src={url}
+        controls
+        autoPlay
+        playsInline
+        className="h-full w-full object-contain"
+      />
+    );
   }
   const embed =
     kind === "youtube"

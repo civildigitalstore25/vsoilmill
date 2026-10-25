@@ -3,6 +3,7 @@
 import { OfferCountdown } from "@/components/features/catalog/OfferCountdown";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -15,13 +16,17 @@ import { PRODUCT_COPY } from "@/constants/home";
 import { LAYOUT } from "@/constants/layout";
 import { ROUTES } from "@/constants/routes";
 import { useCartStore } from "@/hooks/useCartStore";
+import { useRequireLogin } from "@/hooks/useRequireLogin";
 import { VARIANT_AVAILABLE_STOCK, comboIsLive } from "@/lib/products/commerce";
 import { cn } from "@/lib/utils/cn";
 import { formatInr, stripHtml, truncate } from "@/lib/utils/format";
 import type { ComboOffer } from "@/types/combo";
 
 export function ComboCard({ combo }: { combo: ComboOffer }) {
+  const router = useRouter();
+  const { requireLogin } = useRequireLogin();
   const addItem = useCartStore((s) => s.addItem);
+  const buyNowItem = useCartStore((s) => s.buyNowItem);
   const name = stripHtml(combo.name);
   const description = truncate(stripHtml(combo.description ?? ""), 80);
   const image = combo.images[0] || ASSETS.PLACEHOLDER_PRODUCT;
@@ -31,11 +36,12 @@ export function ComboCard({ combo }: { combo: ComboOffer }) {
       ? Math.round(((combo.originalPrice - combo.price) / combo.originalPrice) * 100)
       : 0;
 
-  function handleAdd() {
-    const summary = combo.items
-      .map((item) => `${item.productName ?? "Item"} ${item.variantLabel ?? ""}`.trim())
-      .join(", ");
-    addItem({
+  const summary = combo.items
+    .map((item) => `${item.productName ?? "Item"} ${item.variantLabel ?? ""}`.trim())
+    .join(", ");
+
+  function getPayload() {
+    return {
       productId: combo._id,
       variantId: combo._id,
       slug: combo.slug,
@@ -45,8 +51,26 @@ export function ComboCard({ combo }: { combo: ComboOffer }) {
       price: combo.price,
       originalPrice: combo.originalPrice,
       stock: VARIANT_AVAILABLE_STOCK,
-    });
+      quantity: 1,
+    };
+  }
+
+  function handleAdd(e?: React.MouseEvent) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    addItem(getPayload());
     toast.success(CHECKOUT_COPY.ADDED_TO_CART);
+  }
+
+  function handleBuyNow(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!requireLogin()) return;
+    buyNowItem(getPayload());
+    toast.success(CHECKOUT_COPY.BUY_NOW_SUCCESS);
+    router.push(ROUTES.CHECKOUT);
   }
 
   return (
@@ -94,9 +118,22 @@ export function ComboCard({ combo }: { combo: ComboOffer }) {
         {combo.endsAt && comboIsLive(combo) ? (
           <OfferCountdown endsAt={combo.endsAt} compact />
         ) : null}
-        <div className="mt-auto pt-2">
-          <Button size="sm" className="w-full" onClick={handleAdd}>
+        <div className="mt-auto pt-2 grid grid-cols-2 gap-1.5">
+          <Button
+            size="sm"
+            variant="outline"
+            className="w-full text-xs font-medium border-primary/30 text-primary hover:bg-primary hover:text-white px-1 sm:px-2 transition-colors"
+            onClick={handleAdd}
+          >
             {CHECKOUT_COPY.ADD_TO_CART}
+          </Button>
+          <Button
+            size="sm"
+            variant="accent"
+            className="w-full text-xs font-semibold px-1 sm:px-2 shadow-xs transition-colors"
+            onClick={handleBuyNow}
+          >
+            {CHECKOUT_COPY.BUY_NOW}
           </Button>
         </div>
       </article>
