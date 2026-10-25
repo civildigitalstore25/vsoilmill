@@ -8,16 +8,11 @@ import {
   Copy,
   Check,
   Calendar,
-  Percent,
-  Layers,
   Edit2,
   Trash2,
   Ticket,
-  Package,
   Clock,
-  Sparkles,
   CheckCircle2,
-  AlertTriangle,
 } from "lucide-react";
 import { formatInr } from "@/lib/utils/format";
 import { cn } from "@/lib/utils/cn";
@@ -72,10 +67,9 @@ export function AdminCouponDetailsModal({
   const validTo = new Date(coupon.validTo);
   const isExpired = validTo < now;
   const isUpcoming = validFrom > now;
-  const isActive = coupon.status === "ACTIVE" && !isExpired && !isUpcoming;
 
   // Resolve applicable product objects
-  const applicableIds = (coupon.applicableProducts || []).map((p: any) =>
+  const applicableIds = (coupon.applicableProducts || []).map((p: string | { _id: string }) =>
     typeof p === "string" ? p : p._id,
   );
   const matchedProducts = products.filter((p) => applicableIds.includes(p._id));

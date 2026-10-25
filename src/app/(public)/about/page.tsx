@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { SocialLinks } from "@/components/common/SocialLinks";
 import { LAYOUT } from "@/constants/layout";

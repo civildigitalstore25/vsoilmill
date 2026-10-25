@@ -17,10 +17,6 @@ import {
   Eye,
   LayoutList,
   Table as TableIcon,
-  Tag,
-  CheckCircle2,
-  Clock,
-  Sparkles,
 } from "lucide-react";
 import {
   AdminCard,
@@ -40,7 +36,7 @@ interface AdminCouponsClientProps {
   initialCoupons: Coupon[];
   categories: Array<{ _id: string; name: string }>;
   products: Array<{ _id: string; name: string; categoryId: string; images?: string[] }>;
-  stats: {
+  stats?: {
     total: number;
     active: number;
     expired: number;
@@ -52,7 +48,6 @@ export function AdminCouponsClient({
   initialCoupons,
   categories,
   products,
-  stats: initialStats,
 }: AdminCouponsClientProps) {
   const router = useRouter();
   const [coupons, setCoupons] = useState<Coupon[]>(initialCoupons);
@@ -94,7 +89,7 @@ export function AdminCouponsClient({
     setViewingCoupon(coupon);
   }
 
-  function handleSaved(savedCoupon?: any) {
+  function handleSaved(savedCoupon?: Coupon) {
     if (savedCoupon && savedCoupon._id) {
       setCoupons((prev) => {
         const exists = prev.some((c) => c._id === savedCoupon._id);

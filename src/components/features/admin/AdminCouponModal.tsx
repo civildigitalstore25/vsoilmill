@@ -7,11 +7,7 @@ import {
   RefreshCw,
   ChevronDown,
   ChevronUp,
-  Check,
   Tag,
-  CheckSquare,
-  Square,
-  Sparkles,
 } from "lucide-react";
 import { API_ENDPOINTS } from "@/constants/api";
 import { cn } from "@/lib/utils/cn";
@@ -31,7 +27,7 @@ interface CategoryOption {
 interface AdminCouponModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSaved: (savedCoupon?: any) => void;
+  onSaved: (savedCoupon?: Coupon) => void;
   editingCoupon: Coupon | null;
   categories: CategoryOption[];
   products: ProductOption[];
@@ -84,7 +80,7 @@ export function AdminCouponModal({
       setValidTo(formatDateForInput(editingCoupon.validTo));
       setUsageLimit(editingCoupon.usageLimit ?? 0);
       setSelectedProductIds(
-        (editingCoupon.applicableProducts || []).map((p: any) =>
+        (editingCoupon.applicableProducts || []).map((p: string | { _id: string }) =>
           typeof p === "string" ? p : p._id,
         ),
       );

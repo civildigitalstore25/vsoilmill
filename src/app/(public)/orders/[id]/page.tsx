@@ -5,7 +5,6 @@ import { ArrowLeft, Package, MapPin, CreditCard, Calendar } from "lucide-react";
 import { OrderDeliveredReviews } from "@/components/features/orders/OrderDeliveredReviews";
 import { Button } from "@/components/ui/button";
 import { PageContainer } from "@/components/layout/PageContainer";
-import { ASSETS } from "@/constants/assets";
 import { ROUTES } from "@/constants/routes";
 import { USER_ROLES } from "@/constants/auth";
 import { auth } from "@/lib/auth/auth";

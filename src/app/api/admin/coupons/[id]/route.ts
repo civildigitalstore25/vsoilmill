@@ -54,7 +54,7 @@ export async function PUT(
       }
     }
 
-    const updates: Record<string, any> = { ...parsed.data };
+    const updates: Record<string, unknown> = { ...parsed.data };
     if (parsed.data.validFrom) {
       updates.validFrom = new Date(parsed.data.validFrom);
     }

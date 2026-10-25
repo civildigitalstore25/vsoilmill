@@ -21,7 +21,7 @@ export type ValidatedCouponResult = {
   discountType?: "PERCENTAGE" | "FIXED";
   discountValue?: number;
   error?: string;
-  couponDoc?: any;
+  couponDoc?: { _id?: unknown; [key: string]: unknown } | null;
 };
 
 /**
@@ -64,7 +64,7 @@ export async function validateAndCalculateCouponDiscount({
 
     // Determine eligible subtotal based on applicable products
     let eligibleSubtotal = subtotal;
-    const applicable = dbCoupon.applicableProducts?.map((id: any) => String(id)) ?? [];
+    const applicable = dbCoupon.applicableProducts?.map((id: unknown) => String(id)) ?? [];
 
     if (applicable.length > 0) {
       if (!items || items.length === 0) {
