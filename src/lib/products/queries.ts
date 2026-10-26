@@ -50,8 +50,36 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   const product = await ProductModel.findOne({ slug: slugRegex, isActive: true })
     .populate("categoryId")
     .lean();
-  if (!product) return null;
-  return serializeProduct(product as Record<string, unknown>);
+  if (product) return serializeProduct(product as Record<string, unknown>);
+
+  // Smart fallback: If exact slug is not found, find matching active product by slug keywords or substring
+  const activeProducts = await ProductModel.find({ isActive: true })
+    .populate("categoryId")
+    .lean();
+
+  const targetLower = cleanSlug.toLowerCase();
+  const targetTokens = targetLower.split(/[-_\s]+/).filter((t) => t.length > 2);
+
+  // 1. Direct contains check: target contains product slug or vice versa
+  let matched = activeProducts.find((p) => {
+    const pSlug = (p.slug || "").toLowerCase();
+    return pSlug && (targetLower.includes(pSlug) || pSlug.includes(targetLower));
+  });
+
+  // 2. Token match: matching key word tokens (e.g. "groundnut", "sesame", "coconut", "ghee", "castor", "neem", "mahua", "pongam", "sugar", "honey")
+  if (!matched && targetTokens.length > 0) {
+    matched = activeProducts.find((p) => {
+      const pSlug = (p.slug || "").toLowerCase();
+      const pName = (p.name || "").toLowerCase();
+      return targetTokens.some((token) => pSlug.includes(token) || pName.includes(token));
+    });
+  }
+
+  if (matched) {
+    return serializeProduct(matched as Record<string, unknown>);
+  }
+
+  return null;
 }
 
 export async function getCategories(activeOnly = true): Promise<Category[]> {

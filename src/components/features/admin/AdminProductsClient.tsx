@@ -1,6 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
+import { FileSpreadsheet, Loader2 } from "lucide-react";
 import { AdminListControls, AdminListPagination } from "@/components/features/admin/AdminListControls";
 import { AdminProductDeleteButton } from "@/components/features/admin/AdminProductDeleteButton";
 import { AdminViewPageLink } from "@/components/features/admin/AdminViewPageLink";
@@ -16,6 +19,7 @@ import {
   ADMIN_LIST,
   ADMIN_PRODUCT_STATUS_OPTIONS,
 } from "@/constants/admin-list";
+import { API_ENDPOINTS } from "@/constants/api";
 import { ROUTES } from "@/constants/routes";
 import { useAdminList } from "@/hooks/useAdminList";
 import { formatInr } from "@/lib/utils/format";
@@ -23,6 +27,7 @@ import { getProductImageUrl } from "@/lib/utils/image";
 import type { AdminProductRow } from "@/types/admin-list";
 
 export function AdminProductsClient({ products }: { products: AdminProductRow[] }) {
+  const [exporting, setExporting] = useState(false);
   const list = useAdminList(
     products,
     (product) => `${product.name} ${product.shortDescription ?? ""} ${product.slug}`,
@@ -41,13 +46,83 @@ export function AdminProductsClient({ products }: { products: AdminProductRow[] 
     ],
   );
 
+  async function handleExportExcel() {
+    const exportItems = list.filteredItems ?? products;
+    if (exportItems.length === 0) {
+      toast.error("No products to export");
+      return;
+    }
+    setExporting(true);
+    try {
+      const res = await fetch(API_ENDPOINTS.ADMIN_PRODUCTS_EXPORT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productIds: exportItems.map((p) => p._id),
+        }),
+      });
+
+      if (!res.ok) {
+        const errorJson = await res.json().catch(() => ({}));
+        throw new Error(errorJson.error || "Failed to export products");
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const dateStamp = new Date().toISOString().split("T")[0];
+      a.download = `VS_OilMill_Products_${dateStamp}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast.success(
+        `Successfully downloaded Excel with ${exportItems.length} product(s)!`,
+      );
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to export products to Excel",
+      );
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  const isFiltered =
+    Boolean(list.filteredItems) && list.filteredItems.length !== products.length;
+
   return (
     <div>
       <AdminPageHeader
         title={ADMIN_PRODUCTS_COPY.title}
         description={ADMIN_PRODUCTS_COPY.description}
         actions={
-          <AdminAddButton label={ADMIN_PRODUCTS_COPY.addButton} href={ROUTES.ADMIN.PRODUCT_NEW} />
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleExportExcel}
+              disabled={exporting || (list.filteredItems?.length ?? products.length) === 0}
+              className="gap-2 border-emerald-600/40 bg-emerald-50 text-emerald-800 hover:bg-emerald-600 hover:text-white transition-colors"
+              title="Download products catalog and inventory as an Excel spreadsheet"
+            >
+              {exporting ? (
+                <Loader2 className="h-4 w-4 animate-spin text-emerald-700" />
+              ) : (
+                <FileSpreadsheet className="h-4 w-4 text-emerald-600 group-hover:text-white" />
+              )}
+              <span className="font-medium">
+                {exporting
+                  ? "Exporting..."
+                  : isFiltered
+                    ? `Export Filtered (${list.filteredItems.length})`
+                    : "Export Excel"}
+              </span>
+            </Button>
+            <AdminAddButton label={ADMIN_PRODUCTS_COPY.addButton} href={ROUTES.ADMIN.PRODUCT_NEW} />
+          </div>
         }
       />
       {products.length === 0 ? (

@@ -33,4 +33,8 @@ export const API_ENDPOINTS = {
   ADMIN_COUPONS: "/api/admin/coupons",
   ADMIN_COUPON: (id: string) => `/api/admin/coupons/${id}`,
   COUPON_VALIDATE: "/api/coupons/validate",
+  ADMIN_ORDERS_EXPORT: "/api/admin/orders/export",
+  ADMIN_USERS_EXPORT: "/api/admin/users/export",
+  ADMIN_PRODUCTS_EXPORT: "/api/admin/products/export",
+  ADMIN_COMBOS_EXPORT: "/api/admin/combos/export",
 } as const;

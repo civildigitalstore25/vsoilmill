@@ -21,6 +21,7 @@ export const ROUTES = {
   AUTH_COMPLETE: "/login/complete",
   ABOUT: "/about",
   CERTIFICATES: "/certificates",
+  GALLERY: "/gallery",
   CONTACT: "/contact",
   FAQS: "/faqs",
   PRIVACY: "/privacy",

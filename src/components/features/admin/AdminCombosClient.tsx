@@ -1,6 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
+import { FileSpreadsheet, Loader2 } from "lucide-react";
 import { AdminListControls, AdminListPagination } from "@/components/features/admin/AdminListControls";
 import { AdminComboDeleteButton } from "@/components/features/admin/AdminComboDeleteButton";
 import { AdminViewPageLink } from "@/components/features/admin/AdminViewPageLink";
@@ -13,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ADMIN_ACTIONS } from "@/constants/admin";
 import { ADMIN_ACTIVE_OPTIONS, ADMIN_LIST } from "@/constants/admin-list";
+import { API_ENDPOINTS } from "@/constants/api";
 import { ASSETS } from "@/constants/assets";
 import { CATALOG_COPY } from "@/constants/catalog";
 import { ROUTES } from "@/constants/routes";
@@ -21,6 +25,7 @@ import { formatInr, stripHtml, truncate } from "@/lib/utils/format";
 import type { AdminComboRow } from "@/types/admin-list";
 
 export function AdminCombosClient({ combos }: { combos: AdminComboRow[] }) {
+  const [exporting, setExporting] = useState(false);
   const list = useAdminList(
     combos,
     (combo) => `${stripHtml(combo.name)} ${stripHtml(combo.description ?? "")}`,
@@ -35,12 +40,84 @@ export function AdminCombosClient({ combos }: { combos: AdminComboRow[] }) {
     ],
   );
 
+  async function handleExportExcel() {
+    const exportItems = list.filteredItems ?? combos;
+    if (exportItems.length === 0) {
+      toast.error("No combo offers to export");
+      return;
+    }
+    setExporting(true);
+    try {
+      const res = await fetch(API_ENDPOINTS.ADMIN_COMBOS_EXPORT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          comboIds: exportItems.map((c) => c._id),
+        }),
+      });
+
+      if (!res.ok) {
+        const errorJson = await res.json().catch(() => ({}));
+        throw new Error(errorJson.error || "Failed to export combo offers");
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const dateStamp = new Date().toISOString().split("T")[0];
+      a.download = `VS_OilMill_Combos_${dateStamp}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast.success(
+        `Successfully downloaded Excel with ${exportItems.length} combo offer(s)!`,
+      );
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to export combo offers to Excel",
+      );
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  const isFiltered =
+    Boolean(list.filteredItems) && list.filteredItems.length !== combos.length;
+
   return (
     <div>
       <AdminPageHeader
         title={CATALOG_COPY.comboMenu}
         description={CATALOG_COPY.comboHint}
-        actions={<AdminAddButton label={CATALOG_COPY.comboCreate} href={ROUTES.ADMIN.COMBO_NEW} />}
+        actions={
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleExportExcel}
+              disabled={exporting || (list.filteredItems?.length ?? combos.length) === 0}
+              className="gap-2 border-emerald-600/40 bg-emerald-50 text-emerald-800 hover:bg-emerald-600 hover:text-white transition-colors"
+              title="Download combo offers and bundles as an Excel spreadsheet"
+            >
+              {exporting ? (
+                <Loader2 className="h-4 w-4 animate-spin text-emerald-700" />
+              ) : (
+                <FileSpreadsheet className="h-4 w-4 text-emerald-600 group-hover:text-white" />
+              )}
+              <span className="font-medium">
+                {exporting
+                  ? "Exporting..."
+                  : isFiltered
+                    ? `Export Filtered (${list.filteredItems.length})`
+                    : "Export Excel"}
+              </span>
+            </Button>
+            <AdminAddButton label={CATALOG_COPY.comboCreate} href={ROUTES.ADMIN.COMBO_NEW} />
+          </div>
+        }
       />
       {combos.length === 0 ? (
         <AdminCard className="px-6 py-16 text-center text-sm text-muted">{CATALOG_COPY.comboEmpty}</AdminCard>

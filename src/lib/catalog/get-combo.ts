@@ -15,7 +15,24 @@ export async function getComboBySlug(slug: string): Promise<{
   separateTotal: number;
 } | null> {
   await connectDb();
-  const found = await ComboModel.findOne({ slug }).lean();
+  const cleanSlug = decodeURIComponent(slug).trim();
+  let found = await ComboModel.findOne({ slug: cleanSlug }).lean();
+  if (!found) {
+    const allCombos = await ComboModel.find({ isActive: true }).lean();
+    const target = cleanSlug.toLowerCase();
+    const tokens = target.split(/[-_\s]+/).filter((t) => t.length > 2);
+    found =
+      allCombos.find((c) => {
+        const cSlug = (c.slug || "").toLowerCase();
+        return cSlug && (target.includes(cSlug) || cSlug.includes(target));
+      }) ||
+      allCombos.find((c) => {
+        const cSlug = (c.slug || "").toLowerCase();
+        const cName = (c.name || "").toLowerCase();
+        return tokens.some((t) => cSlug.includes(t) || cName.includes(t));
+      }) ||
+      null;
+  }
   if (!found) return null;
   const combo = JSON.parse(JSON.stringify(found)) as ComboOffer;
   if (!comboIsLive(combo)) return null;

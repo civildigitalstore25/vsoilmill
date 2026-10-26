@@ -70,6 +70,7 @@ export const SOCIAL_LINKS = [
 export const NAV_LINKS = [
   { label: "Shop", href: "/shop" },
   { label: "Bestsellers", href: "/bestsellers" },
+  { label: "Gallery", href: "/gallery" },
   { label: "About", href: "/about" },
   { label: "Certificates", href: "/certificates" },
   { label: "Contact", href: "/contact" },
