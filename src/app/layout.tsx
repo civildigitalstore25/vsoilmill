@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { DM_Sans, Fraunces } from "next/font/google";
 import { Providers } from "@/components/providers/Providers";
 import { ASSETS } from "@/constants/assets";
@@ -44,6 +45,8 @@ export const metadata: Metadata = {
   },
 };
 
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID ?? "G-D6RP1ELY2E";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -55,8 +58,28 @@ export default function RootLayout({
         className={`${dmSans.variable} ${fraunces.variable} antialiased`}
         suppressHydrationWarning
       >
+        {/* Google Analytics (gtag.js) */}
+        {GA_MEASUREMENT_ID ? (
+          <>
+            <Script
+              strategy="afterInteractive"
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+            />
+            <Script id="google-analytics" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+
+                gtag('config', '${GA_MEASUREMENT_ID}');
+              `}
+            </Script>
+          </>
+        ) : null}
+
         <Providers>{children}</Providers>
       </body>
     </html>
   );
 }
+

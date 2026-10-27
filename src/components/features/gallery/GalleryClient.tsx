@@ -15,6 +15,10 @@ import {
   MessageCircle,
   Eye,
   CheckCircle2,
+  Play,
+  Youtube,
+  ExternalLink,
+  Calendar,
 } from "lucide-react";
 import {
   GALLERY_VIDEOS,
@@ -25,6 +29,7 @@ import {
 import { ROUTES } from "@/constants/routes";
 import { UI } from "@/constants/ui";
 import { cn } from "@/lib/utils/cn";
+import { detectMediaKind, youtubeVideoId } from "@/lib/utils/media";
 import { toast } from "sonner";
 
 interface GalleryClientProps {
@@ -37,6 +42,7 @@ export function GalleryClient({ initialImages, initialVideos }: GalleryClientPro
   const videos = initialVideos && initialVideos.length > 0 ? initialVideos : GALLERY_VIDEOS;
 
   const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [videoFilter, setVideoFilter] = useState<string>("all");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   // Dynamic category pills with accurate counts of available items
@@ -69,6 +75,32 @@ export function GalleryClient({ initialImages, initialVideos }: GalleryClientPro
 
     return list;
   }, [images, videos]);
+
+  // Video Sub-Category filter tabs
+  const videoSubCategories = useMemo(() => {
+    const extractionCount = videos.filter((v) => v.subCategory === "extraction").length;
+    const packagingCount = videos.filter((v) => v.subCategory === "packaging").length;
+    const storyCount = videos.filter((v) => v.subCategory === "story").length;
+
+    return [
+      { id: "all", label: `All Videos (${videos.length})` },
+      ...(extractionCount > 0
+        ? [{ id: "extraction", label: `⚙️ Oil Machine & Extraction (${extractionCount})` }]
+        : []),
+      ...(packagingCount > 0
+        ? [{ id: "packaging", label: `📦 Packaging & Dispatch (${packagingCount})` }]
+        : []),
+      ...(storyCount > 0
+        ? [{ id: "story", label: `🎓 Mill Stories & Guides (${storyCount})` }]
+        : []),
+    ];
+  }, [videos]);
+
+  // Filtered videos based on sub-filter
+  const filteredVideos = useMemo(() => {
+    if (videoFilter === "all") return videos;
+    return videos.filter((v) => v.subCategory === videoFilter);
+  }, [videos, videoFilter]);
 
   // Filter images based on category
   const filteredImages = useMemo(() => {
@@ -188,7 +220,7 @@ export function GalleryClient({ initialImages, initialVideos }: GalleryClientPro
             <div>
               <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider mb-1">
                 <Film className="h-4 w-4" />
-                <span>Featured Video Explanations & Mill Tours</span>
+                <span>Featured Mill Videos, Machine Extraction & Customer Delivery</span>
               </div>
               <h2
                 id="mill-videos-heading"
@@ -198,75 +230,36 @@ export function GalleryClient({ initialImages, initialVideos }: GalleryClientPro
               </h2>
             </div>
             <p className="text-xs sm:text-sm text-muted max-w-md">
-              Real video footage explaining our Mara Chekku wooden pressing, direct farmer procurement, and why 12,000+ families choose VS OilMill.
+              Real video footage showing live Mara Chekku machine cold pressing, daily packaging & customer dispatches, and why 12,000+ families trust VS OilMill.
             </p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2">
-            {videos.map((video) => (
-              <div
-                key={video.id}
-                className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-primary/20 bg-card shadow-xs transition-all hover:border-primary/40 hover:shadow-md"
-              >
-                {/* Video Player */}
-                <div className="relative aspect-video w-full overflow-hidden bg-black">
-                  <video
-                    controls
-                    playsInline
-                    preload="metadata"
-                    className="h-full w-full object-contain bg-black"
-                  >
-                    <source src={video.videoUrl} type="video/mp4" />
-                    Your browser does not support the video tag.
-                  </video>
-                  <div className="pointer-events-none absolute top-3 left-3 z-10">
-                    <span className="rounded-full bg-dark/80 backdrop-blur-md px-3 py-1 text-[11px] font-semibold text-cream border border-white/10 shadow-xs">
-                      {video.badge}
-                    </span>
-                  </div>
-                </div>
+          {/* Video Sub-Category Filters */}
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <span className="text-xs font-semibold text-stone-500 mr-1">Filter Videos:</span>
+            {videoSubCategories.map((subCat) => {
+              const isSubActive = videoFilter === subCat.id;
+              return (
+                <button
+                  key={subCat.id}
+                  onClick={() => setVideoFilter(subCat.id)}
+                  className={cn(
+                    "rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer",
+                    isSubActive
+                      ? "bg-stone-900 text-white shadow-xs"
+                      : "bg-stone-100 text-stone-700 hover:bg-stone-200 border border-border/40"
+                  )}
+                >
+                  {subCat.label}
+                </button>
+              );
+            })}
+          </div>
 
-                {/* Details */}
-                <div className="flex flex-1 flex-col justify-between p-5 sm:p-6 space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <span className="rounded-md bg-stone-100 px-2 py-0.5 text-[11px] font-medium text-stone-600">
-                        {video.tag}
-                      </span>
-                    </div>
-                    <h3 className="font-display text-lg sm:text-xl font-bold text-dark leading-snug">
-                      {video.title}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-muted leading-relaxed">
-                      {video.description}
-                    </p>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center justify-between border-t border-border/50 pt-4 text-xs">
-                    <a
-                      href={`https://wa.me/${UI.whatsappNumber}?text=${encodeURIComponent(
-                        `Hi VS OilMill, I watched your video "${video.title}" and would like to learn more!`
-                      )}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 font-semibold text-emerald-700 hover:text-emerald-800 transition-colors"
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                      <span>Ask on WhatsApp</span>
-                    </a>
-
-                    <button
-                      type="button"
-                      onClick={() => handleShare(video.title, video.videoUrl)}
-                      className="inline-flex items-center gap-1.5 text-stone-500 hover:text-dark transition-colors font-medium cursor-pointer"
-                    >
-                      <Share2 className="h-3.5 w-3.5" />
-                      <span>Share</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
+          {/* Video Grid */}
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredVideos.map((video) => (
+              <GalleryVideoCard key={video.id} video={video} onShare={handleShare} />
             ))}
           </div>
         </section>
@@ -535,3 +528,163 @@ export function GalleryClient({ initialImages, initialVideos }: GalleryClientPro
     </div>
   );
 }
+
+function GalleryVideoCard({
+  video,
+  onShare,
+}: {
+  video: GalleryVideo;
+  onShare: (title: string, url: string) => void;
+}) {
+  const isYouTube = video.type === "youtube" || detectMediaKind(video.videoUrl) === "youtube";
+  const ytId = video.youtubeId || (isYouTube ? youtubeVideoId(video.videoUrl) : null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const posterUrl = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null;
+
+  return (
+    <div className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-primary/20 bg-card shadow-xs transition-all hover:border-primary/40 hover:shadow-md">
+      {/* Video Player / Facade */}
+      <div className="relative aspect-video w-full overflow-hidden bg-black">
+        {isYouTube && ytId ? (
+          isPlaying ? (
+            <iframe
+              src={`https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1`}
+              title={video.title}
+              className="h-full w-full border-0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          ) : (
+            <div
+              onClick={() => setIsPlaying(true)}
+              className="relative h-full w-full cursor-pointer overflow-hidden group/thumb"
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setIsPlaying(true);
+                }
+              }}
+              aria-label={`Play video: ${video.title}`}
+            >
+              {posterUrl ? (
+                <Image
+                  src={posterUrl}
+                  alt={video.title}
+                  fill
+                  unoptimized
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-500 group-hover/thumb:scale-105"
+                />
+              ) : (
+                <div className="h-full w-full bg-stone-900" />
+              )}
+
+              {/* Dark Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/30 transition-opacity group-hover/thumb:opacity-90" />
+
+              {/* YouTube Play Icon Button */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-red-600 text-white shadow-xl transition-all duration-300 group-hover/thumb:scale-110 group-hover/thumb:bg-red-700">
+                  <Play className="h-5 w-5 sm:h-6 sm:w-6 fill-white ml-0.5" />
+                </div>
+              </div>
+
+              {/* YouTube Indicator Top-Right */}
+              <div className="absolute top-3 right-3 z-10 flex items-center gap-1 rounded-full bg-dark/85 backdrop-blur-md px-2.5 py-1 text-[10px] font-semibold text-white border border-white/10 shadow-xs">
+                <Youtube className="h-3 w-3 text-red-500" />
+                <span>YouTube Short</span>
+              </div>
+            </div>
+          )
+        ) : (
+          <video
+            controls
+            playsInline
+            preload="metadata"
+            className="h-full w-full object-contain bg-black"
+          >
+            <source src={video.videoUrl} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        )}
+
+        {/* Top-Left Badge */}
+        {(!isYouTube || !isPlaying) && (
+          <div className="pointer-events-none absolute top-3 left-3 z-10">
+            <span className="rounded-full bg-dark/85 backdrop-blur-md px-3 py-1 text-[11px] font-semibold text-cream border border-white/10 shadow-xs">
+              {video.badge}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Details */}
+      <div className="flex flex-1 flex-col justify-between p-5 space-y-4">
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-md bg-stone-100 px-2 py-0.5 text-[11px] font-medium text-stone-600">
+              {video.tag}
+            </span>
+            {video.date && (
+              <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-800 border border-amber-200/60">
+                <Calendar className="h-3 w-3 text-amber-600" />
+                <span>{video.date}</span>
+              </span>
+            )}
+          </div>
+
+          <h3 className="font-display text-base sm:text-lg font-bold text-dark leading-snug">
+            {video.title}
+          </h3>
+          <p className="text-xs sm:text-sm text-muted leading-relaxed line-clamp-3">
+            {video.description}
+          </p>
+        </div>
+
+        {/* Actions Footer */}
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/50 pt-3.5 text-xs">
+          <a
+            href={`https://wa.me/${UI.whatsappNumber}?text=${encodeURIComponent(
+              `Hi VS OilMill, I watched your video "${video.title}" and would like to learn more!`
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 font-semibold text-emerald-700 hover:text-emerald-800 transition-colors"
+          >
+            <MessageCircle className="h-4 w-4" />
+            <span>Ask on WhatsApp</span>
+          </a>
+
+          <div className="flex items-center gap-3">
+            {isYouTube && (
+              <a
+                href={video.videoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-red-600 hover:text-red-700 font-semibold transition-colors"
+                title="Watch directly on YouTube"
+              >
+                <Youtube className="h-3.5 w-3.5" />
+                <span>YouTube</span>
+                <ExternalLink className="h-2.5 w-2.5 opacity-70" />
+              </a>
+            )}
+
+            <button
+              type="button"
+              onClick={() => onShare(video.title, video.videoUrl)}
+              className="inline-flex items-center gap-1.5 text-stone-500 hover:text-dark transition-colors font-medium cursor-pointer"
+            >
+              <Share2 className="h-3.5 w-3.5" />
+              <span>Share</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+

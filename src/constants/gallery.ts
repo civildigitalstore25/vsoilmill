@@ -7,6 +7,10 @@ export type GalleryVideo = {
   tag: string;
   badge: string;
   featured?: boolean;
+  type?: "youtube" | "file";
+  subCategory?: "extraction" | "packaging" | "story";
+  youtubeId?: string;
+  date?: string;
 };
 
 export type GalleryImage = {
@@ -24,8 +28,8 @@ export type GalleryImage = {
 export type GalleryItem = GalleryVideo | GalleryImage;
 
 export const GALLERY_CATEGORIES = [
-  { id: "all", label: "All Media", count: 28 },
-  { id: "videos", label: "🎥 Mill Videos (4)", count: 4 },
+  { id: "all", label: "All Media", count: 33 },
+  { id: "videos", label: "🎥 Mill Videos (9)", count: 9 },
   { id: "banners", label: "✨ Banners & Promos", count: 4 },
   { id: "products", label: "🧴 Wood Pressed Oils", count: 9 },
   { id: "combos", label: "🎁 Combo Offers", count: 4 },
@@ -33,6 +37,83 @@ export const GALLERY_CATEGORIES = [
 ] as const;
 
 export const GALLERY_VIDEOS: GalleryVideo[] = [
+  // 1. Live Mara Chekku Machine Running & Oil Extraction
+  {
+    id: "oil-machine-groundnut-extraction",
+    title: "Mara Chekku Groundnut Oil Machine Running & Live Extraction",
+    description:
+      "Watch our traditional Vaagai wooden cold-press machine running at gentle speed, crushing sun-dried peanuts to extract fresh, aromatic unrefined groundnut oil.",
+    videoUrl: "https://youtube.com/shorts/xJP29mjCkKc?si=iEq37ig2MWkyAJRe",
+    category: "videos",
+    tag: "Machine & Oil Extraction",
+    badge: "Live Machine Running",
+    featured: true,
+    type: "youtube",
+    subCategory: "extraction",
+    youtubeId: "xJP29mjCkKc",
+  },
+  {
+    id: "oil-machine-coconut-extraction",
+    title: "Mara Chekku Coconut Oil Machine Running & Live Extraction",
+    description:
+      "Watch sulphur-free naturally sun-dried copra being cold-pressed in our traditional wooden mill to extract crystal-pure, fragrant Mara Chekku coconut oil.",
+    videoUrl: "https://youtube.com/shorts/_Wug05LRL4g?si=e_479Hi1QJJ_5v-u",
+    category: "videos",
+    tag: "Machine & Oil Extraction",
+    badge: "Live Machine Running",
+    featured: true,
+    type: "youtube",
+    subCategory: "extraction",
+    youtubeId: "_Wug05LRL4g",
+  },
+
+  // 2. Packaging & Dispatching Orders to Customers
+  {
+    id: "customer-packaging-dispatch-general",
+    title: "Safe Packaging & Doorstep Delivery Dispatch to Customers",
+    description:
+      "See how we safely pack pure Mara Chekku oils and Uthukuli cow ghee with bubble cushioning, tamper-proof seals, and corrugated boxes for nationwide doorstep delivery.",
+    videoUrl: "https://www.youtube.com/shorts/Yz_iUykJBzc",
+    category: "videos",
+    tag: "Packaging & Dispatch",
+    badge: "Safe Delivery",
+    featured: true,
+    type: "youtube",
+    subCategory: "packaging",
+    youtubeId: "Yz_iUykJBzc",
+  },
+  {
+    id: "customer-packaging-26-oct-2026",
+    title: "Customer Orders Packaging & Dispatch — 26 October 2026",
+    description:
+      "Real customer shipment dispatch log from 26 October 2026: packing bottles, 5L cans, and combo packs for prompt courier dispatch across Tamil Nadu & India.",
+    videoUrl: "https://www.youtube.com/shorts/38e8jJcyH0I",
+    category: "videos",
+    tag: "Packaging & Dispatch",
+    badge: "26 Oct 2026 Dispatch",
+    featured: false,
+    type: "youtube",
+    subCategory: "packaging",
+    date: "26 October 2026",
+    youtubeId: "38e8jJcyH0I",
+  },
+  {
+    id: "customer-packaging-17-oct-2026",
+    title: "Customer Orders Packaging & Dispatch — 17 October 2026",
+    description:
+      "Real customer shipment dispatch log from 17 October 2026: safe packing of traditional cold-pressed oils and pure cow ghee sent to delighted customers.",
+    videoUrl: "https://www.youtube.com/shorts/tKsSgb3zhuQ",
+    category: "videos",
+    tag: "Packaging & Dispatch",
+    badge: "17 Oct 2026 Dispatch",
+    featured: false,
+    type: "youtube",
+    subCategory: "packaging",
+    date: "17 October 2026",
+    youtubeId: "tKsSgb3zhuQ",
+  },
+
+  // 3. Mill Stories, Sourcing & Founder Explanations
   {
     id: "special-and-taste",
     title: "What Makes VS OilMill Special & The Pure Taste of Mara Chekku Oil",
@@ -44,6 +125,8 @@ export const GALLERY_VIDEOS: GalleryVideo[] = [
     tag: "Special & Taste",
     badge: "Founder Explains",
     featured: true,
+    type: "file",
+    subCategory: "story",
   },
   {
     id: "low-price-part-1",
@@ -56,6 +139,8 @@ export const GALLERY_VIDEOS: GalleryVideo[] = [
     tag: "Mill Pricing Part 1",
     badge: "Direct Farm Sourcing",
     featured: true,
+    type: "file",
+    subCategory: "story",
   },
   {
     id: "low-price-part-2",
@@ -68,6 +153,8 @@ export const GALLERY_VIDEOS: GalleryVideo[] = [
     tag: "Mill Pricing Part 2",
     badge: "In-House Mill Efficiency",
     featured: true,
+    type: "file",
+    subCategory: "story",
   },
   {
     id: "why-choose-vsoilmill",
@@ -80,6 +167,8 @@ export const GALLERY_VIDEOS: GalleryVideo[] = [
     tag: "Why Choose Us",
     badge: "Why Choose Us",
     featured: true,
+    type: "file",
+    subCategory: "story",
   },
 ];
 
