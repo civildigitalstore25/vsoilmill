@@ -44,6 +44,7 @@ export function GalleryClient({ initialImages, initialVideos }: GalleryClientPro
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [videoFilter, setVideoFilter] = useState<string>("all");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [activeVideoModal, setActiveVideoModal] = useState<GalleryVideo | null>(null);
 
   // Dynamic category pills with accurate counts of available items
   const categories = useMemo(() => {
@@ -91,7 +92,7 @@ export function GalleryClient({ initialImages, initialVideos }: GalleryClientPro
         ? [{ id: "packaging", label: `📦 Packaging & Dispatch (${packagingCount})` }]
         : []),
       ...(storyCount > 0
-        ? [{ id: "story", label: `🎓 Mill Stories & Guides (${storyCount})` }]
+        ? [{ id: "story", label: `🎓 Mill Stories & Visits (${storyCount})` }]
         : []),
     ];
   }, [videos]);
@@ -140,22 +141,26 @@ export function GalleryClient({ initialImages, initialVideos }: GalleryClientPro
     }
   }, [lightboxIndex, filteredImages.length]);
 
-  // Handle keyboard navigation for Lightbox
+  // Handle keyboard navigation for Lightbox and Video Modal
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (lightboxIndex === null) return;
-      if (e.key === "Escape") closeLightbox();
-      if (e.key === "ArrowRight") nextLightboxImage();
-      if (e.key === "ArrowLeft") prevLightboxImage();
+      if (e.key === "Escape") {
+        closeLightbox();
+        setActiveVideoModal(null);
+      }
+      if (lightboxIndex !== null) {
+        if (e.key === "ArrowRight") nextLightboxImage();
+        if (e.key === "ArrowLeft") prevLightboxImage();
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [lightboxIndex, nextLightboxImage, prevLightboxImage]);
 
-  // Prevent body scroll when lightbox is open
+  // Prevent body scroll when lightbox or video modal is open
   useEffect(() => {
-    if (lightboxIndex !== null) {
+    if (lightboxIndex !== null || activeVideoModal !== null) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
@@ -163,7 +168,7 @@ export function GalleryClient({ initialImages, initialVideos }: GalleryClientPro
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, [lightboxIndex]);
+  }, [lightboxIndex, activeVideoModal]);
 
   const handleShare = async (title: string, url: string) => {
     if (navigator.share) {
@@ -199,6 +204,7 @@ export function GalleryClient({ initialImages, initialVideos }: GalleryClientPro
               onClick={() => {
                 setActiveCategory(cat.id);
                 setLightboxIndex(null);
+                setActiveVideoModal(null);
               }}
               className={cn(
                 "rounded-full px-4 py-2 text-xs sm:text-sm font-semibold transition-all shadow-2xs cursor-pointer",
@@ -230,7 +236,7 @@ export function GalleryClient({ initialImages, initialVideos }: GalleryClientPro
               </h2>
             </div>
             <p className="text-xs sm:text-sm text-muted max-w-md">
-              Real video footage showing live Mara Chekku machine cold pressing, daily packaging & customer dispatches, and why 12,000+ families trust VS OilMill.
+              Real video footage showing live Mara Chekku machine cold pressing, daily packaging & customer dispatches, raw material drying, and mill visits.
             </p>
           </div>
 
@@ -256,10 +262,15 @@ export function GalleryClient({ initialImages, initialVideos }: GalleryClientPro
             })}
           </div>
 
-          {/* Video Grid */}
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Video Grid - Prominent Video Size with Compact Cards */}
+          <div className="grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {filteredVideos.map((video) => (
-              <GalleryVideoCard key={video.id} video={video} onShare={handleShare} />
+              <GalleryVideoCard
+                key={video.id}
+                video={video}
+                onShare={handleShare}
+                onOpenModal={(v) => setActiveVideoModal(v)}
+              />
             ))}
           </div>
         </section>
@@ -359,28 +370,31 @@ export function GalleryClient({ initialImages, initialVideos }: GalleryClientPro
                   )}
                 </div>
 
-                {/* Details Footer */}
-                <div className="flex flex-1 flex-col justify-between p-4 space-y-3">
-                  <div>
-                    <div className="flex items-center gap-1.5 text-[11px] font-medium text-stone-500 mb-1">
-                      <span>{image.tag}</span>
-                    </div>
-                    <h3 className="font-display text-sm font-bold text-dark leading-snug line-clamp-2">
+                {/* Details Footer - Reduced & Streamlined */}
+                <div className="flex flex-1 flex-col justify-between p-3 sm:p-3.5 space-y-2 bg-card">
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] font-semibold text-stone-500 uppercase tracking-wide">
+                      {image.tag}
+                    </span>
+                    <h3
+                      className="font-display text-xs sm:text-sm font-bold text-dark leading-snug line-clamp-1"
+                      title={image.title}
+                    >
                       {image.title}
                     </h3>
-                    <p className="mt-1 text-xs text-muted line-clamp-2">
+                    <p className="text-[11px] text-muted leading-tight line-clamp-1">
                       {image.description}
                     </p>
                   </div>
 
                   {/* Action Link */}
-                  <div className="flex items-center justify-between border-t border-border/50 pt-2.5 text-xs">
+                  <div className="flex items-center justify-between border-t border-border/50 pt-2 text-[11px]">
                     <button
                       type="button"
                       onClick={() => openLightbox(index)}
                       className="font-medium text-stone-600 hover:text-primary transition-colors flex items-center gap-1 cursor-pointer"
                     >
-                      <Eye className="h-3.5 w-3.5" />
+                      <Eye className="h-3 w-3" />
                       <span>Preview</span>
                     </button>
 
@@ -389,7 +403,7 @@ export function GalleryClient({ initialImages, initialVideos }: GalleryClientPro
                         href={image.link}
                         className="font-semibold text-primary hover:text-primary-dark transition-colors flex items-center gap-1 hover:underline"
                       >
-                        <ShoppingBag className="h-3.5 w-3.5" />
+                        <ShoppingBag className="h-3 w-3" />
                         <span>View Item</span>
                       </Link>
                     ) : null}
@@ -399,6 +413,99 @@ export function GalleryClient({ initialImages, initialVideos }: GalleryClientPro
             ))}
           </div>
         </section>
+      )}
+
+      {/* THEATER / VIDEO MODAL */}
+      {activeVideoModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md p-3 sm:p-6 animate-in fade-in duration-200"
+          onClick={() => setActiveVideoModal(null)}
+        >
+          <div
+            className="relative flex flex-col max-w-4xl w-full max-h-[92vh] bg-stone-950 rounded-2xl overflow-hidden shadow-2xl border border-stone-800"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-3.5 sm:p-4 border-b border-stone-800 bg-stone-950 text-white">
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-primary/20 px-2.5 py-0.5 text-xs font-semibold text-primary-light border border-primary/30">
+                  {activeVideoModal.badge}
+                </span>
+                <span className="text-xs text-stone-400 hidden sm:inline">
+                  {activeVideoModal.tag}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveVideoModal(null)}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-stone-800 text-stone-300 hover:bg-stone-700 hover:text-white transition-colors cursor-pointer"
+                aria-label="Close video player"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Main Video View */}
+            <div className="relative flex-1 min-h-[300px] sm:min-h-[480px] bg-black flex items-center justify-center">
+              {activeVideoModal.type === "youtube" || detectMediaKind(activeVideoModal.videoUrl) === "youtube" ? (
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${
+                    activeVideoModal.youtubeId || youtubeVideoId(activeVideoModal.videoUrl)
+                  }?autoplay=1&rel=0&modestbranding=1`}
+                  title={activeVideoModal.title}
+                  className="h-full w-full aspect-video border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              ) : (
+                <video
+                  controls
+                  autoPlay
+                  playsInline
+                  className="max-h-[70vh] w-full object-contain bg-black"
+                >
+                  <source
+                    src={
+                      activeVideoModal.videoUrl.includes("imagekit.io") && !activeVideoModal.videoUrl.includes("tr=")
+                        ? `${activeVideoModal.videoUrl}${activeVideoModal.videoUrl.includes("?") ? "&" : "?"}tr=orig-true`
+                        : activeVideoModal.videoUrl
+                    }
+                    type="video/mp4"
+                  />
+                  Your browser does not support the video tag.
+                </video>
+              )}
+            </div>
+
+            {/* Bottom Caption & Action */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 bg-stone-950 border-t border-stone-800 text-white">
+              <div className="space-y-0.5 max-w-xl">
+                <h4 className="font-display text-sm sm:text-base font-bold text-white">
+                  {activeVideoModal.title}
+                </h4>
+                <p className="text-xs text-stone-300">
+                  {activeVideoModal.description}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <a
+                  href={`https://wa.me/${UI.whatsappNumber}?text=${encodeURIComponent(
+                    `Hi VS OilMill, I watched your video "${activeVideoModal.title}" and would like to order or enquire!`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-emerald-700 transition-colors shadow-md"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  <span>Enquire on WhatsApp</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* LIGHTBOX MODAL */}
@@ -532,20 +639,31 @@ export function GalleryClient({ initialImages, initialVideos }: GalleryClientPro
 function GalleryVideoCard({
   video,
   onShare,
+  onOpenModal,
 }: {
   video: GalleryVideo;
   onShare: (title: string, url: string) => void;
+  onOpenModal: (video: GalleryVideo) => void;
 }) {
   const isYouTube = video.type === "youtube" || detectMediaKind(video.videoUrl) === "youtube";
   const ytId = video.youtubeId || (isYouTube ? youtubeVideoId(video.videoUrl) : null);
   const [isPlaying, setIsPlaying] = useState(false);
 
+  // Normalize imagekit URLs with tr=orig-true to prevent transformation limit errors
+  const cleanVideoUrl = useMemo(() => {
+    let url = video.videoUrl;
+    if (url.includes("imagekit.io") && !url.includes("tr=")) {
+      url += (url.includes("?") ? "&" : "?") + "tr=orig-true";
+    }
+    return url;
+  }, [video.videoUrl]);
+
   const posterUrl = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null;
 
   return (
-    <div className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-primary/20 bg-card shadow-xs transition-all hover:border-primary/40 hover:shadow-md">
-      {/* Video Player / Facade */}
-      <div className="relative aspect-video w-full overflow-hidden bg-black">
+    <div className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-primary/20 bg-card shadow-xs transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:-translate-y-0.5">
+      {/* Video Player - Enhanced Size (aspect-[4/3] provides commanding video presence) */}
+      <div className="relative aspect-[4/3] sm:aspect-[16/10] md:aspect-[4/3] w-full overflow-hidden bg-stone-950 flex items-center justify-center">
         {isYouTube && ytId ? (
           isPlaying ? (
             <iframe
@@ -583,82 +701,115 @@ function GalleryVideoCard({
               )}
 
               {/* Dark Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/30 transition-opacity group-hover/thumb:opacity-90" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/35 transition-opacity group-hover/thumb:opacity-90" />
 
               {/* YouTube Play Icon Button */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-red-600 text-white shadow-xl transition-all duration-300 group-hover/thumb:scale-110 group-hover/thumb:bg-red-700">
-                  <Play className="h-5 w-5 sm:h-6 sm:w-6 fill-white ml-0.5" />
+                <div className="flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-red-600 text-white shadow-2xl transition-all duration-300 group-hover/thumb:scale-110 group-hover/thumb:bg-red-700">
+                  <Play className="h-6 w-6 sm:h-7 sm:w-7 fill-white ml-0.5" />
                 </div>
               </div>
 
               {/* YouTube Indicator Top-Right */}
-              <div className="absolute top-3 right-3 z-10 flex items-center gap-1 rounded-full bg-dark/85 backdrop-blur-md px-2.5 py-1 text-[10px] font-semibold text-white border border-white/10 shadow-xs">
+              <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1 rounded-full bg-dark/85 backdrop-blur-md px-2.5 py-1 text-[10px] font-semibold text-white border border-white/10 shadow-xs">
                 <Youtube className="h-3 w-3 text-red-500" />
                 <span>YouTube Short</span>
               </div>
             </div>
           )
         ) : (
-          <video
-            controls
-            playsInline
-            preload="metadata"
-            className="h-full w-full object-contain bg-black"
-          >
-            <source src={video.videoUrl} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
+          <div className="relative h-full w-full flex items-center justify-center bg-stone-950">
+            <video
+              controls
+              playsInline
+              preload="metadata"
+              className="h-full w-full object-contain bg-black"
+            >
+              <source src={`${cleanVideoUrl}#t=0.001`} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
         )}
 
         {/* Top-Left Badge */}
         {(!isYouTube || !isPlaying) && (
-          <div className="pointer-events-none absolute top-3 left-3 z-10">
-            <span className="rounded-full bg-dark/85 backdrop-blur-md px-3 py-1 text-[11px] font-semibold text-cream border border-white/10 shadow-xs">
+          <div className="pointer-events-none absolute top-2.5 left-2.5 z-10">
+            <span className="rounded-full bg-dark/85 backdrop-blur-md px-2.5 py-0.5 text-[10px] font-semibold text-cream border border-white/10 shadow-xs">
               {video.badge}
             </span>
           </div>
         )}
+
+        {/* Top-Right Expand Button */}
+        {(!isYouTube || !isPlaying) && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenModal(video);
+            }}
+            className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1 rounded-full bg-dark/80 hover:bg-dark backdrop-blur-md px-2 py-0.5 text-[10px] font-medium text-white border border-white/15 transition-all shadow-xs cursor-pointer hover:scale-105"
+            title="Watch in full theater size"
+            aria-label="Expand video"
+          >
+            <Maximize2 className="h-2.5 w-2.5" />
+            <span className="hidden sm:inline">Expand</span>
+          </button>
+        )}
       </div>
 
-      {/* Details */}
-      <div className="flex flex-1 flex-col justify-between p-5 space-y-4">
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-md bg-stone-100 px-2 py-0.5 text-[11px] font-medium text-stone-600">
+      {/* Reduced & Compact Text Content */}
+      <div className="flex flex-col justify-between p-3 sm:p-3.5 space-y-2 bg-card">
+        <div className="space-y-0.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="rounded-md bg-stone-100 px-2 py-0.5 text-[10px] font-semibold text-stone-600 uppercase tracking-wide">
               {video.tag}
             </span>
             {video.date && (
-              <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-800 border border-amber-200/60">
-                <Calendar className="h-3 w-3 text-amber-600" />
+              <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-800 border border-amber-200/50">
+                <Calendar className="h-2.5 w-2.5 text-amber-600" />
                 <span>{video.date}</span>
               </span>
             )}
           </div>
 
-          <h3 className="font-display text-base sm:text-lg font-bold text-dark leading-snug">
+          <h3
+            className="font-display text-xs sm:text-sm font-bold text-dark leading-snug line-clamp-1 hover:text-primary transition-colors cursor-pointer"
+            onClick={() => onOpenModal(video)}
+            title={video.title}
+          >
             {video.title}
           </h3>
-          <p className="text-xs sm:text-sm text-muted leading-relaxed line-clamp-3">
+          <p className="text-[11px] text-muted leading-tight line-clamp-1">
             {video.description}
           </p>
         </div>
 
-        {/* Actions Footer */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/50 pt-3.5 text-xs">
+        {/* Streamlined Footer */}
+        <div className="flex items-center justify-between gap-2 border-t border-border/50 pt-2 text-[11px]">
           <a
             href={`https://wa.me/${UI.whatsappNumber}?text=${encodeURIComponent(
               `Hi VS OilMill, I watched your video "${video.title}" and would like to learn more!`
             )}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 font-semibold text-emerald-700 hover:text-emerald-800 transition-colors"
+            className="inline-flex items-center gap-1 font-semibold text-emerald-700 hover:text-emerald-800 transition-colors"
           >
-            <MessageCircle className="h-4 w-4" />
-            <span>Ask on WhatsApp</span>
+            <MessageCircle className="h-3.5 w-3.5" />
+            <span>WhatsApp</span>
           </a>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => onOpenModal(video)}
+              className="inline-flex items-center gap-1 text-primary hover:text-primary-dark transition-colors font-medium cursor-pointer"
+              title="Watch in full theater view"
+            >
+              <Maximize2 className="h-3 w-3" />
+              <span>Full View</span>
+            </button>
+
             {isYouTube && (
               <a
                 href={video.videoUrl}
@@ -667,8 +818,8 @@ function GalleryVideoCard({
                 className="inline-flex items-center gap-1 text-red-600 hover:text-red-700 font-semibold transition-colors"
                 title="Watch directly on YouTube"
               >
-                <Youtube className="h-3.5 w-3.5" />
-                <span>YouTube</span>
+                <Youtube className="h-3 w-3" />
+                <span className="hidden sm:inline">YouTube</span>
                 <ExternalLink className="h-2.5 w-2.5 opacity-70" />
               </a>
             )}
@@ -676,9 +827,10 @@ function GalleryVideoCard({
             <button
               type="button"
               onClick={() => onShare(video.title, video.videoUrl)}
-              className="inline-flex items-center gap-1.5 text-stone-500 hover:text-dark transition-colors font-medium cursor-pointer"
+              className="inline-flex items-center gap-1 text-stone-500 hover:text-dark transition-colors font-medium cursor-pointer"
+              title="Share video"
             >
-              <Share2 className="h-3.5 w-3.5" />
+              <Share2 className="h-3 w-3" />
               <span>Share</span>
             </button>
           </div>
@@ -687,4 +839,3 @@ function GalleryVideoCard({
     </div>
   );
 }
-

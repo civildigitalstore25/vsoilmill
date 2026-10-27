@@ -28,8 +28,8 @@ export type GalleryImage = {
 export type GalleryItem = GalleryVideo | GalleryImage;
 
 export const GALLERY_CATEGORIES = [
-  { id: "all", label: "All Media", count: 33 },
-  { id: "videos", label: "🎥 Mill Videos (9)", count: 9 },
+  { id: "all", label: "All Media", count: 37 },
+  { id: "videos", label: "🎥 Mill Videos (13)", count: 13 },
   { id: "banners", label: "✨ Banners & Promos", count: 4 },
   { id: "products", label: "🧴 Wood Pressed Oils", count: 9 },
   { id: "combos", label: "🎁 Combo Offers", count: 4 },
@@ -38,6 +38,48 @@ export const GALLERY_CATEGORIES = [
 
 export const GALLERY_VIDEOS: GalleryVideo[] = [
   // 1. Live Mara Chekku Machine Running & Oil Extraction
+  {
+    id: "groundnuts-live-extraction",
+    title: "Mara Chekku Groundnut Oil Live Extraction & Premium Peanuts",
+    description:
+      "Live cold pressing of farm-fresh groundnuts in traditional Vaagai wooden Chekku, extracting unrefined, naturally nutrient-rich golden peanut oil.",
+    videoUrl:
+      "https://ik.imagekit.io/r33t79noj/vsoilmill/vsupdated/videos-vsoilmill/groundnuts.mp4?tr=orig-true",
+    category: "videos",
+    tag: "Groundnut Oil Machine",
+    badge: "Live Groundnut Extraction",
+    featured: true,
+    type: "file",
+    subCategory: "extraction",
+  },
+  {
+    id: "coconut-oil-live-flow",
+    title: "Mara Chekku Coconut Oil Extraction & Pure Fresh Flow",
+    description:
+      "Watch sulphur-free sun-dried copra being cold-pressed in our wooden expeller, releasing crystal-pure, deeply fragrant Mara Chekku coconut oil.",
+    videoUrl:
+      "https://ik.imagekit.io/r33t79noj/vsoilmill/vsupdated/videos-vsoilmill/coconut-oil.mp4?tr=orig-true",
+    category: "videos",
+    tag: "Coconut Oil Machine",
+    badge: "Pure Coconut Flow",
+    featured: true,
+    type: "file",
+    subCategory: "extraction",
+  },
+  {
+    id: "dry-process-sesame-coconut-groundnut",
+    title: "Natural Sun-Drying Process: Sesame Seeds, Copra & Groundnuts",
+    description:
+      "Traditional open-air sunlight drying of sesame seeds, premium coconut copra, and groundnuts to eliminate moisture before authentic Mara Chekku pressing.",
+    videoUrl:
+      "https://ik.imagekit.io/r33t79noj/vsoilmill/vsupdated/videos-vsoilmill/dry-process-sesame-coconut-groundnut.mp4?tr=orig-true",
+    category: "videos",
+    tag: "Raw Material Sun-Drying",
+    badge: "Natural Sun-Drying",
+    featured: true,
+    type: "file",
+    subCategory: "extraction",
+  },
   {
     id: "oil-machine-groundnut-extraction",
     title: "Mara Chekku Groundnut Oil Machine Running & Live Extraction",
@@ -114,6 +156,20 @@ export const GALLERY_VIDEOS: GalleryVideo[] = [
   },
 
   // 3. Mill Stories, Sourcing & Founder Explanations
+  {
+    id: "president-dignitary-mill-visit",
+    title: "President & Dignitary Inspection Visit to VS Oil Mill",
+    description:
+      "Dignitary and association president visit to VS Oil Mill in Madurai, observing authentic Mara Chekku wooden press operations and traditional purity standards.",
+    videoUrl:
+      "https://ik.imagekit.io/r33t79noj/vsoilmill/vsupdated/videos-vsoilmill/presdient-visit.mp4?tr=orig-true",
+    category: "videos",
+    tag: "President & Dignitary Visit",
+    badge: "President Mill Visit",
+    featured: true,
+    type: "file",
+    subCategory: "story",
+  },
   {
     id: "special-and-taste",
     title: "What Makes VS OilMill Special & The Pure Taste of Mara Chekku Oil",
