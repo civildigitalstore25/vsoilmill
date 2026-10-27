@@ -11,7 +11,8 @@ import { markOrderPaid } from "@/lib/orders/mark-paid";
 import { getPhonePeStatus } from "@/lib/payment/phonepe";
 import { formatInr } from "@/lib/utils/format";
 import { OrderModel } from "@/models/Order";
-import { PaymentStatus } from "@/types/order";
+import type { AnalyticsPurchaseItem } from "@/types/analytics";
+import { PaymentStatus, type OrderItem } from "@/types/order";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -55,16 +56,35 @@ export default async function OrderConfirmationPage({ params }: Props) {
 
   if (!order) notFound();
   const data = JSON.parse(JSON.stringify(order));
+  const isCustomer = String(order.userId) === session.user.id;
 
-  if (data.paymentStatus === "PAID") {
+  if (data.paymentStatus === "PAID" && !isCustomer) {
     redirect(ROUTES.PROFILE_ORDERS);
   }
+
+  const purchaseItems: AnalyticsPurchaseItem[] = (data.items as OrderItem[]).map(
+    (item) => ({
+      itemId: String(item.productId),
+      itemName: item.name,
+      quantity: item.quantity,
+      price: item.price,
+    }),
+  );
 
   return (
     <PageContainer className="py-16 text-center">
       <PhonePeStatusSync
         merchantOrderId={data.phonepeMerchantOrderId}
         paymentStatus={data.paymentStatus}
+        purchase={
+          isCustomer
+            ? {
+                orderId: String(data._id),
+                value: data.pricing.total,
+                items: purchaseItems,
+              }
+            : undefined
+        }
       />
       <h1 className="font-display text-4xl text-dark">Thank you!</h1>
       <p className="mt-3 text-muted">
