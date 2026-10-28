@@ -4,15 +4,19 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { API_ENDPOINTS } from "@/constants/api";
 import { ROUTES } from "@/constants/routes";
+import { trackPurchase } from "@/lib/analytics/purchase";
+import type { PurchaseTracking } from "@/types/analytics";
 
 const RETRY_DELAYS_MS = [0, 1500, 3000, 5000];
 
 export function PhonePeStatusSync({
   merchantOrderId,
   paymentStatus,
+  purchase,
 }: {
   merchantOrderId?: string;
   paymentStatus: string;
+  purchase?: PurchaseTracking;
 }) {
   const router = useRouter();
   const ran = useRef(false);
@@ -24,6 +28,8 @@ export function PhonePeStatusSync({
     if (ran.current) return;
     if (!merchantOrderId) return;
     if (paymentStatus === "PAID") {
+      ran.current = true;
+      if (purchase) trackPurchase(purchase);
       router.replace(ROUTES.PROFILE_ORDERS);
       return;
     }
@@ -47,6 +53,7 @@ export function PhonePeStatusSync({
           const nextStatus = json?.data?.paymentStatus as string | undefined;
 
           if (nextStatus === "PAID") {
+            if (purchase) trackPurchase(purchase);
             setMessage("Payment confirmed. Redirecting to your orders…");
             router.replace(ROUTES.PROFILE_ORDERS);
             router.refresh();
@@ -74,7 +81,7 @@ export function PhonePeStatusSync({
     return () => {
       cancelled = true;
     };
-  }, [merchantOrderId, paymentStatus, router]);
+  }, [merchantOrderId, paymentStatus, purchase, router]);
 
   if (!message) return null;
 
