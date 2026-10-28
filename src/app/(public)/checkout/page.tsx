@@ -30,6 +30,7 @@ import { ROUTES } from "@/constants/routes";
 import { ASSETS } from "@/constants/assets";
 import { useCartStore } from "@/hooks/useCartStore";
 import { useRequireLogin } from "@/hooks/useRequireLogin";
+import { readStoredAttribution } from "@/lib/attribution/storage";
 import { calculatePricing } from "@/lib/orders/pricing";
 import { formatInr } from "@/lib/utils/format";
 import { cn } from "@/lib/utils/cn";
@@ -232,6 +233,7 @@ export default function CheckoutPage() {
             fullName: [firstName, lastName].filter(Boolean).join(" "),
           },
           couponCode: appliedCoupon?.code,
+          attribution: readStoredAttribution() ?? undefined,
         }),
       });
       const orderJson = await orderRes.json();

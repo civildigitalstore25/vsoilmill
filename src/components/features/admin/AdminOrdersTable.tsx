@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { ADMIN_ACTIONS, ADMIN_ORDERS_COPY } from "@/constants/admin";
 import { API_ENDPOINTS } from "@/constants/api";
 import { ROUTES } from "@/constants/routes";
+import { formatSourceLabel } from "@/lib/attribution/labels";
 import { formatInr } from "@/lib/utils/format";
 import { OrderStatus, PaymentStatus, type Order } from "@/types/order";
 
@@ -18,6 +19,7 @@ const PAYMENT_OPTIONS = Object.values(PaymentStatus);
 
 const HEADERS = [
   ADMIN_ORDERS_COPY.tableCustomer,
+  ADMIN_ORDERS_COPY.tableSource,
   ADMIN_ORDERS_COPY.tableDate,
   ADMIN_ORDERS_COPY.tableItems,
   ADMIN_ORDERS_COPY.tableTotal,
@@ -107,6 +109,9 @@ export function AdminOrdersTable({ orders }: { orders: Order[] }) {
                         ) : null}
                       </div>
                     </div>
+                  </td>
+                  <td className="px-5 py-4 text-muted">
+                    {formatSourceLabel(order.attribution?.source)}
                   </td>
                 <td className="px-5 py-4 whitespace-nowrap text-muted">
                   {formatOrderDate(order.createdAt)}

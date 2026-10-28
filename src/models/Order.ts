@@ -28,6 +28,18 @@ const AddressSchema = new Schema(
   { _id: false },
 );
 
+const AttributionSchema = new Schema(
+  {
+    source: String,
+    medium: String,
+    campaign: String,
+    content: String,
+    term: String,
+    landingPath: String,
+  },
+  { _id: false },
+);
+
 const PricingSchema = new Schema(
   {
     subtotal: { type: Number, required: true },
@@ -58,6 +70,7 @@ const OrderSchema = new Schema(
     phonepeMerchantOrderId: { type: String, index: true },
     phonepeTransactionId: String,
     couponCode: String,
+    attribution: AttributionSchema,
     notes: String,
     stockDecremented: { type: Boolean, default: false },
     trackingNumber: String,
@@ -65,5 +78,7 @@ const OrderSchema = new Schema(
   },
   { timestamps: true },
 );
+
+OrderSchema.index({ "attribution.source": 1 });
 
 export const OrderModel = models.Order ?? model("Order", OrderSchema);

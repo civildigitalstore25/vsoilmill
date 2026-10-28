@@ -6,6 +6,7 @@ import {
   ShoppingBag,
   Users,
 } from "lucide-react";
+import { AdminTrafficSources } from "@/components/features/admin/AdminTrafficSources";
 import {
   AdminCard,
   AdminPageHeader,
@@ -88,6 +89,8 @@ export default async function AdminDashboardPage() {
           icon={<IndianRupee className="h-5 w-5" />}
         />
       </div>
+
+      <AdminTrafficSources />
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
         <AdminCard className="p-6">

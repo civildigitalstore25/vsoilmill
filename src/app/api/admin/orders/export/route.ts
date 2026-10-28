@@ -7,6 +7,8 @@ import { connectDb } from "@/lib/db/mongoose";
 import { OrderModel } from "@/models/Order";
 import { UserModel } from "@/models/User";
 import { PaymentStatus, type OrderItem } from "@/types/order";
+import { ATTRIBUTION_COPY, ATTRIBUTION_EXPORT } from "@/constants/attribution";
+import { formatSourceLabel } from "@/lib/attribution/labels";
 import { UI } from "@/constants/ui";
 
 export async function POST(request: Request) {
@@ -129,6 +131,10 @@ export async function POST(request: Request) {
       { header: "Payment Status", key: "paymentStatus", width: 16 },
       { header: "PhonePe Order ID", key: "merchantOrderId", width: 28 },
       { header: "Transaction ID", key: "transactionId", width: 28 },
+      { header: ATTRIBUTION_EXPORT.source, key: "source", width: 16 },
+      { header: ATTRIBUTION_EXPORT.medium, key: "medium", width: 14 },
+      { header: ATTRIBUTION_EXPORT.campaign, key: "campaign", width: 22 },
+      { header: ATTRIBUTION_EXPORT.content, key: "content", width: 16 },
     ];
 
     const tableHeaderRowIndex = 6;
@@ -241,6 +247,10 @@ export async function POST(request: Request) {
         order.paymentStatus,
         order.phonepeMerchantOrderId || "—",
         order.phonepeTransactionId || "—",
+        formatSourceLabel(order.attribution?.source),
+        order.attribution?.medium || ATTRIBUTION_COPY.empty,
+        order.attribution?.campaign || ATTRIBUTION_COPY.empty,
+        order.attribution?.content || ATTRIBUTION_COPY.empty,
       ];
 
       rowValues.forEach((val, colIdx) => {

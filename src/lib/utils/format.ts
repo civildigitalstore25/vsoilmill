@@ -1,5 +1,15 @@
 import { CURRENCY_SYMBOL } from "@/constants/seo";
 
+export function formatInrDateTime(value: string | Date): string {
+  return new Date(value).toLocaleString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export function formatInr(amount: number): string {
   return `${CURRENCY_SYMBOL}${amount.toLocaleString("en-IN", {
     minimumFractionDigits: 0,

@@ -1,3 +1,4 @@
+import type { CampaignAttribution } from "@/types/attribution";
 import type { ShippingAddress } from "@/types/user";
 
 export enum OrderStatus {
@@ -77,6 +78,7 @@ export interface Order {
   phonepeMerchantOrderId?: string;
   phonepeTransactionId?: string;
   couponCode?: string;
+  attribution?: CampaignAttribution;
   notes?: string;
   stockDecremented?: boolean;
   trackingNumber?: string;

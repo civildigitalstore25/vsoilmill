@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ADMIN_ORDERS_COPY } from "@/constants/admin";
 import { ROUTES } from "@/constants/routes";
 import { connectDb } from "@/lib/db/mongoose";
+import { formatAttributionLine } from "@/lib/attribution/labels";
 import { formatInr } from "@/lib/utils/format";
 import { OrderModel } from "@/models/Order";
 
@@ -78,6 +79,13 @@ export default async function AdminOrderDetailPage({ params }: Props) {
               {data.shippingAddress?.pincode}
             </p>
           </div>
+          <p className="mt-4 text-sm text-muted">
+            <span className="font-medium text-dark">
+              {ADMIN_ORDERS_COPY.attributionTitle}
+            </span>
+            <br />
+            {formatAttributionLine(data.attribution)}
+          </p>
         </AdminCard>
 
         <AdminCard className="p-6">

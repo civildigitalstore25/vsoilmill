@@ -1,4 +1,6 @@
+import { ATTRIBUTION_LIMITS } from "@/constants/attribution";
 import { connectDb } from "@/lib/db/mongoose";
+import { normalizeAttribution } from "@/lib/attribution/parse";
 import { validateAndCalculateCouponDiscount } from "@/lib/orders/coupons";
 import { resolveOrderItemsFromCatalog } from "@/lib/orders/inventory";
 import {
@@ -34,6 +36,16 @@ const orderSchema = z.object({
     country: z.string().default("India"),
   }),
   couponCode: z.string().optional(),
+  attribution: z
+    .object({
+      source: z.string().max(ATTRIBUTION_LIMITS.maxLength).optional(),
+      medium: z.string().max(ATTRIBUTION_LIMITS.maxLength).optional(),
+      campaign: z.string().max(ATTRIBUTION_LIMITS.maxLength).optional(),
+      content: z.string().max(ATTRIBUTION_LIMITS.maxLength).optional(),
+      term: z.string().max(ATTRIBUTION_LIMITS.maxLength).optional(),
+      landingPath: z.string().max(ATTRIBUTION_LIMITS.pathMaxLength).optional(),
+    })
+    .optional(),
 });
 
 export async function POST(request: Request) {
@@ -84,6 +96,8 @@ export async function POST(request: Request) {
       country: parsed.data.shippingAddress.country || "India",
     };
 
+    const attribution = normalizeAttribution(parsed.data.attribution);
+
     const order = await OrderModel.create({
       userId: session.user.id,
       items: resolved.items.map((line) => {
@@ -95,6 +109,7 @@ export async function POST(request: Request) {
       shippingAddress,
       pricing,
       couponCode: coupon.code,
+      ...(attribution ? { attribution } : {}),
       status: "PENDING",
       paymentStatus: "PENDING",
       stockDecremented: false,

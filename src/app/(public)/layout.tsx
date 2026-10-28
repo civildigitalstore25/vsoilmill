@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { AttributionCapture } from "@/components/features/attribution/AttributionCapture";
 import { Footer } from "@/components/layout/Footer/Footer";
 import { Header } from "@/components/layout/Header/Header";
 import { getCategories } from "@/lib/products/queries";
@@ -17,6 +19,9 @@ export default async function PublicLayout({
 
   return (
     <>
+      <Suspense fallback={null}>
+        <AttributionCapture />
+      </Suspense>
       <Header categories={categories} />
       <main className="min-h-[70vh]">{children}</main>
       <Footer />
