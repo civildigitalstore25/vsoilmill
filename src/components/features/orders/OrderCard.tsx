@@ -13,6 +13,7 @@ export function OrderCard({ order }: { order: Order }) {
   const shortId = `VSO-${order._id.slice(-6).toUpperCase()}`;
   const formattedDate = order.createdAt
     ? new Date(order.createdAt).toLocaleDateString("en-IN", {
+        timeZone: "Asia/Kolkata",
         day: "numeric",
         month: "short",
         year: "numeric",

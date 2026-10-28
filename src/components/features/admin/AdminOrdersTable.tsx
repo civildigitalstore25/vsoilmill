@@ -30,6 +30,7 @@ const HEADERS = [
 
 function formatOrderDate(value: string) {
   return new Date(value).toLocaleDateString("en-IN", {
+    timeZone: "Asia/Kolkata",
     day: "numeric",
     month: "short",
     year: "numeric",

@@ -2,11 +2,13 @@ import { CURRENCY_SYMBOL } from "@/constants/seo";
 
 export function formatInrDateTime(value: string | Date): string {
   return new Date(value).toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
     day: "numeric",
     month: "short",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    hour12: true,
   });
 }
 
