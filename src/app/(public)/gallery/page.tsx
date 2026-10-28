@@ -18,17 +18,21 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Visual Gallery — Live Mill Videos, Oil Extraction & Packaging",
+  title: "Visual Gallery — Live Extraction, Packing, Selling & White Label Supply",
   description:
-    "Explore VS OilMill's live Mara Chekku machine running, authentic groundnut and coconut cold press extraction, customer order packaging dispatches, and product showcases in Madurai, Tamil Nadu.",
+    "Explore VS OilMill's live Mara Chekku machine extraction, customer order packing & courier dispatches, factory-direct selling rates, and White Label (unlabeled) oil supply in Madurai, Tamil Nadu.",
   path: "/gallery",
   keywords: [
     "VS OilMill gallery",
+    "white label wood pressed oil",
+    "unlabeled cold pressed oil supply",
+    "private brand oil manufacturer Madurai",
     "wooden pressed oil machine running video",
     "Mara Chekku oil extraction video",
     "cold pressed groundnut oil extraction",
-    "pure coconut oil machine pressing",
-    "customer packaging dispatch video",
+    "customer order packing video",
+    "courier dispatch logs Madurai",
+    "direct mill selling rates",
     "pure cold pressed oil photos",
     "Uthukuli cow ghee images",
     "traditional oil mill Madurai Tamil Nadu",
@@ -82,7 +86,7 @@ export default async function GalleryPage() {
         "@type": "ImageGallery",
         name: "VS OilMill Visual Gallery",
         description:
-          "Live Mara Chekku oil extraction videos, customer packaging & dispatch footage, and pure cold-pressed oils.",
+          "Live Mara Chekku oil extraction videos, customer order packing & dispatch footage, direct selling rates, and pure cold-pressed oils.",
         url: `${siteUrl}${ROUTES.GALLERY}`,
       },
       ...GALLERY_VIDEOS.map((v) => ({
@@ -132,7 +136,7 @@ export default async function GalleryPage() {
         <div className="max-w-3xl mb-10">
           <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary mb-3">
             <Film className="h-3.5 w-3.5" />
-            <span>Live Extraction Videos, Customer Packaging & Product Gallery</span>
+            <span>Extraction Videos, Order Packing & Direct Selling Gallery</span>
           </div>
 
           <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-dark leading-tight">
@@ -140,7 +144,7 @@ export default async function GalleryPage() {
           </h1>
 
           <p className="mt-3 text-base sm:text-lg text-muted leading-relaxed">
-            Take a visual tour inside our traditional Mara Chekku oil mill in Madurai. Watch live footage of our oil machines running and pure oil extraction, view our safe customer packaging dispatch logs, and browse our cold-pressed oils and pure Uthukuli cow ghee.
+            Take a visual tour inside our traditional Mara Chekku oil mill in Madurai. Watch live cold-press machine extraction, view our safe customer order packing & courier dispatch logs, and explore our factory-direct selling offers, pure wood-pressed oils, and Uthukuli cow ghee.
           </p>
         </div>
 

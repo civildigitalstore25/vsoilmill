@@ -19,6 +19,13 @@ import {
   Youtube,
   ExternalLink,
   Calendar,
+  Package,
+  Tag,
+  Truck,
+  ShieldCheck,
+  Phone,
+  Layers,
+  Store,
 } from "lucide-react";
 import {
   GALLERY_VIDEOS,
@@ -48,30 +55,39 @@ export function GalleryClient({ initialImages, initialVideos }: GalleryClientPro
 
   // Dynamic category pills with accurate counts of available items
   const categories = useMemo(() => {
-    const bannersCount = images.filter((img) => img.category === "banners").length;
+    const packingCount = videos.filter(
+      (v) => v.subCategory === "packing" || v.subCategory === "packaging"
+    ).length;
+    const sellingVideosCount = videos.filter((v) => v.subCategory === "selling").length;
+    const whitelabelCount = videos.filter((v) => v.subCategory === "whitelabel").length;
+    const extractionCount = videos.filter((v) => v.subCategory === "extraction").length;
     const productsCount = images.filter((img) => img.category === "products").length;
     const combosCount = images.filter((img) => img.category === "combos").length;
+    const bannersCount = images.filter((img) => img.category === "banners").length;
     const traditionalCount = images.filter((img) => img.category === "traditional").length;
+    const totalSellingCount = sellingVideosCount + productsCount + combosCount;
     const totalCount = images.length + videos.length;
 
-    const list: Array<{ id: string; label: string }> = [
-      { id: "all", label: `All Media (${totalCount})` },
+    const list: Array<{ id: string; label: string; count: number }> = [
+      { id: "all", label: `All Media (${totalCount})`, count: totalCount },
+      { id: "packing", label: `📦 Packing & Dispatch (${packingCount})`, count: packingCount },
+      { id: "selling", label: `🛍️ Selling & Offers (${totalSellingCount})`, count: totalSellingCount },
+      { id: "whitelabel", label: `🏷️ White Label & Your Brand (${whitelabelCount})`, count: whitelabelCount },
+      { id: "extraction", label: `⚙️ Oil Extraction (${extractionCount})`, count: extractionCount },
+      { id: "videos", label: `🎥 All Videos (${videos.length})`, count: videos.length },
     ];
 
-    if (videos.length > 0) {
-      list.push({ id: "videos", label: `🎥 Mill Videos (${videos.length})` });
-    }
-    if (bannersCount > 0) {
-      list.push({ id: "banners", label: `✨ Banners & Promos (${bannersCount})` });
-    }
     if (productsCount > 0) {
-      list.push({ id: "products", label: `🧴 Wood Pressed Oils (${productsCount})` });
+      list.push({ id: "products", label: `🧴 Wood Pressed Oils (${productsCount})`, count: productsCount });
     }
     if (combosCount > 0) {
-      list.push({ id: "combos", label: `🎁 Combo Offers (${combosCount})` });
+      list.push({ id: "combos", label: `🎁 Combo Offers (${combosCount})`, count: combosCount });
+    }
+    if (bannersCount > 0) {
+      list.push({ id: "banners", label: `✨ Banners & Promos (${bannersCount})`, count: bannersCount });
     }
     if (traditionalCount > 0) {
-      list.push({ id: "traditional", label: `🏺 Heritage & Traditional (${traditionalCount})` });
+      list.push({ id: "traditional", label: `🏺 Heritage & Traditional (${traditionalCount})`, count: traditionalCount });
     }
 
     return list;
@@ -79,17 +95,27 @@ export function GalleryClient({ initialImages, initialVideos }: GalleryClientPro
 
   // Video Sub-Category filter tabs
   const videoSubCategories = useMemo(() => {
+    const packingCount = videos.filter(
+      (v) => v.subCategory === "packing" || v.subCategory === "packaging"
+    ).length;
+    const sellingCount = videos.filter((v) => v.subCategory === "selling").length;
+    const whitelabelCount = videos.filter((v) => v.subCategory === "whitelabel").length;
     const extractionCount = videos.filter((v) => v.subCategory === "extraction").length;
-    const packagingCount = videos.filter((v) => v.subCategory === "packaging").length;
     const storyCount = videos.filter((v) => v.subCategory === "story").length;
 
     return [
       { id: "all", label: `All Videos (${videos.length})` },
+      ...(packingCount > 0
+        ? [{ id: "packing", label: `📦 Packing & Dispatch (${packingCount})` }]
+        : []),
+      ...(sellingCount > 0
+        ? [{ id: "selling", label: `🛍️ Live Selling & Offers (${sellingCount})` }]
+        : []),
+      ...(whitelabelCount > 0
+        ? [{ id: "whitelabel", label: `🏷️ White Label / Your Brand (${whitelabelCount})` }]
+        : []),
       ...(extractionCount > 0
         ? [{ id: "extraction", label: `⚙️ Oil Machine & Extraction (${extractionCount})` }]
-        : []),
-      ...(packagingCount > 0
-        ? [{ id: "packaging", label: `📦 Packaging & Dispatch (${packagingCount})` }]
         : []),
       ...(storyCount > 0
         ? [{ id: "story", label: `🎓 Mill Stories & Visits (${storyCount})` }]
@@ -97,22 +123,73 @@ export function GalleryClient({ initialImages, initialVideos }: GalleryClientPro
     ];
   }, [videos]);
 
-  // Filtered videos based on sub-filter
+  // Filtered videos based on active category and video sub-filter
   const filteredVideos = useMemo(() => {
-    if (videoFilter === "all") return videos;
-    return videos.filter((v) => v.subCategory === videoFilter);
-  }, [videos, videoFilter]);
-
-  // Filter images based on category
-  const filteredImages = useMemo(() => {
+    if (activeCategory === "packing") {
+      return videos.filter(
+        (v) => v.subCategory === "packing" || v.subCategory === "packaging"
+      );
+    }
+    if (activeCategory === "selling") {
+      return videos.filter((v) => v.subCategory === "selling");
+    }
+    if (activeCategory === "whitelabel") {
+      return videos.filter((v) => v.subCategory === "whitelabel");
+    }
+    if (activeCategory === "extraction") {
+      return videos.filter((v) => v.subCategory === "extraction");
+    }
     if (activeCategory === "all" || activeCategory === "videos") {
+      if (videoFilter === "all") return videos;
+      if (videoFilter === "packing") {
+        return videos.filter(
+          (v) => v.subCategory === "packing" || v.subCategory === "packaging"
+        );
+      }
+      if (videoFilter === "whitelabel") {
+        return videos.filter((v) => v.subCategory === "whitelabel");
+      }
+      return videos.filter((v) => v.subCategory === videoFilter);
+    }
+    return [];
+  }, [videos, activeCategory, videoFilter]);
+
+  // Filter images based on active category
+  const filteredImages = useMemo(() => {
+    if (activeCategory === "all") {
       return images;
+    }
+    if (activeCategory === "selling") {
+      return images.filter(
+        (img) => img.category === "products" || img.category === "combos"
+      );
+    }
+    if (
+      activeCategory === "packing" ||
+      activeCategory === "whitelabel" ||
+      activeCategory === "extraction" ||
+      activeCategory === "videos"
+    ) {
+      return [];
     }
     return images.filter((img) => img.category === activeCategory);
   }, [images, activeCategory]);
 
-  const showVideos = activeCategory === "all" || activeCategory === "videos";
-  const showImages = activeCategory !== "videos";
+  const showVideos =
+    activeCategory === "all" ||
+    activeCategory === "videos" ||
+    activeCategory === "packing" ||
+    activeCategory === "selling" ||
+    activeCategory === "whitelabel" ||
+    activeCategory === "extraction";
+
+  const showImages =
+    activeCategory === "all" ||
+    activeCategory === "selling" ||
+    (activeCategory !== "videos" &&
+      activeCategory !== "packing" &&
+      activeCategory !== "whitelabel" &&
+      activeCategory !== "extraction");
 
   // Lightbox handlers
   const openLightbox = (index: number) => {
@@ -194,73 +271,298 @@ export function GalleryClient({ initialImages, initialVideos }: GalleryClientPro
 
   return (
     <div className="space-y-12">
-      {/* Category Filter Pills */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-border/70 pb-4">
-        {categories.map((cat) => {
-          const isActive = activeCategory === cat.id;
-          return (
-            <button
-              key={cat.id}
-              onClick={() => {
-                setActiveCategory(cat.id);
-                setLightboxIndex(null);
-                setActiveVideoModal(null);
-              }}
-              className={cn(
-                "rounded-full px-4 py-2 text-xs sm:text-sm font-semibold transition-all shadow-2xs cursor-pointer",
-                isActive
-                  ? "bg-primary text-white shadow-xs"
-                  : "bg-card text-stone-600 hover:bg-stone-100 hover:text-dark border border-border/60"
-              )}
-            >
-              {cat.label}
-            </button>
-          );
-        })}
+      {/* Category Filter Pills — Distinct, Neat Menus */}
+      <div className="space-y-2 border-b border-border/70 pb-4">
+        <div className="flex flex-wrap items-center gap-2">
+          {categories.map((cat) => {
+            const isActive = activeCategory === cat.id;
+            const isHighlightTab = cat.id === "packing" || cat.id === "selling" || cat.id === "whitelabel";
+            return (
+              <button
+                key={cat.id}
+                onClick={() => {
+                  setActiveCategory(cat.id);
+                  setLightboxIndex(null);
+                  setActiveVideoModal(null);
+                }}
+                className={cn(
+                  "rounded-full px-4 py-2 text-xs sm:text-sm font-semibold transition-all shadow-2xs cursor-pointer",
+                  isActive
+                    ? "bg-primary text-white shadow-md ring-2 ring-primary/25 scale-[1.02]"
+                    : cat.id === "whitelabel"
+                    ? "bg-indigo-500/10 text-indigo-900 hover:bg-indigo-500/20 border border-indigo-400/40"
+                    : isHighlightTab
+                    ? "bg-amber-500/10 text-amber-900 hover:bg-amber-500/20 border border-amber-400/40"
+                    : "bg-card text-stone-600 hover:bg-stone-100 hover:text-dark border border-border/60"
+                )}
+              >
+                {cat.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* SECTION 1: VIDEOS & MILL STORIES */}
-      {showVideos && videos.length > 0 && (
+      {/* SECTION 1: VIDEOS & MILL FOOTAGE */}
+      {showVideos && filteredVideos.length > 0 && (
         <section aria-labelledby="mill-videos-heading" className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-border/40 pb-4">
             <div>
               <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider mb-1">
-                <Film className="h-4 w-4" />
-                <span>Featured Mill Videos, Machine Extraction & Customer Delivery</span>
+                {activeCategory === "packing" ? (
+                  <>
+                    <Package className="h-4 w-4 text-emerald-600" />
+                    <span className="text-emerald-700">Customer Orders Packaging & Courier Dispatch Logs</span>
+                  </>
+                ) : activeCategory === "selling" ? (
+                  <>
+                    <ShoppingBag className="h-4 w-4 text-amber-600" />
+                    <span className="text-amber-800">Direct Mill Rate Announcements & Special Booking Offers</span>
+                  </>
+                ) : activeCategory === "whitelabel" ? (
+                  <>
+                    <Tag className="h-4 w-4 text-indigo-600" />
+                    <span className="text-indigo-700">White Label & Private Brand Supply — Unlabeled Oils for Your Brand</span>
+                  </>
+                ) : activeCategory === "extraction" ? (
+                  <>
+                    <Film className="h-4 w-4" />
+                    <span>Traditional Vaagai Wood Chekku Running & Cold Extraction</span>
+                  </>
+                ) : (
+                  <>
+                    <Film className="h-4 w-4" />
+                    <span>Featured Mill Videos, Machine Extraction, Packing & Selling</span>
+                  </>
+                )}
               </div>
               <h2
                 id="mill-videos-heading"
                 className="font-display text-2xl sm:text-3xl font-bold text-dark"
               >
-                Watch Our Mill in Action
+                {activeCategory === "packing"
+                  ? "Customer Orders Packing & Dispatch Logs"
+                  : activeCategory === "selling"
+                  ? "Live Mill Selling & Daily Offers"
+                  : activeCategory === "whitelabel"
+                  ? "White Label Oil Supply — Sell Under Your Own Brand"
+                  : activeCategory === "extraction"
+                  ? "Oil Machine & Extraction Live Footage"
+                  : "Watch Our Mill in Action"}
               </h2>
             </div>
             <p className="text-xs sm:text-sm text-muted max-w-md">
-              Real video footage showing live Mara Chekku machine cold pressing, daily packaging & customer dispatches, raw material drying, and mill visits.
+              {activeCategory === "packing"
+                ? "See how we safely wrap pure oils with 5-layer bubble cushioning, tamper seals, and dispatch parcels daily across Tamil Nadu & India."
+                : activeCategory === "selling"
+                ? "Direct mill prices: ₹220/L groundnut oil, ₹350/L coconut oil, ₹700/L cow ghee weekend deal, and festive combo savings."
+                : activeCategory === "whitelabel"
+                ? "VS OilMill supplies 100% pure Mara Chekku groundnut, sesame, and coconut oils in unlabeled bottles and cans. Paste your custom label, set your prices, and start your business with zero factory investment."
+                : activeCategory === "extraction"
+                ? "Watch sulphur-free copra, premium peanuts, and sesame seeds cold pressed slowly in authentic Vaagai wood without heat."
+                : "Real video footage showing live cold pressing, safe customer order packaging dispatches, live mill selling offers, and visits."}
             </p>
           </div>
 
-          {/* Video Sub-Category Filters */}
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            <span className="text-xs font-semibold text-stone-500 mr-1">Filter Videos:</span>
-            {videoSubCategories.map((subCat) => {
-              const isSubActive = videoFilter === subCat.id;
-              return (
-                <button
-                  key={subCat.id}
-                  onClick={() => setVideoFilter(subCat.id)}
-                  className={cn(
-                    "rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer",
-                    isSubActive
-                      ? "bg-stone-900 text-white shadow-xs"
-                      : "bg-stone-100 text-stone-700 hover:bg-stone-200 border border-border/40"
-                  )}
-                >
-                  {subCat.label}
-                </button>
-              );
-            })}
-          </div>
+          {/* Dedicated White Label B2B Feature Highlights & Direct Inquiry */}
+          {activeCategory === "whitelabel" && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 bg-indigo-50/50 border border-indigo-200/70 rounded-2xl p-4 sm:p-5">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-600/10 text-indigo-700 mt-0.5">
+                    <Layers className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-dark">1. Unlabeled Pure Oils</p>
+                    <p className="text-[11px] text-muted leading-tight">
+                      Authentic Mara Chekku oils supplied in clean, neutral 1L bottles, 5L cans & 15Kg tins.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-600/10 text-purple-700 mt-0.5">
+                    <Tag className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-dark">2. Your Brand Label</p>
+                    <p className="text-[11px] text-muted leading-tight">
+                      Design & apply your own custom label, logo, and brand name onto the containers.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-600/10 text-emerald-700 mt-0.5">
+                    <Store className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-dark">3. High Profit Margins</p>
+                    <p className="text-[11px] text-muted leading-tight">
+                      Purchase at factory wholesale mill prices and set your own profitable retail prices.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-600/10 text-blue-700 mt-0.5">
+                    <Truck className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-dark">4. Doorstep Reseller Delivery</p>
+                    <p className="text-[11px] text-muted leading-tight">
+                      Direct courier & freight delivery right to your shop or warehouse across India.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* White Label CTA Box */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl bg-gradient-to-r from-indigo-950 via-stone-900 to-indigo-900 p-4 sm:p-6 text-white shadow-md border border-indigo-800/60">
+                <div className="space-y-1 max-w-xl">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/20 px-2.5 py-0.5 text-[11px] font-semibold text-indigo-300 border border-indigo-400/30">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-indigo-400" />
+                    <span>Zero Factory Setup Investment Required</span>
+                  </span>
+                  <h3 className="font-display text-base sm:text-lg font-bold text-white">
+                    Start Your Own Cold-Pressed Oil Brand Today
+                  </h3>
+                  <p className="text-xs text-stone-300 leading-relaxed">
+                    Connect directly with founder Sarathkumar for White Label wholesale pricing, minimum order quantities (MOQ), and packaging customization.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                  <a
+                    href={`https://wa.me/${UI.whatsappNumber}?text=${encodeURIComponent(
+                      "Hi VS OilMill, I am interested in White Label (unlabeled) Mara Chekku oil supply to paste my own brand label and sell. Please share wholesale prices and minimum order quantity."
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white transition-colors shadow-md"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    <span>Enquire on WhatsApp</span>
+                  </a>
+                  <a
+                    href={`tel:${UI.phoneDisplay.replace(/[^0-9+]/g, "")}`}
+                    className="inline-flex items-center gap-2 rounded-xl bg-white/10 hover:bg-white/20 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white transition-colors border border-white/20"
+                  >
+                    <Phone className="h-4 w-4" />
+                    <span>Call Now</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Dedicated Packing Trust Highlights */}
+          {activeCategory === "packing" && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-emerald-50/60 border border-emerald-200/80 rounded-2xl p-4 sm:p-5">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-600/10 text-emerald-700">
+                  <ShieldCheck className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-dark">5-Layer Bubble Wrap</p>
+                  <p className="text-[11px] text-muted">Cushioned bottle protection</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-600/10 text-emerald-700">
+                  <Package className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-dark">5-Ply Cartons</p>
+                  <p className="text-[11px] text-muted">Sturdy corrugated boxes</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-700">
+                  <Truck className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-dark">Doorstep Express</p>
+                  <p className="text-[11px] text-muted">Safe delivery across India</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-500/10 text-purple-700">
+                  <CheckCircle2 className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-dark">Tamper-Proof Seals</p>
+                  <p className="text-[11px] text-muted">100% leak-tested security</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Dedicated Selling Advantage Highlights */}
+          {activeCategory === "selling" && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-amber-500/5 border border-amber-500/20 rounded-2xl p-4 sm:p-5">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/15 text-amber-800">
+                  <Tag className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-dark">Direct Mill Rates</p>
+                  <p className="text-[11px] text-muted">Zero middleman markup</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <ShoppingBag className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-dark">Combo Deals</p>
+                  <p className="text-[11px] text-muted">Up to 25% savings</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-700">
+                  <Truck className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-dark">Free Shipping</p>
+                  <p className="text-[11px] text-muted">On eligible orders</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-green-500/10 text-green-700">
+                  <MessageCircle className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-dark">Instant Booking</p>
+                  <p className="text-[11px] text-muted">Direct WhatsApp booking</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Video Sub-Category Filters (Only when viewing "all" or "videos") */}
+          {(activeCategory === "all" || activeCategory === "videos") && (
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className="text-xs font-semibold text-stone-500 mr-1">Filter Videos:</span>
+              {videoSubCategories.map((subCat) => {
+                const isSubActive = videoFilter === subCat.id;
+                return (
+                  <button
+                    key={subCat.id}
+                    onClick={() => setVideoFilter(subCat.id)}
+                    className={cn(
+                      "rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer",
+                      isSubActive
+                        ? "bg-stone-900 text-white shadow-xs ring-2 ring-stone-900/20"
+                        : "bg-stone-100 text-stone-700 hover:bg-stone-200 border border-border/40"
+                    )}
+                  >
+                    {subCat.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           {/* Video Grid - Prominent Video Size with Compact Cards */}
           <div className="grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -277,14 +579,16 @@ export function GalleryClient({ initialImages, initialVideos }: GalleryClientPro
       )}
 
       {/* SECTION 2: BANNERS & AVAILABLE PRODUCT SHOWCASE */}
-      {showImages && (
+      {showImages && filteredImages.length > 0 && (
         <section aria-labelledby="visual-showcase-heading" className="space-y-6 pt-4">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-border/40 pb-4">
             <div>
               <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider mb-1">
                 <Sparkles className="h-4 w-4" />
                 <span>
-                  {activeCategory === "banners"
+                  {activeCategory === "selling"
+                    ? "Available Wood-Pressed Oils & Special Combo Packs Ready to Order"
+                    : activeCategory === "banners"
                     ? "Banners & Promotions"
                     : activeCategory === "products"
                     ? "Available Wood-Pressed Mara Chekku Oils"
@@ -299,7 +603,9 @@ export function GalleryClient({ initialImages, initialVideos }: GalleryClientPro
                 id="visual-showcase-heading"
                 className="font-display text-2xl sm:text-3xl font-bold text-dark"
               >
-                {activeCategory === "banners"
+                {activeCategory === "selling"
+                  ? "Wood-Pressed Oils & Combos Ready to Order"
+                  : activeCategory === "banners"
                   ? "Banners & Promos"
                   : activeCategory === "products"
                   ? "Available Mara Chekku Products"
@@ -734,7 +1040,18 @@ function GalleryVideoCard({
         {/* Top-Left Badge */}
         {(!isYouTube || !isPlaying) && (
           <div className="pointer-events-none absolute top-2.5 left-2.5 z-10">
-            <span className="rounded-full bg-dark/85 backdrop-blur-md px-2.5 py-0.5 text-[10px] font-semibold text-cream border border-white/10 shadow-xs">
+            <span
+              className={cn(
+                "rounded-full px-2.5 py-0.5 text-[10px] font-semibold border shadow-xs backdrop-blur-md",
+                video.subCategory === "selling"
+                  ? "bg-amber-600/90 text-white border-amber-400/40"
+                  : video.subCategory === "whitelabel"
+                  ? "bg-indigo-700/90 text-white border-indigo-400/40"
+                  : video.subCategory === "packing"
+                  ? "bg-emerald-700/90 text-white border-emerald-400/40"
+                  : "bg-dark/85 text-cream border-white/10"
+              )}
+            >
               {video.badge}
             </span>
           </div>
@@ -789,14 +1106,28 @@ function GalleryVideoCard({
         <div className="flex items-center justify-between gap-2 border-t border-border/50 pt-2 text-[11px]">
           <a
             href={`https://wa.me/${UI.whatsappNumber}?text=${encodeURIComponent(
-              `Hi VS OilMill, I watched your video "${video.title}" and would like to learn more!`
+              video.subCategory === "selling"
+                ? `Hi VS OilMill, I watched your selling offer video "${video.title}" and would like to order or book!`
+                : video.subCategory === "whitelabel"
+                ? `Hi VS OilMill, I watched your white label video "${video.title}" and would like to order unlabeled oils to sell under my own brand!`
+                : video.subCategory === "packing"
+                ? `Hi VS OilMill, I saw your customer packing video "${video.title}" and would like to order with doorstep delivery!`
+                : `Hi VS OilMill, I watched your video "${video.title}" and would like to learn more!`
             )}`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 font-semibold text-emerald-700 hover:text-emerald-800 transition-colors"
           >
             <MessageCircle className="h-3.5 w-3.5" />
-            <span>WhatsApp</span>
+            <span>
+              {video.subCategory === "selling"
+                ? "Book on WhatsApp"
+                : video.subCategory === "whitelabel"
+                ? "Inquire White Label"
+                : video.subCategory === "packing"
+                ? "Inquire on WhatsApp"
+                : "WhatsApp"}
+            </span>
           </a>
 
           <div className="flex items-center gap-2">

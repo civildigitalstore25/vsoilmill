@@ -8,7 +8,7 @@ export type GalleryVideo = {
   badge: string;
   featured?: boolean;
   type?: "youtube" | "file";
-  subCategory?: "extraction" | "packaging" | "story";
+  subCategory?: "extraction" | "packing" | "packaging" | "selling" | "whitelabel" | "story";
   youtubeId?: string;
   date?: string;
 };
@@ -28,8 +28,12 @@ export type GalleryImage = {
 export type GalleryItem = GalleryVideo | GalleryImage;
 
 export const GALLERY_CATEGORIES = [
-  { id: "all", label: "All Media", count: 37 },
-  { id: "videos", label: "🎥 Mill Videos (13)", count: 13 },
+  { id: "all", label: "All Media", count: 44 },
+  { id: "packing", label: "📦 Packing & Dispatch", count: 4 },
+  { id: "selling", label: "🛍️ Selling & Offers", count: 21 },
+  { id: "whitelabel", label: "🏷️ White Label & Your Brand", count: 2 },
+  { id: "extraction", label: "⚙️ Oil Extraction", count: 5 },
+  { id: "videos", label: "🎥 Mill Videos (19)", count: 19 },
   { id: "banners", label: "✨ Banners & Promos", count: 4 },
   { id: "products", label: "🧴 Wood Pressed Oils", count: 9 },
   { id: "combos", label: "🎁 Combo Offers", count: 4 },
@@ -109,7 +113,7 @@ export const GALLERY_VIDEOS: GalleryVideo[] = [
     youtubeId: "_Wug05LRL4g",
   },
 
-  // 2. Packaging & Dispatching Orders to Customers
+  // 2. Customer Orders Packaging & Doorstep Courier Dispatch (PACKING)
   {
     id: "customer-packaging-dispatch-general",
     title: "Safe Packaging & Doorstep Delivery Dispatch to Customers",
@@ -121,7 +125,7 @@ export const GALLERY_VIDEOS: GalleryVideo[] = [
     badge: "Safe Delivery",
     featured: true,
     type: "youtube",
-    subCategory: "packaging",
+    subCategory: "packing",
     youtubeId: "Yz_iUykJBzc",
   },
   {
@@ -135,7 +139,7 @@ export const GALLERY_VIDEOS: GalleryVideo[] = [
     badge: "26 Oct 2026 Dispatch",
     featured: false,
     type: "youtube",
-    subCategory: "packaging",
+    subCategory: "packing",
     date: "26 October 2026",
     youtubeId: "38e8jJcyH0I",
   },
@@ -150,12 +154,114 @@ export const GALLERY_VIDEOS: GalleryVideo[] = [
     badge: "17 Oct 2026 Dispatch",
     featured: false,
     type: "youtube",
-    subCategory: "packaging",
+    subCategory: "packing",
     date: "17 October 2026",
     youtubeId: "tKsSgb3zhuQ",
   },
+  {
+    id: "customer-packaging-cow-ghee-30l",
+    title: "Customer Orders Packaging & Dispatch — 30 Litres Cow Ghee Courier Dispatch",
+    description:
+      "Watch our team carefully pack and dispatch 30 litres of pure Uthukuli cow ghee in protective courier packaging with doorstep delivery all over Tamil Nadu.",
+    videoUrl: "https://www.youtube.com/shorts/S4F6A1PH-9E",
+    category: "videos",
+    tag: "Packaging & Dispatch",
+    badge: "30L Ghee Dispatch",
+    featured: true,
+    type: "youtube",
+    subCategory: "packing",
+    youtubeId: "S4F6A1PH-9E",
+  },
 
-  // 3. Mill Stories, Sourcing & Founder Explanations
+  // 3. Direct Mill Selling, Factory Rates & Exclusive Offers (SELLING)
+  {
+    id: "selling-groundnut-oil-220",
+    title: "Wooden Pressed Groundnut Oil Direct Sale — ₹220/L with Door Delivery",
+    description:
+      "Direct mill selling: fresh Mara Chekku peanut oil cold-pressed in Madurai at direct factory rate ₹220 per litre with door delivery available.",
+    videoUrl: "https://youtube.com/shorts/xJP29mjCkKc?si=iEq37ig2MWkyAJRe",
+    category: "videos",
+    tag: "Direct Selling",
+    badge: "₹220/L Direct Sale",
+    featured: true,
+    type: "youtube",
+    subCategory: "selling",
+    youtubeId: "xJP29mjCkKc",
+  },
+  {
+    id: "selling-coconut-oil-350",
+    title: "Wooden Pressed Coconut Oil Direct Sale — ₹350/L with Door Delivery",
+    description:
+      "Direct mill selling: 100% sulphur-free copra Mara Chekku coconut oil at direct mill rate ₹350 per litre with prompt courier delivery.",
+    videoUrl: "https://youtube.com/shorts/_Wug05LRL4g?si=e_479Hi1QJJ_5v-u",
+    category: "videos",
+    tag: "Direct Selling",
+    badge: "₹350/L Direct Sale",
+    featured: true,
+    type: "youtube",
+    subCategory: "selling",
+    youtubeId: "_Wug05LRL4g",
+  },
+  {
+    id: "selling-diwali-combo-offer",
+    title: "Diwali Special Combo Offer & Booking — ₹2,222 Sale Price (MRP ₹3,000)",
+    description:
+      "Festive celebration combo booking: cold pressed groundnut, sesame & coconut oils plus pure Uthukuli cow ghee at ₹2,222 exclusive sale price.",
+    videoUrl: "https://www.youtube.com/shorts/Kjz0OuGsh-s",
+    category: "videos",
+    tag: "Combo Sale Offer",
+    badge: "₹2,222 Sale Booking",
+    featured: true,
+    type: "youtube",
+    subCategory: "selling",
+    youtubeId: "Kjz0OuGsh-s",
+  },
+  {
+    id: "selling-weekend-cow-ghee-700",
+    title: "Weekend Pure Cow Ghee Sale Offer — ₹700/L with Free Door Delivery",
+    description:
+      "Special weekend direct sale: pure golden grainy Uthukuli Desi Cow Ghee at ₹700 per litre with free doorstep courier delivery across Tamil Nadu.",
+    videoUrl: "https://www.youtube.com/shorts/92frcHQQS_g",
+    category: "videos",
+    tag: "Weekend Sale Offer",
+    badge: "₹700/L Ghee Sale",
+    featured: true,
+    type: "youtube",
+    subCategory: "selling",
+    youtubeId: "92frcHQQS_g",
+  },
+
+  // 4. White Label, Unlabeled Supply & Custom Branding (WHITE LABEL)
+  {
+    id: "white-label-unlabeled-supply-video",
+    title: "White Label & Private Brand Supply — Unlabeled Oils for Your Own Brand",
+    description:
+      "VS OilMill supplies pure wood-pressed Mara Chekku oils in unlabeled bottles and cans. Resellers and brand owners paste their own custom labels and sell under their own brand with zero factory setup cost.",
+    videoUrl:
+      "https://ik.imagekit.io/r33t79noj/vsoilmill/vsupdated/whitelabel/whitelabel.mp4?tr=orig-true",
+    category: "videos",
+    tag: "White Label Supply",
+    badge: "Sell With Your Brand",
+    featured: true,
+    type: "file",
+    subCategory: "whitelabel",
+  },
+  {
+    id: "white-label-branding-nonbranding-short",
+    title: "Branded & Non-Branded (Unlabeled) Oil Supply & Direct Reseller Service",
+    description:
+      "Watch how we supply non-branded (unlabeled) oil cans and bottles for resellers who apply their own brand labels, as well as direct doorstep indirect services.",
+    videoUrl: "https://www.youtube.com/shorts/rQvuRBB4EMk",
+    category: "videos",
+    tag: "Custom Branding",
+    badge: "Non-Branded Supply",
+    featured: true,
+    type: "youtube",
+    subCategory: "whitelabel",
+    youtubeId: "rQvuRBB4EMk",
+  },
+
+  // 5. Mill Stories, Sourcing & Founder Explanations
   {
     id: "president-dignitary-mill-visit",
     title: "President & Dignitary Inspection Visit to VS Oil Mill",
