@@ -1,5 +1,6 @@
 import { ANALYTICS } from "@/constants/analytics";
 import type { PurchaseTracking } from "@/types/analytics";
+import { capturePostHogEvent } from "./posthog";
 
 const trackedOrders = new Set<string>();
 
@@ -43,15 +44,28 @@ export function trackPurchase(purchase: PurchaseTracking): void {
   }
 
   trackedOrders.add(orderId);
+
+  const purchaseItems = purchase.items.map((item) => ({
+    item_id: item.itemId,
+    item_name: item.itemName,
+    price: item.price,
+    quantity: item.quantity,
+  }));
+
+  // Google Analytics
   queueGtag(ANALYTICS.PURCHASE_EVENT, {
     transaction_id: orderId,
     value: purchase.value,
     currency: ANALYTICS.CURRENCY,
-    items: purchase.items.map((item) => ({
-      item_id: item.itemId,
-      item_name: item.itemName,
-      price: item.price,
-      quantity: item.quantity,
-    })),
+    items: purchaseItems,
+  });
+
+  // PostHog Analytics
+  capturePostHogEvent("order_completed", {
+    transaction_id: orderId,
+    value: purchase.value,
+    currency: ANALYTICS.CURRENCY,
+    items_count: purchase.items.length,
+    items: purchaseItems,
   });
 }
