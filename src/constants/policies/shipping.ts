@@ -1,7 +1,7 @@
 export const SHIPPING_POLICY = {
   title: "Shipping Policy",
   intro:
-    "We deliver pure oils and ghee across India with care. Free express shipping applies on orders above ₹999.",
+    "We deliver pure oils and ghee across India with care. Free express shipping applies on all orders with zero delivery charges.",
   sections: [
     {
       title: "Delivery Timeline",
@@ -9,7 +9,7 @@ export const SHIPPING_POLICY = {
     },
     {
       title: "Shipping Charges",
-      body: "Orders above ₹999 qualify for free express shipping. Smaller orders may include a flat shipping fee shown at checkout.",
+      body: "All orders qualify for free express shipping. There is no cost for delivery at checkout.",
     },
     {
       title: "Bulk & Tin Orders",

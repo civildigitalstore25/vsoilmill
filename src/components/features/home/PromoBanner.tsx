@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { LAYOUT } from "@/constants/layout";
 import { ROUTES } from "@/constants/routes";
-import { FREE_SHIPPING_THRESHOLD } from "@/constants/seo";
 
 export function PromoBanner() {
   const reduce = useReducedMotion();
@@ -25,8 +24,7 @@ export function PromoBanner() {
             Pure oils, delivered with care
           </h2>
           <p className="mt-3 text-primary-foreground/85">
-            Free express shipping across India on orders above ₹
-            {FREE_SHIPPING_THRESHOLD}
+            Free express shipping across India on all orders — no delivery cost
           </p>
           <Button size="lg" variant="accent" className="mt-6" asChild>
             <Link href={ROUTES.SHOP}>Shop Now</Link>

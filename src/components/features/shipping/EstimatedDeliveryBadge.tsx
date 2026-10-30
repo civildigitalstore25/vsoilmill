@@ -194,7 +194,7 @@ export function EstimatedDeliveryBadge({
                 .{" "}
               </>
             ) : null}
-            Dispatched within 24–48 hours directly from our Madurai mill. Free shipping on orders above ₹999.
+            Dispatched within 24–48 hours directly from our Madurai mill. Free shipping on all orders — no delivery cost.
           </p>
         </div>
       </div>

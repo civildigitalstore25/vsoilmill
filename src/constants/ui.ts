@@ -1,5 +1,3 @@
-import { FREE_SHIPPING_THRESHOLD } from "@/constants/seo";
-
 export const UI = {
   brand: "VS OilMill",
   phoneDisplay: "+91 84387 75451",
@@ -13,7 +11,7 @@ export const UI = {
   mapEmbedUrl:
     "https://maps.google.com/maps?q=9.9188687,78.1542067&hl=en&z=17&output=embed",
   workingHours: "Mon – Sun: 8:00 AM – 8:30 PM",
-  announcement: `Free Express Shipping Across India on Orders Above ₹${FREE_SHIPPING_THRESHOLD}`,
+  announcement: "Free Delivery on All Orders — There is No Cost for Delivery",
   since: "Since 2020 · Madurai, Tamil Nadu",
   trustFamilies: "12,000+",
   trustYears: "38+",
