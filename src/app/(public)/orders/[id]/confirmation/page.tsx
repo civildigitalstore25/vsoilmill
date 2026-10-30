@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { PhonePeStatusSync } from "@/components/features/orders/PhonePeStatusSync";
+import { EstimatedDeliveryBadge } from "@/components/features/shipping/EstimatedDeliveryBadge";
 import { Button } from "@/components/ui/button";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { USER_ROLES } from "@/constants/auth";
@@ -94,17 +95,25 @@ export default async function OrderConfirmationPage({ params }: Props) {
           : "pending payment confirmation"}
         .
       </p>
-      <div className="mt-8 rounded-xl border border-border bg-card p-6 text-left text-sm">
+
+      {/* Prominent Estimated Delivery Card */}
+      <div className="mx-auto mt-8 max-w-xl text-left">
+        <EstimatedDeliveryBadge variant="order" baseDate={data.createdAt} />
+      </div>
+
+      <div className="mx-auto mt-6 max-w-xl rounded-xl border border-border bg-card p-6 text-left text-sm">
         <p className="font-semibold">Ship to</p>
         <p className="mt-1 text-muted">
           {data.shippingAddress.fullName}, {data.shippingAddress.line1},{" "}
           {data.shippingAddress.city}, {data.shippingAddress.state}{" "}
           {data.shippingAddress.pincode}
         </p>
-        <p className="mt-4 font-semibold">
-          Total: {formatInr(data.pricing.total)}
-        </p>
-        <p className="text-muted">Payment: {data.paymentStatus}</p>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-3">
+          <p className="font-semibold">
+            Total: {formatInr(data.pricing.total)}
+          </p>
+          <p className="text-xs text-muted">Payment: {data.paymentStatus}</p>
+        </div>
       </div>
       <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
         <Button asChild>

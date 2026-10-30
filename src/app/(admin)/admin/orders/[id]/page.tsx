@@ -9,6 +9,7 @@ import { ADMIN_ORDERS_COPY } from "@/constants/admin";
 import { ROUTES } from "@/constants/routes";
 import { connectDb } from "@/lib/db/mongoose";
 import { formatAttributionLine } from "@/lib/attribution/labels";
+import { getEstimatedDeliveryRange } from "@/lib/utils/delivery";
 import { formatInr } from "@/lib/utils/format";
 import { OrderModel } from "@/models/Order";
 
@@ -32,6 +33,8 @@ export default async function AdminOrderDetailPage({ params }: Props) {
       : "") ||
     ""
   ).trim();
+
+  const estDelivery = getEstimatedDeliveryRange(data.createdAt);
 
   return (
     <div>
@@ -141,6 +144,14 @@ export default async function AdminOrderDetailPage({ params }: Props) {
           <div className="flex justify-between">
             <span className="text-muted">{ADMIN_ORDERS_COPY.shipping}</span>
             <span>{data.pricing.shipping === 0 ? "FREE" : formatInr(data.pricing.shipping)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted">Estimated Delivery</span>
+            <span className="font-medium text-dark">
+              {data.status?.toUpperCase() === "DELIVERED"
+                ? "Delivered"
+                : `3 to 5 days (${estDelivery.formattedRange})`}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted">GST (5%)</span>

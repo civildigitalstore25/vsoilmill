@@ -86,7 +86,7 @@ export const FAQS: FaqItem[] = [
   {
     id: "delivery-across-india",
     q: "Do you deliver across India?",
-    a: "Yes. We ship pan-India. Orders above ₹999 get free express shipping. Typical delivery is 2–7 business days.",
+    a: "Yes. We ship pan-India. Orders above ₹999 get free express shipping. Estimated delivery typically takes 3 to 5 business days.",
     category: "delivery",
   },
   {

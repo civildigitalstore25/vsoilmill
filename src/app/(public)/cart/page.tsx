@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCartStore } from "@/hooks/useCartStore";
 import { CheckoutButton } from "@/components/features/cart/CheckoutButton";
+import { EstimatedDeliveryBadge } from "@/components/features/shipping/EstimatedDeliveryBadge";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Button } from "@/components/ui/button";
 import { CHECKOUT_COPY } from "@/constants/checkout";
@@ -70,7 +71,10 @@ export default function CartPage() {
           </div>
         ))}
       </div>
-      <div className="mt-8 flex items-center justify-between border-t border-border pt-6">
+      <div className="mt-6">
+        <EstimatedDeliveryBadge variant="cart" />
+      </div>
+      <div className="mt-6 flex items-center justify-between border-t border-border pt-6">
         <p className="text-lg font-semibold">Subtotal: {formatInr(subtotal)}</p>
         <CheckoutButton>{CHECKOUT_COPY.PROCEED}</CheckoutButton>
       </div>

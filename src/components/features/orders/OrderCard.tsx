@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Package, Calendar, ChevronRight, CheckCircle2, Clock, Truck, AlertCircle, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { EstimatedDeliveryBadge } from "@/components/features/shipping/EstimatedDeliveryBadge";
 import { CATALOG_COPY } from "@/constants/catalog";
 import { ROUTES } from "@/constants/routes";
 import { formatInr } from "@/lib/utils/format";
@@ -60,6 +61,9 @@ export function OrderCard({ order }: { order: Order }) {
   const StatusIcon = statusInfo.icon;
 
   const isPaid = order.paymentStatus?.toUpperCase() === "PAID";
+  const isActive =
+    order.status.toUpperCase() !== "DELIVERED" &&
+    order.status.toUpperCase() !== "CANCELLED";
 
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xs transition-all hover:shadow-md hover:border-primary/40">
@@ -154,6 +158,13 @@ export function OrderCard({ order }: { order: Order }) {
           );
         })}
       </div>
+
+      {/* Estimated Delivery strip for active orders */}
+      {isActive ? (
+        <div className="border-t border-border/50 bg-cream/20 px-5 py-2.5">
+          <EstimatedDeliveryBadge variant="card" baseDate={order.createdAt} />
+        </div>
+      ) : null}
 
       {/* Order Card Footer */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border bg-cream/20 px-5 py-4">

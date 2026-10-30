@@ -21,7 +21,7 @@ const FEATURES = [
   {
     icon: Truck,
     title: "Pan-India Delivery",
-    description: "Express shipping in 24–48 hours",
+    description: "3 to 5 days delivery across India",
   },
 ] as const;
 

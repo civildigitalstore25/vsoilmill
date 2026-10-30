@@ -12,6 +12,7 @@ import { OfferCountdown } from "@/components/features/catalog/OfferCountdown";
 import { ProductMediaGallery } from "@/components/features/products/ProductMediaGallery";
 import { ProductDetailTabs } from "@/components/features/products/ProductDetailTabs";
 import { ProductPurchaseActions } from "@/components/features/products/ProductPurchaseActions";
+import { EstimatedDeliveryBadge } from "@/components/features/shipping/EstimatedDeliveryBadge";
 import { QuantityStepper } from "@/components/features/products/QuantityStepper";
 import { WhatsAppIcon } from "@/components/features/products/ProductShareIcons";
 import { CATALOG_COPY } from "@/constants/catalog";
@@ -191,6 +192,10 @@ export function ProductDetailClient({ product }: { product: Product }) {
           variantLabel={variant?.label}
           unitPrice={unitPrice}
         />
+
+        <div className="mt-5">
+          <EstimatedDeliveryBadge variant="product" />
+        </div>
         </div>
       </div>
       <ProductDetailTabs description={product.description} productId={product._id} />

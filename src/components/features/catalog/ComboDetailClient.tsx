@@ -8,6 +8,7 @@ import { ProductShare } from "@/components/features/products/ProductShare";
 import { ProductDetailTabs } from "@/components/features/products/ProductDetailTabs";
 import { OfferCountdown } from "@/components/features/catalog/OfferCountdown";
 import { ProductMediaGallery } from "@/components/features/products/ProductMediaGallery";
+import { EstimatedDeliveryBadge } from "@/components/features/shipping/EstimatedDeliveryBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ASSETS } from "@/constants/assets";
@@ -171,6 +172,9 @@ export function ComboDetailClient({
           >
             {CHECKOUT_COPY.WHATSAPP_CTA}
           </Button>
+          <div className="mt-5">
+            <EstimatedDeliveryBadge variant="product" />
+          </div>
           <div className="mt-4">
             <ProductShare name={name} text={combo.description ?? name} />
           </div>

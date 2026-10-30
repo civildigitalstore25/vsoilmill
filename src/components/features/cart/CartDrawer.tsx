@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { CheckoutButton } from "@/components/features/cart/CheckoutButton";
+import { EstimatedDeliveryBadge } from "@/components/features/shipping/EstimatedDeliveryBadge";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
 import { CHECKOUT_COPY } from "@/constants/checkout";
@@ -121,6 +122,7 @@ export function CartDrawer({
             </div>
 
             <div className="mt-auto space-y-3 border-t border-border pt-4">
+              <EstimatedDeliveryBadge variant="cart" />
               <div className="flex justify-between text-sm font-semibold">
                 <span>Subtotal</span>
                 <span>{formatInr(subtotal)}</span>

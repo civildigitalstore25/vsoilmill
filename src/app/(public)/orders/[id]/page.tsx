@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Package, MapPin, CreditCard, Calendar } from "lucide-react";
 import { OrderDeliveredReviews } from "@/components/features/orders/OrderDeliveredReviews";
+import { EstimatedDeliveryBadge } from "@/components/features/shipping/EstimatedDeliveryBadge";
 import { Button } from "@/components/ui/button";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { ROUTES } from "@/constants/routes";
@@ -77,6 +78,10 @@ export default async function OrderDetailPage({ params }: Props) {
 
       <div className="mt-8 grid gap-8 md:grid-cols-3">
         <div className="space-y-6 md:col-span-2">
+          {!isDelivered ? (
+            <EstimatedDeliveryBadge variant="order" baseDate={data.createdAt} />
+          ) : null}
+
           <div className="rounded-2xl border border-border bg-card p-6 shadow-xs">
             <div className="flex items-center justify-between border-b border-border pb-4">
               <h2 className="font-display text-xl text-dark flex items-center gap-2">
@@ -173,6 +178,12 @@ export default async function OrderDetailPage({ params }: Props) {
                 <span>Shipping Fee</span>
                 <span className="font-medium text-dark">
                   {data.pricing.shipping === 0 ? "FREE" : formatInr(data.pricing.shipping)}
+                </span>
+              </div>
+              <div className="flex justify-between text-muted">
+                <span>Estimated Delivery</span>
+                <span className="font-semibold text-primary">
+                  {isDelivered ? "Delivered" : "3 to 5 Days"}
                 </span>
               </div>
               <div className="flex justify-between text-muted">

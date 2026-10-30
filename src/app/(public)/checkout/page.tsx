@@ -19,6 +19,7 @@ import {
   Ticket,
 } from "lucide-react";
 import { CheckoutSavedAddresses } from "@/components/features/checkout/CheckoutSavedAddresses";
+import { EstimatedDeliveryBadge } from "@/components/features/shipping/EstimatedDeliveryBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -824,6 +825,10 @@ export default function CheckoutPage() {
                 <span className="font-semibold text-primary">FREE</span>
               </div>
               <div className="flex justify-between text-muted">
+                <span>Estimated Delivery</span>
+                <span className="font-semibold text-primary">3 to 5 Days</span>
+              </div>
+              <div className="flex justify-between text-muted">
                 <span>GST (5%)</span>
                 <span className="font-medium text-dark">Included</span>
               </div>
@@ -831,6 +836,10 @@ export default function CheckoutPage() {
                 <span>Total</span>
                 <span className="text-primary">{formatInr(total)}</span>
               </div>
+            </div>
+
+            <div className="mt-5">
+              <EstimatedDeliveryBadge variant="checkout" />
             </div>
 
             {/* Trust Badges matching the Screenshot */}
@@ -849,7 +858,7 @@ export default function CheckoutPage() {
               </div>
               <div className="flex items-center gap-2.5">
                 <Truck className="h-4 w-4 shrink-0 text-primary/80" />
-                <span>Real-time order tracking</span>
+                <span>Pan-India express delivery (3 to 5 days)</span>
               </div>
             </div>
           </aside>

@@ -63,16 +63,17 @@ export async function sendOrderConfirmationEmail(order: OrderEmailLike) {
   const details: EmailDetailRow[] = [
     { label: "Order ID", value: `#${id}` },
     { label: "Payment", value: "Paid" },
+    { label: "Estimated Delivery", value: "3 to 5 business days" },
     { label: "Total", value: `₹${order.pricing?.total ?? 0}` },
     ...itemRows(order),
   ];
-  const text = `Hi ${name},\nYour payment was received. Order #${id} is confirmed.\nTotal: ₹${order.pricing?.total ?? 0}`;
+  const text = `Hi ${name},\nYour payment was received. Order #${id} is confirmed.\nEstimated Delivery: 3 to 5 business days.\nTotal: ₹${order.pricing?.total ?? 0}`;
   const html = renderEmailHtml({
     title: "Order confirmed",
     greeting: name === "there" ? undefined : name,
     paragraphs: [
       "Thank you for shopping with VS OilMill. Your payment was received and your order is confirmed.",
-      "We will email you again when your order ships.",
+      "Estimated delivery: 3 to 5 business days. We will email you again when your order ships with tracking details.",
     ],
     details,
     cta: { label: "View your orders", href: getEmailSiteUrl("/orders") },
@@ -103,6 +104,7 @@ export async function sendAdminNewOrderEmail(order: OrderEmailLike) {
     { label: "Phone", value: addr?.phone ?? "—" },
     { label: "Email", value: addr?.email ?? "—" },
     ...addressRows(order),
+    { label: "Estimated Delivery", value: "3 to 5 business days" },
     { label: "Total", value: `₹${order.pricing?.total ?? 0}` },
     ...itemRows(order),
   ];
@@ -116,6 +118,7 @@ export async function sendAdminNewOrderEmail(order: OrderEmailLike) {
     `State: ${addr?.state ?? "—"}`,
     `Pincode: ${addr?.pincode ?? "—"}`,
     `Country: ${addr?.country ?? "—"}`,
+    `Estimated Delivery: 3 to 5 business days`,
     `Total: ₹${order.pricing?.total ?? 0}`,
   ].join("\n");
   const html = renderEmailHtml({
@@ -154,8 +157,11 @@ export async function sendOrderStatusEmail(
   const details: EmailDetailRow[] = [
     { label: "Order ID", value: `#${id}` },
     { label: "Status", value: status },
-    { label: "Total", value: `₹${order.pricing?.total ?? 0}` },
   ];
+  if (status.toUpperCase() !== "DELIVERED" && status.toUpperCase() !== "CANCELLED") {
+    details.push({ label: "Estimated Delivery", value: "3 to 5 business days" });
+  }
+  details.push({ label: "Total", value: `₹${order.pricing?.total ?? 0}` });
   if (order.trackingNumber) {
     details.push({
       label: "Tracking",
@@ -169,7 +175,7 @@ export async function sendOrderStatusEmail(
     paragraphs: [
       `Your order status has been updated to ${status}.`,
       status === "SHIPPED"
-        ? "Your package is on the way. Track it using the details below when available."
+        ? "Your package is on the way. Estimated delivery is 3 to 5 business days. Track it using the details below when available."
         : "Thank you for choosing VS OilMill.",
     ],
     details,

@@ -5,7 +5,7 @@ export const SHIPPING_POLICY = {
   sections: [
     {
       title: "Delivery Timeline",
-      body: "Most orders are dispatched within 24–48 hours. Delivery typically takes 2–7 business days depending on your location.",
+      body: "Most orders are dispatched within 24–48 hours. Estimated delivery typically takes 3 to 5 business days depending on your location across India.",
     },
     {
       title: "Shipping Charges",
