@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { toast } from "sonner";
 import {
   Send,
@@ -22,6 +22,8 @@ import { UI } from "@/constants/ui";
 
 export function ContactForm() {
   const [loading, setLoading] = useState(false);
+  const startedAt = useRef<number>(Date.now());
+  const [website, setWebsite] = useState("");
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -36,7 +38,7 @@ export function ContactForm() {
       const res = await fetch(API_ENDPOINTS.CONTACT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, website, startedAt: startedAt.current }),
       });
       const json = await res.json();
       if (!res.ok) {
@@ -44,6 +46,7 @@ export function ContactForm() {
       }
       toast.success(json.data?.message ?? EMAIL_COPY.contactThanks);
       setForm({ name: "", email: "", phone: "", message: "" });
+      startedAt.current = Date.now();
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : EMAIL_COPY.contactError,
@@ -114,6 +117,19 @@ export function ContactForm() {
       </div>
 
       <form onSubmit={onSubmit} className="space-y-4">
+        {/* Honeypot: hidden from humans, bots fill it */}
+        <div aria-hidden="true" style={{ position: "absolute", left: "-10000px", width: 1, height: 1, overflow: "hidden" }}>
+          <label htmlFor="contact-website">Website</label>
+          <input
+            id="contact-website"
+            name="website"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
+          />
+        </div>
         <div>
           <Label htmlFor="contact-name" className="text-sm font-medium text-dark">
             {EMAIL_COPY.contactName} <span className="text-destructive">*</span>
