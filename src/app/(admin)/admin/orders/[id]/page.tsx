@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdminOrderDeleteButton } from "@/components/features/admin/AdminOrderDeleteButton";
 import { AdminOrderStatusForm } from "@/components/features/admin/AdminOrderStatusForm";
+import { AdminOrderTrackingCard } from "@/components/features/admin/AdminOrderTrackingCard";
 import { AdminCard, AdminPageHeader } from "@/components/features/admin/AdminUi";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { Button } from "@/components/ui/button";
@@ -103,8 +104,15 @@ export default async function AdminOrderDetailPage({ params }: Props) {
               orderId={data._id}
               currentStatus={data.status}
               currentPaymentStatus={data.paymentStatus}
-              trackingNumber={data.trackingNumber ?? ""}
-              courier={data.courier ?? ""}
+            />
+          </div>
+          <div className="mt-6 border-t border-border pt-5">
+            <AdminOrderTrackingCard
+              orderId={data._id}
+              paymentStatus={data.paymentStatus}
+              trackingNumber={data.trackingNumber ?? undefined}
+              trackingStatus={data.trackingStatus ?? undefined}
+              trackingLastCheckedAt={data.trackingLastCheckedAt ?? undefined}
             />
           </div>
         </AdminCard>

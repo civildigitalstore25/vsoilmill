@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Package, Calendar, ChevronRight, CheckCircle2, Clock, Truck, AlertCircle, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EstimatedDeliveryBadge } from "@/components/features/shipping/EstimatedDeliveryBadge";
+import { OrderTrackingInfo } from "@/components/features/orders/OrderTrackingInfo";
 import { CATALOG_COPY } from "@/constants/catalog";
 import { ROUTES } from "@/constants/routes";
 import { formatInr } from "@/lib/utils/format";
@@ -158,6 +159,16 @@ export function OrderCard({ order }: { order: Order }) {
           );
         })}
       </div>
+
+      {order.trackingNumber ? (
+        <div className="border-t border-border/50 px-5 py-2.5">
+          <OrderTrackingInfo
+            orderId={order._id}
+            trackingNumber={order.trackingNumber}
+            trackingStatus={order.trackingStatus}
+          />
+        </div>
+      ) : null}
 
       {/* Estimated Delivery strip for active orders */}
       {isActive ? (

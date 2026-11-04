@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Package, MapPin, CreditCard, Calendar } from "lucide-react";
 import { OrderDeliveredReviews } from "@/components/features/orders/OrderDeliveredReviews";
+import { OrderTrackingInfo } from "@/components/features/orders/OrderTrackingInfo";
 import { EstimatedDeliveryBadge } from "@/components/features/shipping/EstimatedDeliveryBadge";
 import { Button } from "@/components/ui/button";
 import { PageContainer } from "@/components/layout/PageContainer";
@@ -80,6 +81,16 @@ export default async function OrderDetailPage({ params }: Props) {
         <div className="space-y-6 md:col-span-2">
           {!isDelivered ? (
             <EstimatedDeliveryBadge variant="order" baseDate={data.createdAt} />
+          ) : null}
+
+          {data.trackingNumber ? (
+            <div className="rounded-2xl border border-border bg-card px-6 py-4 shadow-xs">
+              <OrderTrackingInfo
+                orderId={data._id}
+                trackingNumber={data.trackingNumber}
+                trackingStatus={data.trackingStatus}
+              />
+            </div>
           ) : null}
 
           <div className="rounded-2xl border border-border bg-card p-6 shadow-xs">

@@ -25,6 +25,7 @@ const HEADERS = [
   ADMIN_ORDERS_COPY.tableTotal,
   ADMIN_ORDERS_COPY.tableStatus,
   ADMIN_ORDERS_COPY.tablePayment,
+  ADMIN_ORDERS_COPY.tableConsignment,
   ADMIN_ORDERS_COPY.tableActions,
 ] as const;
 
@@ -71,7 +72,7 @@ export function AdminOrdersTable({ orders }: { orders: Order[] }) {
   return (
     <AdminCard className="overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[960px] text-left text-sm">
+        <table className="w-full min-w-[1080px] text-left text-sm">
           <thead className="border-b border-border bg-cream/70">
             <tr className="text-xs uppercase tracking-[0.12em] text-muted">
               {HEADERS.map((header) => (
@@ -142,6 +143,19 @@ export function AdminOrdersTable({ orders }: { orders: Order[] }) {
                       patchOrder(order._id, { paymentStatus })
                     }
                   />
+                </td>
+                <td className="px-5 py-4 whitespace-nowrap">
+                  {order.trackingNumber ? (
+                    <Link
+                      href={ROUTES.ADMIN.TRACKING(order.trackingNumber)}
+                      className="font-mono text-xs text-primary hover:underline"
+                      title={order.trackingStatus ?? undefined}
+                    >
+                      {order.trackingNumber}
+                    </Link>
+                  ) : (
+                    <span className="text-xs text-muted">-</span>
+                  )}
                 </td>
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-2">
