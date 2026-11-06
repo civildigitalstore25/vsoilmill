@@ -75,10 +75,15 @@ const OrderSchema = new Schema(
     stockDecremented: { type: Boolean, default: false },
     trackingNumber: String,
     courier: String,
+    trackingStatus: String,
+    trackingLastCheckedAt: Date,
+    trackingUpdatedAt: Date,
+    shippedAt: Date,
   },
   { timestamps: true },
 );
 
 OrderSchema.index({ "attribution.source": 1 });
+OrderSchema.index({ trackingNumber: 1 }, { sparse: true });
 
 export const OrderModel = models.Order ?? model("Order", OrderSchema);

@@ -83,6 +83,10 @@ export interface Order {
   stockDecremented?: boolean;
   trackingNumber?: string;
   courier?: string;
+  trackingStatus?: string;
+  trackingLastCheckedAt?: string;
+  trackingUpdatedAt?: string;
+  shippedAt?: string;
   createdAt: string;
   updatedAt: string;
 }

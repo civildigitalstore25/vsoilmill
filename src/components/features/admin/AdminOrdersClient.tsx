@@ -8,6 +8,7 @@ import { AdminCreateOrderForm } from "@/components/features/admin/AdminCreateOrd
 import { AdminFormDialog } from "@/components/features/admin/AdminFormDialog";
 import { AdminListControls, AdminListPagination } from "@/components/features/admin/AdminListControls";
 import { AdminOrdersTable } from "@/components/features/admin/AdminOrdersTable";
+import { AdminTrackAnyConsignment } from "@/components/features/admin/AdminTrackAnyConsignment";
 import {
   AdminAddButton,
   AdminCard,
@@ -38,7 +39,7 @@ export function AdminOrdersClient({
           ? (order.userId as { phone?: string }).phone
           : "") ||
         "";
-      return `${order.shippingAddress?.fullName ?? ""} ${phone} ${order.shippingAddress?.city ?? ""} ${order._id}`;
+      return `${order.shippingAddress?.fullName ?? ""} ${phone} ${order.shippingAddress?.city ?? ""} ${order._id} ${order.trackingNumber ?? ""}`;
     },
     [
       {
@@ -143,6 +144,10 @@ export function AdminOrdersClient({
           </div>
         }
       />
+
+      <div className="mb-4">
+        <AdminTrackAnyConsignment />
+      </div>
 
       {orders.length === 0 ? (
         <AdminCard className="px-6 py-16 text-center text-sm text-muted">
