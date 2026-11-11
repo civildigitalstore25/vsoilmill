@@ -2,12 +2,14 @@ import { Button } from "@/components/ui/button";
 import { ProductShare } from "@/components/features/products/ProductShare";
 import { WhatsAppIcon } from "@/components/features/products/ProductShareIcons";
 import { QuantityStepper } from "@/components/features/products/QuantityStepper";
+import { trackAndOpenWhatsApp } from "@/components/shared/TrackedWhatsAppLink";
 import { CATALOG_COPY } from "@/constants/catalog";
 import { CHECKOUT_COPY } from "@/constants/checkout";
 import {
   buildProductWhatsAppMessage,
   buildWhatsAppUrl,
 } from "@/lib/utils/whatsapp";
+import { WhatsAppLeadContext } from "@/types/whatsapp-lead";
 
 export function ProductPurchaseActions({
   available,
@@ -16,6 +18,7 @@ export function ProductPurchaseActions({
   onAdd,
   onBuy,
   onWhatsApp,
+  productId,
   productName,
   shareText,
   variantLabel,
@@ -27,6 +30,7 @@ export function ProductPurchaseActions({
   onAdd: () => void;
   onBuy: () => void;
   onWhatsApp?: () => boolean;
+  productId: string;
   productName: string;
   shareText: string;
   variantLabel?: string;
@@ -52,14 +56,28 @@ export function ProductPurchaseActions({
           variant="whatsapp"
           className="mt-3 w-full flex items-center justify-center gap-2.5 font-semibold text-white bg-[#25D366] hover:bg-[#1ebe57] transition-all shadow-sm hover:shadow-md py-6 rounded-xl text-base"
           onClick={() => {
-            if (onWhatsApp && !onWhatsApp()) return;
-            window.open(
-              buildWhatsAppUrl(
-                buildProductWhatsAppMessage(productName, variantLabel, unitPrice, quantity),
+            trackAndOpenWhatsApp({
+              href: buildWhatsAppUrl(
+                buildProductWhatsAppMessage(
+                  productName,
+                  variantLabel,
+                  unitPrice,
+                  quantity,
+                ),
               ),
-              "_blank",
-              "noopener,noreferrer",
-            );
+              context: WhatsAppLeadContext.PRODUCT,
+              items: [
+                {
+                  productId,
+                  name: productName,
+                  variantLabel,
+                  quantity,
+                  price: unitPrice,
+                },
+              ],
+              estimatedTotal: unitPrice * quantity,
+              onBeforeTrack: onWhatsApp,
+            });
           }}
         >
           <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20 p-1">

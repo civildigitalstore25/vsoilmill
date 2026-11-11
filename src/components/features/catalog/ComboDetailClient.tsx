@@ -19,11 +19,13 @@ import { useCartStore } from "@/hooks/useCartStore";
 import { useRequireLogin } from "@/hooks/useRequireLogin";
 import { VARIANT_AVAILABLE_STOCK } from "@/lib/products/commerce";
 import { formatInr, stripHtml } from "@/lib/utils/format";
+import { trackAndOpenWhatsApp } from "@/components/shared/TrackedWhatsAppLink";
 import {
   buildProductWhatsAppMessage,
   buildWhatsAppUrl,
 } from "@/lib/utils/whatsapp";
 import type { ComboLineDetail, ComboOffer } from "@/types/combo";
+import { WhatsAppLeadContext } from "@/types/whatsapp-lead";
 
 export function ComboDetailClient({
   combo,
@@ -160,14 +162,28 @@ export function ComboDetailClient({
             variant="whatsapp"
             className="mt-3 w-full"
             onClick={() => {
-              if (!requireLogin()) return;
-              window.open(
-                buildWhatsAppUrl(
-                  buildProductWhatsAppMessage(name, summary || CATALOG_COPY.comboChip, combo.price, 1),
+              trackAndOpenWhatsApp({
+                href: buildWhatsAppUrl(
+                  buildProductWhatsAppMessage(
+                    name,
+                    summary || CATALOG_COPY.comboChip,
+                    combo.price,
+                    1,
+                  ),
                 ),
-                "_blank",
-                "noopener,noreferrer",
-              );
+                context: WhatsAppLeadContext.COMBO,
+                items: [
+                  {
+                    productId: combo._id,
+                    name,
+                    variantLabel: summary || CATALOG_COPY.comboChip,
+                    quantity: 1,
+                    price: combo.price,
+                  },
+                ],
+                estimatedTotal: combo.price,
+                onBeforeTrack: requireLogin,
+              });
             }}
           >
             {CHECKOUT_COPY.WHATSAPP_CTA}

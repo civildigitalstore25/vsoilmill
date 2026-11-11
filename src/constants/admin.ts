@@ -22,7 +22,7 @@ export const ADMIN_NAV = [
   {
     href: ROUTES.ADMIN.TRAFFIC,
     label: "Traffic",
-    description: "Campaign sources & UTMs",
+    description: "Campaigns & WhatsApp leads",
     icon: Megaphone,
   },
   {

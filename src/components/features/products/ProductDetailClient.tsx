@@ -12,18 +12,14 @@ import { OfferCountdown } from "@/components/features/catalog/OfferCountdown";
 import { ProductMediaGallery } from "@/components/features/products/ProductMediaGallery";
 import { ProductDetailTabs } from "@/components/features/products/ProductDetailTabs";
 import { ProductPurchaseActions } from "@/components/features/products/ProductPurchaseActions";
+import { ProductWhatsAppFloat } from "@/components/features/products/ProductWhatsAppFloat";
 import { EstimatedDeliveryBadge } from "@/components/features/shipping/EstimatedDeliveryBadge";
 import { QuantityStepper } from "@/components/features/products/QuantityStepper";
-import { WhatsAppIcon } from "@/components/features/products/ProductShareIcons";
 import { CATALOG_COPY } from "@/constants/catalog";
 import { CHECKOUT_COPY } from "@/constants/checkout";
 import { ROUTES } from "@/constants/routes";
 import { useCartStore } from "@/hooks/useCartStore";
 import { useRequireLogin } from "@/hooks/useRequireLogin";
-import {
-  buildProductWhatsAppMessage,
-  buildWhatsAppUrl,
-} from "@/lib/utils/whatsapp";
 import {
   compareAtPrice,
   offerIsLive,
@@ -71,10 +67,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
   }
 
   function addToCart() {
-    if (!available) {
-      toast.error(CATALOG_COPY.outOfStock);
-      return;
-    }
+    if (!available) return toast.error(CATALOG_COPY.outOfStock);
     const payload = buildCartPayload();
     if (!payload) return;
     addItem(payload);
@@ -83,10 +76,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
 
   function buyNow() {
     if (!requireLogin()) return;
-    if (!available) {
-      toast.error(CATALOG_COPY.outOfStock);
-      return;
-    }
+    if (!available) return toast.error(CATALOG_COPY.outOfStock);
     const payload = buildCartPayload();
     if (!payload) return;
     buyNowItem(payload);
@@ -158,13 +148,9 @@ export function ProductDetailClient({ product }: { product: Product }) {
                   {formatInr(unitPrice)}
                 </span>
                 {strikePrice > unitPrice ? (
-                  <span className="text-lg text-muted line-through">
-                    {formatInr(strikePrice)}
-                  </span>
+                  <span className="text-lg text-muted line-through">{formatInr(strikePrice)}</span>
                 ) : null}
-                {!available ? (
-                  <Badge>{CATALOG_COPY.outOfStock}</Badge>
-                ) : null}
+                {!available ? <Badge>{CATALOG_COPY.outOfStock}</Badge> : null}
               </div>
             </div>
             <div className="mb-0.5 lg:hidden">
@@ -187,6 +173,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
           onQuantity={setQuantity}
           onAdd={addToCart}
           onBuy={buyNow}
+          productId={product._id}
           productName={product.name}
           shareText={product.shortDescription || product.description}
           variantLabel={variant?.label}
@@ -199,31 +186,13 @@ export function ProductDetailClient({ product }: { product: Product }) {
         </div>
       </div>
       <ProductDetailTabs description={product.description} productId={product._id} />
-
-      {/* Floating WhatsApp chat icon button at bottom of product view */}
-      <div className="fixed bottom-6 right-6 z-40">
-        <a
-          href={buildWhatsAppUrl(
-            buildProductWhatsAppMessage(
-              product.name,
-              variant?.label ?? "",
-              unitPrice,
-              quantity,
-            ),
-          )}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group flex items-center gap-2.5 rounded-full bg-[#25D366] px-4 py-3 text-white shadow-xl hover:bg-[#1ebe57] hover:shadow-2xl transition-all hover:scale-105"
-          aria-label="Chat with VS OilMill on WhatsApp"
-        >
-          <span className="flex h-6 w-6 items-center justify-center">
-            <WhatsAppIcon className="h-5 w-5 text-white" />
-          </span>
-          <span className="text-sm font-bold hidden sm:inline">
-            Chat on WhatsApp
-          </span>
-        </a>
-      </div>
+      <ProductWhatsAppFloat
+        productId={product._id}
+        productName={product.name}
+        variantLabel={variant?.label}
+        unitPrice={unitPrice}
+        quantity={quantity}
+      />
     </div>
   );
 }

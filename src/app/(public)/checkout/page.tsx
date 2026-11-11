@@ -35,11 +35,13 @@ import { readStoredAttribution } from "@/lib/attribution/storage";
 import { calculatePricing } from "@/lib/orders/pricing";
 import { formatInr } from "@/lib/utils/format";
 import { cn } from "@/lib/utils/cn";
+import { trackAndOpenWhatsApp } from "@/components/shared/TrackedWhatsAppLink";
 import {
   buildCartWhatsAppMessage,
   buildWhatsAppUrl,
 } from "@/lib/utils/whatsapp";
 import type { ShippingAddress } from "@/types/user";
+import { WhatsAppLeadContext } from "@/types/whatsapp-lead";
 
 const EMPTY_ADDRESS: ShippingAddress = {
   fullName: "",
@@ -673,18 +675,25 @@ export default function CheckoutPage() {
                     variant="whatsapp"
                     type="button"
                     className="h-11 w-full gap-2 rounded-xl text-sm font-medium"
-                    asChild
+                    onClick={() => {
+                      trackAndOpenWhatsApp({
+                        href: buildWhatsAppUrl(
+                          buildCartWhatsAppMessage(items, total),
+                        ),
+                        context: WhatsAppLeadContext.CHECKOUT,
+                        items: items.map((item) => ({
+                          productId: item.productId,
+                          name: item.name,
+                          variantLabel: item.variantLabel,
+                          quantity: item.quantity,
+                          price: item.price,
+                        })),
+                        estimatedTotal: total,
+                      });
+                    }}
                   >
-                    <a
-                      href={buildWhatsAppUrl(
-                        buildCartWhatsAppMessage(items, total),
-                      )}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                      {CHECKOUT_COPY.WHATSAPP_CTA}
-                    </a>
+                    <MessageCircle className="h-4 w-4" />
+                    {CHECKOUT_COPY.WHATSAPP_CTA}
                   </Button>
 
                   <Button

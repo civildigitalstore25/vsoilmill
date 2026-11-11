@@ -16,11 +16,13 @@ import { ROUTES } from "@/constants/routes";
 import { CHECKOUT_COPY } from "@/constants/checkout";
 import { useCartStore } from "@/hooks/useCartStore";
 import { useRequireLogin } from "@/hooks/useRequireLogin";
+import { trackAndOpenWhatsApp } from "@/components/shared/TrackedWhatsAppLink";
 import { formatInr } from "@/lib/utils/format";
 import {
   buildCartWhatsAppMessage,
   buildWhatsAppUrl,
 } from "@/lib/utils/whatsapp";
+import { WhatsAppLeadContext } from "@/types/whatsapp-lead";
 
 export function CartDrawer({
   open,
@@ -137,12 +139,21 @@ export function CartDrawer({
                 variant="whatsapp"
                 className="w-full"
                 onClick={() => {
-                  if (!requireLogin()) return;
-                  window.open(
-                    buildWhatsAppUrl(buildCartWhatsAppMessage(items, subtotal)),
-                    "_blank",
-                    "noopener,noreferrer",
-                  );
+                  trackAndOpenWhatsApp({
+                    href: buildWhatsAppUrl(
+                      buildCartWhatsAppMessage(items, subtotal),
+                    ),
+                    context: WhatsAppLeadContext.CART,
+                    items: items.map((item) => ({
+                      productId: item.productId,
+                      name: item.name,
+                      variantLabel: item.variantLabel,
+                      quantity: item.quantity,
+                      price: item.price,
+                    })),
+                    estimatedTotal: subtotal,
+                    onBeforeTrack: requireLogin,
+                  });
                 }}
               >
                 {CHECKOUT_COPY.WHATSAPP_CTA}

@@ -25,6 +25,8 @@ export const API_ENDPOINTS = {
   AUTH_REGISTER: "/api/auth/register",
   CONTACT: "/api/contact",
   ANALYTICS_VISITS: "/api/analytics/visits",
+  ANALYTICS_WHATSAPP_CLICKS: "/api/analytics/whatsapp-clicks",
+  ADMIN_WHATSAPP_CLICK: (id: string) => `/api/admin/whatsapp-clicks/${id}`,
   ADMIN_STATS: "/api/admin/stats",
   ADMIN_USERS: "/api/admin/users",
   ADMIN_USER: (id: string) => `/api/admin/users/${id}`,
