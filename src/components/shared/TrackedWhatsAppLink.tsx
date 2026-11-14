@@ -34,7 +34,11 @@ export function TrackedWhatsAppLink({
       event.preventDefault();
       return;
     }
-    trackWhatsAppClick({ context, items, estimatedTotal, pagePath });
+    try {
+      trackWhatsAppClick({ context, items, estimatedTotal, pagePath });
+    } catch {
+      // Keep the WhatsApp link working even if analytics throws.
+    }
   }
 
   return (
@@ -60,11 +64,15 @@ export function trackAndOpenWhatsApp(options: {
   onBeforeTrack?: () => boolean;
 }): void {
   if (options.onBeforeTrack && !options.onBeforeTrack()) return;
-  trackWhatsAppClick({
-    context: options.context,
-    items: options.items,
-    estimatedTotal: options.estimatedTotal,
-    pagePath: options.pagePath,
-  });
+  try {
+    trackWhatsAppClick({
+      context: options.context,
+      items: options.items,
+      estimatedTotal: options.estimatedTotal,
+      pagePath: options.pagePath,
+    });
+  } catch {
+    // Never block opening WhatsApp if tracking fails.
+  }
   window.open(options.href, "_blank", "noopener,noreferrer");
 }

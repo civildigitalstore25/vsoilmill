@@ -16,6 +16,22 @@ export type TrackWhatsAppClickInput = {
   estimatedTotal: number;
 };
 
+function safeSessionKey(): string | undefined {
+  try {
+    return getOrCreateSessionKey();
+  } catch {
+    return undefined;
+  }
+}
+
+function safeAttribution(): WhatsAppClickInput["attribution"] {
+  try {
+    return readStoredAttribution() ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function trackWhatsAppClick(input: TrackWhatsAppClickInput): void {
   if (typeof window === "undefined") return;
   if (!input.items.length) return;
@@ -25,14 +41,30 @@ export function trackWhatsAppClick(input: TrackWhatsAppClickInput): void {
     pagePath: input.pagePath || window.location.pathname,
     items: input.items,
     estimatedTotal: input.estimatedTotal,
-    sessionKey: getOrCreateSessionKey(),
-    attribution: readStoredAttribution() ?? undefined,
+    sessionKey: safeSessionKey(),
+    attribution: safeAttribution(),
   };
 
-  void fetch(API_ENDPOINTS.ANALYTICS_WHATSAPP_CLICKS, {
+  const body = JSON.stringify(payload);
+  const url = API_ENDPOINTS.ANALYTICS_WHATSAPP_CLICKS;
+
+  // sendBeacon survives WhatsApp app-switch better than a normal fetch.
+  try {
+    if (typeof navigator.sendBeacon === "function") {
+      const queued = navigator.sendBeacon(
+        url,
+        new Blob([body], { type: "application/json" }),
+      );
+      if (queued) return;
+    }
+  } catch {
+    // fall through to fetch
+  }
+
+  void fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    body,
     keepalive: true,
   }).catch(() => undefined);
 }

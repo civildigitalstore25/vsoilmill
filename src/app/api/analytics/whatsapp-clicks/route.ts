@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { ATTRIBUTION_LIMITS } from "@/constants/attribution";
@@ -63,7 +64,23 @@ export async function POST(request: Request) {
       }
     }
 
-    const session = await auth();
+    let userId: string | undefined;
+    let userName: string | undefined;
+    let userEmail: string | undefined;
+    try {
+      const session = await auth();
+      if (
+        session?.user?.id &&
+        mongoose.Types.ObjectId.isValid(session.user.id)
+      ) {
+        userId = session.user.id;
+        userName = session.user.name || undefined;
+        userEmail = session.user.email || undefined;
+      }
+    } catch {
+      // Still record the click as a guest if auth fails.
+    }
+
     const attribution = normalizeAttribution(parsed.data.attribution);
 
     await WhatsAppClickModel.create({
@@ -74,13 +91,7 @@ export async function POST(request: Request) {
       estimatedTotal: parsed.data.estimatedTotal,
       sessionKey: sessionKey || undefined,
       ...(attribution ? { attribution } : {}),
-      ...(session?.user?.id
-        ? {
-            userId: session.user.id,
-            userName: session.user.name || undefined,
-            userEmail: session.user.email || undefined,
-          }
-        : {}),
+      ...(userId ? { userId, userName, userEmail } : {}),
     });
 
     return NextResponse.json({ data: { ok: true } });
