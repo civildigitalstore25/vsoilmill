@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { PageContainer } from "@/components/layout/PageContainer";
-import { FOOTER_POLICY_LINKS, NAV_LINKS, UI } from "@/constants/ui";
+import { DEVELOPER_CREDIT, FOOTER_POLICY_LINKS, NAV_LINKS, UI } from "@/constants/ui";
 import { ASSETS } from "@/constants/assets";
 import { ROUTES } from "@/constants/routes";
 import { SocialLinks } from "@/components/common/SocialLinks";
@@ -117,9 +117,22 @@ export function Footer() {
       {/* Bottom Bar: Copyright & Quick Social Icons */}
       <div className="border-t border-cream/10">
         <PageContainer className="flex flex-col items-center justify-between gap-3 py-3 text-center text-[0.65rem] text-cream/60 sm:flex-row sm:py-4 sm:text-xs">
-          <span>
-            © {new Date().getFullYear()} {UI.brand}. All rights reserved. Traditional Mara Chekku Mills, Madurai.
-          </span>
+          <div className="space-y-1">
+            <span className="block">
+              © {new Date().getFullYear()} {UI.brand}. All rights reserved. Traditional Mara Chekku Mills, Madurai.
+            </span>
+            <span className="block">
+              {DEVELOPER_CREDIT.prefix}{" "}
+              <a
+                href={DEVELOPER_CREDIT.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-accent hover:underline"
+              >
+                {DEVELOPER_CREDIT.name}
+              </a>
+            </span>
+          </div>
           <div className="flex items-center gap-3">
             <span className="text-[11px] text-cream/40">Connect:</span>
             <SocialLinks variant="icons" iconClassName="h-3.5 w-3.5" className="gap-1.5" />

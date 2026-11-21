@@ -1,3 +1,9 @@
+export const DEVELOPER_CREDIT = {
+  prefix: "Design and development by",
+  name: "Tom Scope Digital Marketing",
+  href: "https://tomscope.com/",
+} as const;
+
 export const UI = {
   brand: "VS OilMill",
   phoneDisplay: "+91 84387 75451",
