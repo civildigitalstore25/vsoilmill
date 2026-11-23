@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { ASSETS } from "@/constants/assets";
 import {
   MANUAL_SHIPMENT_COPY,
   MANUAL_SHIPMENT_LIMITS,
@@ -8,13 +7,16 @@ import {
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { connectDb } from "@/lib/db/mongoose";
 import { mapManualListRow } from "@/lib/manual-shipments/map";
+import {
+  resolveManualLineItems,
+  sumManualLineItems,
+} from "@/lib/manual-shipments/resolve-items";
 import { createPublicTrackToken } from "@/lib/manual-shipments/token";
 import {
   normalizeConsignment,
   ST_COURIER_NAME,
 } from "@/lib/shipping/st-courier";
 import { ManualShipmentModel } from "@/models/ManualShipment";
-import { ProductModel } from "@/models/Product";
 import { ManualShipmentStatus } from "@/types/manual-shipment";
 
 const itemSchema = z.object({
@@ -79,59 +81,14 @@ export async function POST(request: Request) {
     }
 
     await connectDb();
-    const lineItems = [];
-
-    for (const item of parsed.data.items) {
-      if (item.isCustom || !item.productId) {
-        lineItems.push({
-          name: item.name,
-          variantLabel: item.variantLabel,
-          price: item.price,
-          quantity: item.quantity,
-          isCustom: true,
-          image: ASSETS.PLACEHOLDER_PRODUCT,
-        });
-        continue;
-      }
-
-      const product = (await ProductModel.findById(item.productId).lean()) as {
-        _id: unknown;
-        name?: string;
-        images?: string[];
-        variants?: Array<{ _id: unknown; label: string; price: number }>;
-      } | null;
-      if (!product?.name) {
-        return NextResponse.json(
-          { error: MANUAL_SHIPMENT_COPY.invalid },
-          { status: 400 },
-        );
-      }
-      const variant = (product.variants ?? []).find(
-        (entry) => String(entry._id) === item.variantId,
+    const lineItems = await resolveManualLineItems(parsed.data.items);
+    if ("error" in lineItems) {
+      return NextResponse.json(
+        { error: MANUAL_SHIPMENT_COPY.invalid },
+        { status: 400 },
       );
-      if (!variant) {
-        return NextResponse.json(
-          { error: MANUAL_SHIPMENT_COPY.invalid },
-          { status: 400 },
-        );
-      }
-      lineItems.push({
-        productId: product._id,
-        variantId: String(variant._id),
-        name: product.name,
-        variantLabel: variant.label,
-        image: product.images?.[0] ?? ASSETS.PLACEHOLDER_PRODUCT,
-        price: item.price >= 0 ? item.price : variant.price,
-        quantity: item.quantity,
-        isCustom: false,
-      });
     }
-
-    const summed = lineItems.reduce(
-      (sum, line) => sum + line.price * line.quantity,
-      0,
-    );
-    const total = parsed.data.totalOverride ?? summed;
+    const total = parsed.data.totalOverride ?? sumManualLineItems(lineItems);
     const rawAwb = parsed.data.trackingNumber?.trim() || "";
     if (rawAwb && !normalizeConsignment(rawAwb)) {
       return NextResponse.json(

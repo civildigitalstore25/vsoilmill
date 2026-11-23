@@ -1,5 +1,6 @@
 "use client";
 
+import { Pencil } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -159,9 +160,19 @@ export function AdminOrdersTable({ orders }: { orders: Order[] }) {
                 </td>
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-2">
-                    <Button size="sm" variant="outline" asChild>
-                      <Link href={ROUTES.ADMIN.ORDER_DETAIL(order._id)}>
-                        {ADMIN_ORDERS_COPY.view}
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="h-9 w-9 rounded-xl p-0"
+                      asChild
+                    >
+                      <Link
+                        href={ROUTES.ADMIN.ORDER_DETAIL(order._id)}
+                        title={ADMIN_ORDERS_COPY.editOrder}
+                        aria-label={ADMIN_ORDERS_COPY.editOrder}
+                      >
+                        <Pencil className="h-4 w-4" />
                       </Link>
                     </Button>
                     <Button

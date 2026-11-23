@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { AdminCreateOrderForm } from "@/components/features/admin/AdminCreateOrderForm";
 import { AdminFormDialog } from "@/components/features/admin/AdminFormDialog";
 import { AdminListControls, AdminListPagination } from "@/components/features/admin/AdminListControls";
+import { AdminOrdersStats } from "@/components/features/admin/AdminOrdersStats";
 import { AdminOrdersTable } from "@/components/features/admin/AdminOrdersTable";
 import { AdminTrackAnyConsignment } from "@/components/features/admin/AdminTrackAnyConsignment";
 import {
@@ -144,6 +145,8 @@ export function AdminOrdersClient({
           </div>
         }
       />
+
+      <AdminOrdersStats orders={orders} />
 
       <div className="mb-4">
         <AdminTrackAnyConsignment />

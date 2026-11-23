@@ -9,16 +9,43 @@ import {
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { connectDb } from "@/lib/db/mongoose";
 import {
+  resolveManualLineItems,
+  sumManualLineItems,
+} from "@/lib/manual-shipments/resolve-items";
+import {
   normalizeConsignment,
   ST_COURIER_NAME,
 } from "@/lib/shipping/st-courier";
 import { ManualShipmentModel } from "@/models/ManualShipment";
 import { ManualShipmentStatus } from "@/types/manual-shipment";
 
+const itemSchema = z.object({
+  productId: z.string().optional(),
+  variantId: z.string().optional(),
+  name: z.string().trim().min(1).max(MANUAL_SHIPMENT_LIMITS.maxNameLength),
+  variantLabel: z.string().max(MANUAL_SHIPMENT_LIMITS.maxNameLength).optional(),
+  price: z.number().min(0),
+  quantity: z.number().int().positive().max(999),
+  isCustom: z.boolean().optional(),
+});
+
 const patchSchema = z.object({
   trackingNumber: z.string().trim().optional(),
   status: z.enum(MANUAL_SHIPMENT_STATUSES).optional(),
   notes: z.string().max(MANUAL_SHIPMENT_LIMITS.maxNotesLength).optional(),
+  customer: z
+    .object({
+      name: z.string().trim().min(2).max(MANUAL_SHIPMENT_LIMITS.maxNameLength),
+      phone: z.string().trim().min(MANUAL_SHIPMENT_LIMITS.phoneMin),
+      email: z.string().email().optional().or(z.literal("")),
+    })
+    .optional(),
+  items: z
+    .array(itemSchema)
+    .min(1)
+    .max(MANUAL_SHIPMENT_LIMITS.maxItems)
+    .optional(),
+  totalOverride: z.number().min(0).optional(),
 });
 
 type Props = { params: Promise<{ id: string }> };
@@ -86,6 +113,30 @@ export async function PATCH(request: Request, { params }: Props) {
         { error: MANUAL_SHIPMENT_COPY.notFound },
         { status: 404 },
       );
+    }
+
+    if (parsed.data.customer) {
+      shipment.customer = {
+        name: parsed.data.customer.name,
+        phone: parsed.data.customer.phone.replace(/\D/g, ""),
+        email: parsed.data.customer.email || undefined,
+      };
+    }
+
+    if (parsed.data.items) {
+      const lineItems = await resolveManualLineItems(parsed.data.items);
+      if ("error" in lineItems) {
+        return NextResponse.json(
+          { error: MANUAL_SHIPMENT_COPY.invalid },
+          { status: 400 },
+        );
+      }
+      shipment.items = lineItems;
+      shipment.pricing = {
+        total: parsed.data.totalOverride ?? sumManualLineItems(lineItems),
+      };
+    } else if (parsed.data.totalOverride !== undefined) {
+      shipment.pricing = { total: parsed.data.totalOverride };
     }
 
     if (parsed.data.notes !== undefined) {

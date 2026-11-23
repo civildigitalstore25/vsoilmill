@@ -1,11 +1,13 @@
 "use client";
 
+import { Pencil } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { AdminCard, AdminPageHeader } from "@/components/features/admin/AdminUi";
+import { AdminManualOrderForm } from "@/components/features/admin/manual-orders/AdminManualOrderForm";
 import { ManualOrderShareActions } from "@/components/features/admin/manual-orders/ManualOrderShareActions";
+import { AdminCard, AdminPageHeader } from "@/components/features/admin/AdminUi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,13 +17,17 @@ import { ROUTES } from "@/constants/routes";
 import { shortManualId } from "@/lib/manual-shipments/token";
 import { formatInr, formatInrDateTime } from "@/lib/utils/format";
 import type { ManualShipment } from "@/types/manual-shipment";
+import type { AdminProductOption } from "@/types/order";
 
 export function AdminManualOrderDetail({
   shipment,
+  products,
 }: {
   shipment: ManualShipment;
+  products: AdminProductOption[];
 }) {
   const router = useRouter();
+  const [editing, setEditing] = useState(false);
   const [awb, setAwb] = useState(shipment.trackingNumber ?? "");
   const [busy, setBusy] = useState(false);
 
@@ -54,84 +60,117 @@ export function AdminManualOrderDetail({
         title={`${MANUAL_SHIPMENT_COPY.detailTitle} #${shortManualId(shipment._id)}`}
         description={formatInrDateTime(shipment.createdAt)}
         actions={
-          <Button variant="outline" asChild>
-            <Link href={ROUTES.ADMIN.MANUAL_ORDERS}>Back</Link>
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            {!editing ? (
+              <Button type="button" variant="outline" onClick={() => setEditing(true)}>
+                <Pencil className="mr-2 h-4 w-4" />
+                {MANUAL_SHIPMENT_COPY.editOrder}
+              </Button>
+            ) : null}
+            <Button variant="outline" asChild>
+              <Link href={ROUTES.ADMIN.MANUAL_ORDERS}>Back</Link>
+            </Button>
+          </div>
         }
       />
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <AdminCard className="space-y-4 p-6">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted">Customer</p>
-            <p className="mt-1 font-semibold text-dark">{shipment.customer.name}</p>
-            <p className="text-sm text-muted">{shipment.customer.phone}</p>
-            {shipment.customer.email ? (
-              <p className="text-sm text-muted">{shipment.customer.email}</p>
-            ) : null}
-          </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted">
-              {MANUAL_SHIPMENT_COPY.items}
-            </p>
-            <ul className="mt-2 space-y-1 text-sm text-dark">
-              {shipment.items.map((item, index) => (
-                <li key={`${item.name}-${index}`}>
-                  {item.name}
-                  {item.variantLabel ? ` (${item.variantLabel})` : ""} × {item.quantity} —{" "}
-                  {formatInr(item.price * item.quantity)}
-                </li>
-              ))}
-            </ul>
-            <p className="mt-3 font-bold text-dark">
-              {MANUAL_SHIPMENT_COPY.total}: {formatInr(shipment.pricing.total)}
-            </p>
-          </div>
-          <p className="text-xs font-semibold uppercase text-muted">Status: {shipment.status}</p>
+      {editing ? (
+        <AdminCard className="p-6">
+          <AdminManualOrderForm
+            key={shipment.updatedAt}
+            products={products}
+            shipment={shipment}
+            onCancel={() => setEditing(false)}
+            onSaved={() => setEditing(false)}
+          />
         </AdminCard>
-
-        <AdminCard className="space-y-4 p-6">
-          <div>
-            <Label htmlFor="detail-awb">{MANUAL_SHIPMENT_COPY.awb}</Label>
-            <Input
-              id="detail-awb"
-              className="mt-1.5 font-mono"
-              value={awb}
-              onChange={(e) => setAwb(e.target.value)}
-              placeholder="58240292331"
-            />
-            <p className="mt-1 text-xs text-muted">{MANUAL_SHIPMENT_COPY.awbHint}</p>
-            <Button className="mt-3" type="button" disabled={busy} onClick={saveAwb}>
-              {MANUAL_SHIPMENT_COPY.saveAwb}
-            </Button>
-          </div>
-
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted">
-              {MANUAL_SHIPMENT_COPY.publicLink}
-            </p>
-            <p className="mt-1 break-all font-mono text-xs text-muted">
-              {ROUTES.PUBLIC_TRACK(shipment.publicTrackToken)}
-            </p>
-            <div className="mt-3">
-              <ManualOrderShareActions
-                id={shipment._id}
-                token={shipment.publicTrackToken}
-                customerName={shipment.customer.name}
-                phone={shipment.customer.phone}
-              />
+      ) : (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <AdminCard className="space-y-4 p-6">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+                Customer
+              </p>
+              <p className="mt-1 font-semibold text-dark">{shipment.customer.name}</p>
+              <p className="text-sm text-muted">{shipment.customer.phone}</p>
+              {shipment.customer.email ? (
+                <p className="text-sm text-muted">{shipment.customer.email}</p>
+              ) : null}
             </div>
-          </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+                {MANUAL_SHIPMENT_COPY.items}
+              </p>
+              <ul className="mt-2 space-y-1 text-sm text-dark">
+                {shipment.items.map((item, index) => (
+                  <li key={`${item.name}-${index}`}>
+                    {item.name}
+                    {item.variantLabel ? ` (${item.variantLabel})` : ""} ×{" "}
+                    {item.quantity} — {formatInr(item.price * item.quantity)}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 font-bold text-dark">
+                {MANUAL_SHIPMENT_COPY.total}: {formatInr(shipment.pricing.total)}
+              </p>
+            </div>
+            {shipment.notes ? (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+                  {MANUAL_SHIPMENT_COPY.notes}
+                </p>
+                <p className="mt-1 text-sm text-dark">{shipment.notes}</p>
+              </div>
+            ) : null}
+            <p className="text-xs font-semibold uppercase text-muted">
+              Status: {shipment.status}
+            </p>
+          </AdminCard>
 
-          {shipment.trackingNumber ? (
-            <Button variant="outline" asChild>
-              <Link href={ROUTES.PUBLIC_TRACK(shipment.publicTrackToken)} target="_blank">
-                Open public track page
-              </Link>
-            </Button>
-          ) : null}
-        </AdminCard>
-      </div>
+          <AdminCard className="space-y-4 p-6">
+            <div>
+              <Label htmlFor="detail-awb">{MANUAL_SHIPMENT_COPY.awb}</Label>
+              <Input
+                id="detail-awb"
+                className="mt-1.5 font-mono"
+                value={awb}
+                onChange={(e) => setAwb(e.target.value)}
+                placeholder="58240292331"
+              />
+              <p className="mt-1 text-xs text-muted">{MANUAL_SHIPMENT_COPY.awbHint}</p>
+              <Button className="mt-3" type="button" disabled={busy} onClick={saveAwb}>
+                {MANUAL_SHIPMENT_COPY.saveAwb}
+              </Button>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+                {MANUAL_SHIPMENT_COPY.publicLink}
+              </p>
+              <p className="mt-1 break-all font-mono text-xs text-muted">
+                {ROUTES.PUBLIC_TRACK(shipment.publicTrackToken)}
+              </p>
+              <div className="mt-3">
+                <ManualOrderShareActions
+                  id={shipment._id}
+                  token={shipment.publicTrackToken}
+                  customerName={shipment.customer.name}
+                  phone={shipment.customer.phone}
+                  showEdit={false}
+                />
+              </div>
+            </div>
+
+            {shipment.trackingNumber ? (
+              <Button variant="outline" asChild>
+                <Link href={ROUTES.PUBLIC_TRACK(shipment.publicTrackToken)} target="_blank">
+                  Open public track page
+                </Link>
+              </Button>
+            ) : null}
+          </AdminCard>
+        </div>
+      )}
     </div>
   );
 }
