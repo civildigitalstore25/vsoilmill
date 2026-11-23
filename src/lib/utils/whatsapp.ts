@@ -1,9 +1,12 @@
 import { UI } from "@/constants/ui";
 import type { CartItem } from "@/types/cart";
 
-export function buildWhatsAppUrl(message: string): string {
+export function buildWhatsAppUrl(message: string, phone?: string): string {
   const encoded = encodeURIComponent(message);
-  return `https://wa.me/${UI.whatsappNumber}?text=${encoded}`;
+  const digits = (phone ?? UI.whatsappNumber).replace(/\D/g, "");
+  const withCountry =
+    digits.length === 10 ? `91${digits}` : digits;
+  return `https://wa.me/${withCountry}?text=${encoded}`;
 }
 
 export function buildProductWhatsAppMessage(

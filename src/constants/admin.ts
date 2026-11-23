@@ -1,4 +1,5 @@
 import {
+  ClipboardList,
   FolderTree,
   Images,
   LayoutDashboard,
@@ -10,6 +11,7 @@ import {
   Users,
   Ticket,
 } from "lucide-react";
+import { MANUAL_SHIPMENT_COPY } from "@/constants/manual-shipments";
 import { ROUTES } from "@/constants/routes";
 
 export const ADMIN_NAV = [
@@ -54,6 +56,12 @@ export const ADMIN_NAV = [
     label: "Orders",
     description: "Fulfillment",
     icon: ShoppingBag,
+  },
+  {
+    href: ROUTES.ADMIN.MANUAL_ORDERS,
+    label: MANUAL_SHIPMENT_COPY.navLabel,
+    description: MANUAL_SHIPMENT_COPY.navHint,
+    icon: ClipboardList,
   },
   {
     href: ROUTES.ADMIN.COUPONS,

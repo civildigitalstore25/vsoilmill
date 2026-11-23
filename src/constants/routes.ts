@@ -13,6 +13,7 @@ export const ROUTES = {
   ORDER_DETAIL: (id: string) => `/orders/${id}`,
   ORDER_CONFIRMATION: (id: string) => `/orders/${id}/confirmation`,
   ORDER_TRACKING: (id: string) => `/orders/${id}/tracking`,
+  PUBLIC_TRACK: (token: string) => `/track/${token}`,
   PROFILE: "/profile",
   PROFILE_ORDERS: "/profile?tab=orders",
   LOGIN: "/login",
@@ -42,6 +43,9 @@ export const ROUTES = {
     CATEGORIES: "/admin/categories",
     ORDERS: "/admin/orders",
     ORDER_DETAIL: (id: string) => `/admin/orders/${id}`,
+    MANUAL_ORDERS: "/admin/manual-orders",
+    MANUAL_ORDER_NEW: "/admin/manual-orders/new",
+    MANUAL_ORDER_DETAIL: (id: string) => `/admin/manual-orders/${id}`,
     TRACKING: (awb?: string) =>
       awb ? `/admin/tracking?awb=${encodeURIComponent(awb)}` : "/admin/tracking",
     USERS: "/admin/users",
