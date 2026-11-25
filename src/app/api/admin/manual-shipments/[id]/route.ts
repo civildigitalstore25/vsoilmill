@@ -1,17 +1,13 @@
 import { NextResponse } from "next/server";
 import { isValidObjectId } from "mongoose";
-import { z } from "zod";
-import {
-  MANUAL_SHIPMENT_COPY,
-  MANUAL_SHIPMENT_LIMITS,
-  MANUAL_SHIPMENT_STATUSES,
-} from "@/constants/manual-shipments";
+import { MANUAL_SHIPMENT_COPY } from "@/constants/manual-shipments";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { connectDb } from "@/lib/db/mongoose";
 import {
   resolveManualLineItems,
   sumManualLineItems,
 } from "@/lib/manual-shipments/resolve-items";
+import { manualShipmentPatchSchema } from "@/lib/manual-shipments/schemas";
 import {
   normalizeConsignment,
   ST_COURIER_NAME,
@@ -19,36 +15,14 @@ import {
 import { ManualShipmentModel } from "@/models/ManualShipment";
 import { ManualShipmentStatus } from "@/types/manual-shipment";
 
-const itemSchema = z.object({
-  productId: z.string().optional(),
-  variantId: z.string().optional(),
-  name: z.string().trim().min(1).max(MANUAL_SHIPMENT_LIMITS.maxNameLength),
-  variantLabel: z.string().max(MANUAL_SHIPMENT_LIMITS.maxNameLength).optional(),
-  price: z.number().min(0),
-  quantity: z.number().int().positive().max(999),
-  isCustom: z.boolean().optional(),
-});
-
-const patchSchema = z.object({
-  trackingNumber: z.string().trim().optional(),
-  status: z.enum(MANUAL_SHIPMENT_STATUSES).optional(),
-  notes: z.string().max(MANUAL_SHIPMENT_LIMITS.maxNotesLength).optional(),
-  customer: z
-    .object({
-      name: z.string().trim().min(2).max(MANUAL_SHIPMENT_LIMITS.maxNameLength),
-      phone: z.string().trim().min(MANUAL_SHIPMENT_LIMITS.phoneMin),
-      email: z.string().email().optional().or(z.literal("")),
-    })
-    .optional(),
-  items: z
-    .array(itemSchema)
-    .min(1)
-    .max(MANUAL_SHIPMENT_LIMITS.maxItems)
-    .optional(),
-  totalOverride: z.number().min(0).optional(),
-});
-
 type Props = { params: Promise<{ id: string }> };
+
+function invalidId() {
+  return NextResponse.json(
+    { error: MANUAL_SHIPMENT_COPY.notFound },
+    { status: 404 },
+  );
+}
 
 export async function GET(_request: Request, { params }: Props) {
   const admin = await requireAdmin();
@@ -56,20 +30,10 @@ export async function GET(_request: Request, { params }: Props) {
 
   try {
     const { id } = await params;
-    if (!isValidObjectId(id)) {
-      return NextResponse.json(
-        { error: MANUAL_SHIPMENT_COPY.notFound },
-        { status: 404 },
-      );
-    }
+    if (!isValidObjectId(id)) return invalidId();
     await connectDb();
     const shipment = await ManualShipmentModel.findById(id).lean();
-    if (!shipment || Array.isArray(shipment)) {
-      return NextResponse.json(
-        { error: MANUAL_SHIPMENT_COPY.notFound },
-        { status: 404 },
-      );
-    }
+    if (!shipment || Array.isArray(shipment)) return invalidId();
     return NextResponse.json({
       data: JSON.parse(JSON.stringify(shipment)),
     });
@@ -92,13 +56,8 @@ export async function PATCH(request: Request, { params }: Props) {
 
   try {
     const { id } = await params;
-    if (!isValidObjectId(id)) {
-      return NextResponse.json(
-        { error: MANUAL_SHIPMENT_COPY.notFound },
-        { status: 404 },
-      );
-    }
-    const parsed = patchSchema.safeParse(await request.json());
+    if (!isValidObjectId(id)) return invalidId();
+    const parsed = manualShipmentPatchSchema.safeParse(await request.json());
     if (!parsed.success) {
       return NextResponse.json(
         { error: MANUAL_SHIPMENT_COPY.invalid },
@@ -108,12 +67,7 @@ export async function PATCH(request: Request, { params }: Props) {
 
     await connectDb();
     const shipment = await ManualShipmentModel.findById(id);
-    if (!shipment) {
-      return NextResponse.json(
-        { error: MANUAL_SHIPMENT_COPY.notFound },
-        { status: 404 },
-      );
-    }
+    if (!shipment) return invalidId();
 
     if (parsed.data.customer) {
       shipment.customer = {
@@ -139,12 +93,9 @@ export async function PATCH(request: Request, { params }: Props) {
       shipment.pricing = { total: parsed.data.totalOverride };
     }
 
-    if (parsed.data.notes !== undefined) {
-      shipment.notes = parsed.data.notes;
-    }
-    if (parsed.data.status) {
-      shipment.status = parsed.data.status;
-    }
+    if (parsed.data.notes !== undefined) shipment.notes = parsed.data.notes;
+    if (parsed.data.status) shipment.status = parsed.data.status;
+
     if (parsed.data.trackingNumber !== undefined) {
       const raw = parsed.data.trackingNumber.trim();
       if (raw) {
@@ -180,6 +131,30 @@ export async function PATCH(request: Request, { params }: Props) {
           error instanceof Error
             ? error.message
             : MANUAL_SHIPMENT_COPY.updateFailed,
+      },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(_request: Request, { params }: Props) {
+  const admin = await requireAdmin();
+  if (!admin.ok) return admin.response;
+
+  try {
+    const { id } = await params;
+    if (!isValidObjectId(id)) return invalidId();
+    await connectDb();
+    const deleted = await ManualShipmentModel.findByIdAndDelete(id);
+    if (!deleted) return invalidId();
+    return NextResponse.json({ data: { id } });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : MANUAL_SHIPMENT_COPY.deleteFailed,
       },
       { status: 500 },
     );

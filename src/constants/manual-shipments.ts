@@ -47,6 +47,11 @@ export const MANUAL_SHIPMENT_COPY = {
   createFailed: "Could not create manual order",
   updated: "Manual order updated",
   updateFailed: "Could not update manual order",
+  deleted: "Manual order deleted",
+  deleteFailed: "Could not delete manual order",
+  deleteOrder: "Delete order",
+  confirmDelete:
+    "Delete this manual order? The public track link will stop working. This cannot be undone.",
   notFound: "Manual order not found",
   invalid: "Invalid manual order data",
   copyLink: "Copy track link",

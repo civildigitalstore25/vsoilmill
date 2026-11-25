@@ -157,6 +157,7 @@ export function AdminManualOrderDetail({
                   customerName={shipment.customer.name}
                   phone={shipment.customer.phone}
                   showEdit={false}
+                  redirectAfterDelete
                 />
               </div>
             </div>
